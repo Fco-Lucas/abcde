@@ -1,7 +1,6 @@
 package com.lcsz.abcde.controllers;
 
 import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
-import com.lcsz.abcde.mappers.PermissionMapper;
 import com.lcsz.abcde.services.PermissionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
