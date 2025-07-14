@@ -13,6 +13,7 @@ import com.lcsz.abcde.repositorys.ClientRepository;
 import com.lcsz.abcde.repositorys.projection.ClientProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,11 @@ import java.util.UUID;
 @Service
 public class ClientService {
     private final ClientRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    ClientService(ClientRepository repository) {
+    ClientService(ClientRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +46,7 @@ public class ClientService {
         Client client = new Client();
         client.setName(dto.getName());
         client.setCnpj(dto.getCnpj());
-        client.setPassword(dto.getPassword());
+        client.setPassword(passwordEncoder.encode(dto.getPassword()));
         client.setStatus(ClientStatus.ACTIVE);
 
         Client savedClient = this.repository.save(client);
@@ -106,13 +109,10 @@ public class ClientService {
             throw new RuntimeException("Nova senha não é igual a confirmação da nova senha");
 
         Client client = this.getClientById(id);
-        if(!currentPassword.equals(client.getPassword()))
+
+        if(!passwordEncoder.matches(currentPassword, client.getPassword()))
             throw new RuntimeException("Senha atual inválida");
-
-        client.setPassword(newPassword);
-
-        // if(!passwordEncoder.matches(currentPassword, appUser.getPassword())) throw new RuntimeException("Senha atual inválida");
-        // appUser.setPassword(passwordEncoder.encode(newPassword));
+        client.setPassword(passwordEncoder.encode(newPassword));
 
         this.repository.save(client);
     }
@@ -120,9 +120,13 @@ public class ClientService {
     @Transactional(readOnly = false)
     public void restorePassword(UUID id) {
         Client client = this.getClientById(id);
-        // String newPassword = passwordEncoder.encode("123456");
-        String newPassword = "abcdefgh";
+        String newPassword = passwordEncoder.encode("abcdefgh");
         client.setPassword(newPassword);
         this.repository.save(client);
+    }
+
+    @Transactional(readOnly = true)
+    public Client getByCnpj(String cnpj, ClientStatus status) {
+        return this.findClientIfExists(cnpj, status).orElse(null);
     }
 }

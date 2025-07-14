@@ -13,6 +13,7 @@ import com.lcsz.abcde.repositorys.ClientUserRepository;
 import com.lcsz.abcde.repositorys.projection.ClientUserProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,20 +23,22 @@ import java.util.UUID;
 @Service
 public class ClientUserService {
     private final ClientUserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    ClientUserService(ClientUserRepository repository) {
+    ClientUserService(ClientUserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
-    private Optional<ClientUser> findClientIfExists(String email, ClientUserStatus status) {
+    private Optional<ClientUser> findClientUserIfExists(String email, ClientUserStatus status) {
         return this.repository.findByEmailAndStatus(email, status);
     }
 
     @Transactional(readOnly = false)
     public ClientUserResponseDto create(ClientUserCreateDto dto) {
         // Verifica se já existe um usuário do cliente com email informado
-        if(this.findClientIfExists(dto.getEmail(), ClientUserStatus.ACTIVE).isPresent())
+        if(this.findClientUserIfExists(dto.getEmail(), ClientUserStatus.ACTIVE).isPresent())
             throw new EntityExistsException(String.format("Usuário com email '%s' já cadastrado no sistema", dto.getEmail()));
 
         // Converte o dto recebido para entidade
@@ -43,7 +46,7 @@ public class ClientUserService {
         clientUser.setClientId(dto.getClientId());
         clientUser.setName(dto.getName());
         clientUser.setEmail(dto.getEmail());
-        clientUser.setPassword(dto.getPassword());
+        clientUser.setPassword(passwordEncoder.encode(dto.getPassword()));
         clientUser.setPermission(dto.getPermission());
         clientUser.setStatus(ClientUserStatus.ACTIVE);
 
@@ -80,7 +83,7 @@ public class ClientUserService {
         if(dto.getClientId() != null) clientUser.setClientId(dto.getClientId());
         if(dto.getName() != null) clientUser.setName(dto.getName());
         if(dto.getEmail() != null) {
-            Optional<ClientUser> clientUserExits = this.findClientIfExists(dto.getEmail(), ClientUserStatus.ACTIVE);
+            Optional<ClientUser> clientUserExits = this.findClientUserIfExists(dto.getEmail(), ClientUserStatus.ACTIVE);
             if(clientUserExits.isPresent() && clientUserExits.get().getId() != clientUser.getId())
                 throw new EntityExistsException(String.format("Usuário com e-mail '%s' já existente", dto.getEmail()));
 
@@ -108,13 +111,9 @@ public class ClientUserService {
             throw new RuntimeException("Nova senha não é igual a confirmação da nova senha");
 
         ClientUser clientUser = this.getById(id);
-        if(!currentPassword.matches(clientUser.getPassword()))
+        if(!passwordEncoder.matches(currentPassword, clientUser.getPassword()))
             throw new RuntimeException("Senha atual inválida");
-
-        clientUser.setPassword(newPassword);
-
-        // if(!passwordEncoder.matches(currentPassword, appUser.getPassword())) throw new RuntimeException("Senha atual inválida");
-        // appUser.setPassword(passwordEncoder.encode(newPassword));
+        clientUser.setPassword(passwordEncoder.encode(newPassword));
 
         this.repository.save(clientUser);
     }
@@ -122,9 +121,13 @@ public class ClientUserService {
     @Transactional(readOnly = false)
     public void restorePassword(UUID id) {
         ClientUser clientUser = this.getById(id);
-        // String newPassword = passwordEncoder.encode("123456");
-        String newPassword = "abcdefgh";
+        String newPassword = passwordEncoder.encode("abcdefgh");
         clientUser.setPassword(newPassword);
         this.repository.save(clientUser);
+    }
+
+    @Transactional(readOnly = true)
+    public ClientUser getByEmail(String email, ClientUserStatus status) {
+        return this.findClientUserIfExists(email, status).orElse(null);
     }
 }
