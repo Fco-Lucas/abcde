@@ -47,7 +47,7 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.OK).body(this.service.getClientByIdDto(id));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Void> updateClient(@PathVariable UUID id, @RequestBody @Valid ClientUpdateDto dto) {
         this.service.updateClient(id, dto);
         return ResponseEntity.noContent().build();
@@ -59,14 +59,14 @@ public class ClientController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/updatePassword/{id}")
-    public ResponseEntity<Void> updatePassword(@PathVariable UUID id, @RequestBody @Valid ClientUpdatePasswordDto dto) {
+    @PostMapping("/updatePassword/{id}")
+    public ResponseEntity<Void> updatePasswordClient(@PathVariable UUID id, @RequestBody @Valid ClientUpdatePasswordDto dto) {
         this.service.updatePassword(id, dto);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/restorePassword/{id}")
-    public ResponseEntity<Void> restorePassword(@PathVariable UUID id) {
+    @PostMapping("/restorePassword/{id}")
+    public ResponseEntity<Void> restorePasswordClient(@PathVariable UUID id) {
         this.service.restorePassword(id);
         return ResponseEntity.noContent().build();
     }
