@@ -3,6 +3,7 @@ package com.lcsz.abcde.exceptions;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.coyote.Response;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,5 +50,13 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ExceptionMessage(request, HttpStatus.CONFLICT, ex.getMessage()));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ExceptionMessage> runtimeException(RuntimeException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ExceptionMessage(request, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()));
     }
 }

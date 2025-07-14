@@ -4,6 +4,7 @@ import com.lcsz.abcde.dtos.clients.ClientCreateDto;
 import com.lcsz.abcde.dtos.clients.ClientResponseDto;
 import com.lcsz.abcde.dtos.clients.ClientUpdateDto;
 import com.lcsz.abcde.dtos.clients.ClientUpdatePasswordDto;
+import com.lcsz.abcde.dtos.clients_users.ClientUserResponseDto;
 import com.lcsz.abcde.enums.client.ClientStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
@@ -24,10 +25,12 @@ import java.util.UUID;
 @Service
 public class ClientService {
     private final ClientRepository repository;
+    private final ClientUserService clientUserService;
     private final PasswordEncoder passwordEncoder;
 
-    ClientService(ClientRepository repository, PasswordEncoder passwordEncoder) {
+    ClientService(ClientRepository repository, ClientUserService clientUserService, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.clientUserService = clientUserService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -51,12 +54,22 @@ public class ClientService {
 
         Client savedClient = this.repository.save(client);
 
-        return ClientMapper.toDto(savedClient);
+        ClientResponseDto clientResponse = ClientMapper.toDto(savedClient);
+        clientResponse.setUsers(this.clientUserService.getUsersByClientId(client.getId()));
+
+        return clientResponse;
     }
 
     @Transactional(readOnly = true)
-    public Page<ClientProjection> getAllPageable(Pageable pageable, String filterCnpj, ClientStatus filterStatus) {
-        return this.repository.findAllPageable(pageable, filterCnpj, filterStatus);
+    public Page<ClientResponseDto> getAllPageable(Pageable pageable, String filterCnpj, ClientStatus filterStatus) {
+        Page<ClientProjection> clients = this.repository.findAllPageable(pageable, filterCnpj, filterStatus);
+        return clients.map(client -> {
+            List<ClientUserResponseDto> users = this.clientUserService.getUsersByClientId(client.getId());
+            Client clientEntity = new Client(client.getId(), client.getName(), client.getCnpj(), "", client.getStatus());
+            ClientResponseDto responseDto = ClientMapper.toDto(clientEntity);
+            responseDto.setUsers(users);
+            return responseDto;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -69,7 +82,9 @@ public class ClientService {
     @Transactional(readOnly = true)
     public ClientResponseDto getClientByIdDto(UUID id) {
         Client client = this.getClientById(id);
-        return ClientMapper.toDto(client);
+        ClientResponseDto clientResponse = ClientMapper.toDto(client);
+        clientResponse.setUsers(this.clientUserService.getUsersByClientId(id));
+        return clientResponse;
     }
 
     @Transactional(readOnly = false)

@@ -8,25 +8,30 @@ import com.lcsz.abcde.enums.clientUser.ClientUserStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.ClientUserMapper;
+import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.models.ClientUser;
 import com.lcsz.abcde.repositorys.ClientUserRepository;
 import com.lcsz.abcde.repositorys.projection.ClientUserProjection;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ClientUserService {
     private final ClientUserRepository repository;
+    private final ClientService clientService;
     private final PasswordEncoder passwordEncoder;
 
-    ClientUserService(ClientUserRepository repository, PasswordEncoder passwordEncoder) {
+    ClientUserService(ClientUserRepository repository, @Lazy ClientService clientService, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.clientService = clientService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -40,6 +45,9 @@ public class ClientUserService {
         // Verifica se já existe um usuário do cliente com email informado
         if(this.findClientUserIfExists(dto.getEmail(), ClientUserStatus.ACTIVE).isPresent())
             throw new EntityExistsException(String.format("Usuário com email '%s' já cadastrado no sistema", dto.getEmail()));
+
+        // Verifica se existe o clientId informado, se não existir lança exceção
+        this.clientService.getClientById(dto.getClientId());
 
         // Converte o dto recebido para entidade
         ClientUser clientUser = new ClientUser();
@@ -129,5 +137,11 @@ public class ClientUserService {
     @Transactional(readOnly = true)
     public ClientUser getByEmail(String email, ClientUserStatus status) {
         return this.findClientUserIfExists(email, status).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClientUserResponseDto> getUsersByClientId(UUID clientId) {
+        List<ClientUser> users = this.repository.findAllByClientIdAndStatus(clientId, ClientUserStatus.ACTIVE);
+        return ClientUserMapper.toListDto(users);
     }
 }

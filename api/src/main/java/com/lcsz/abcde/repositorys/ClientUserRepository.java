@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,4 +26,6 @@ public interface ClientUserRepository extends JpaRepository<ClientUser, UUID> {
         @Param("name") String name,
         @Param("email") String email
     );
+
+    List<ClientUser> findAllByClientIdAndStatus(UUID clientId, ClientUserStatus status);
 }

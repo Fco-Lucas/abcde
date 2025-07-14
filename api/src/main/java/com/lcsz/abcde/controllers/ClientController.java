@@ -38,7 +38,7 @@ public class ClientController {
             @RequestParam(required = false) ClientStatus status,
             Pageable pageable
     ) {
-        Page<ClientProjection> clients = this.service.getAllPageable(pageable, cnpj, status);
+        Page<ClientResponseDto> clients = this.service.getAllPageable(pageable, cnpj, status);
         return ResponseEntity.ok(PageableMapper.toDto(clients));
     }
 
