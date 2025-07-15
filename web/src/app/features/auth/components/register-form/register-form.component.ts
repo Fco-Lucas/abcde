@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, type OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RegisterFormValues } from '../../models/register.model';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgxMaskDirective } from 'ngx-mask';
+import { cnpjValidator } from '../../../../shared/utils/custom-validators';
 
 @Component({
   selector: 'app-register-form',
@@ -29,18 +30,18 @@ import { NgxMaskDirective } from 'ngx-mask';
   ],
   templateUrl: './register-form.component.html',
 })
-export class RegisterFormComponent {
-  @Output()
-  submitForm = new EventEmitter<RegisterFormValues>();
-  
-  @Input()
-  isLoading: boolean = false;
-
+export class RegisterFormComponent implements OnInit {
   registerForm = new FormGroup({
     name: new FormControl("", [Validators.required]),
     cnpj: new FormControl("", [Validators.required, Validators.minLength(14), Validators.maxLength(14)]),
     password: new FormControl("", [Validators.required, Validators.minLength(6)])
   });
+
+  @Output()
+  submitForm = new EventEmitter<RegisterFormValues>();
+  
+  @Input()
+  isLoading: boolean = false;
 
   onSubmit() {
     this.registerForm.markAllAsTouched;
@@ -51,6 +52,24 @@ export class RegisterFormComponent {
     }
 
     this.submitForm.emit(this.registerForm.value as RegisterFormValues);
+  }
+
+  ngOnInit(): void {
+    this.cnpjControl?.valueChanges.subscribe(value => {
+      this.updateCnpjValidators(value);
+    });
+  }
+
+  updateCnpjValidators(value: string | null): void {
+    const onlyNumbers = value?.replace(/\D/g, '') || '';
+    
+    // Remove validadores antigos para evitar conflitos
+    this.cnpjControl?.clearValidators();
+
+    if (onlyNumbers.length === 14) this.cnpjControl?.setValidators([Validators.required, cnpjValidator()]);
+
+    // Atualiza o estado de validação do controle sem emitir um novo evento de valueChanges
+    this.cnpjControl?.updateValueAndValidity({ emitEvent: false });
   }
 
   get nameControl() {

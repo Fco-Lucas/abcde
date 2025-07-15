@@ -14,10 +14,15 @@
           type="text"
           formControlName="login"
           required 
+          [mask]="getLoginMask()"
         />
         <mat-error *ngIf="loginControl?.invalid && loginControl?.touched">
           @if (loginControl?.hasError('required')) {
             E-mail/CNPJ obrigatório.
+          } @else if (loginControl?.hasError('cnpjInvalid')) {
+            CNPJ inválido
+          } @else if (loginControl?.hasError('email')) {
+            Formato de e-mail inválido.
           }
         </mat-error>
       </mat-form-field>

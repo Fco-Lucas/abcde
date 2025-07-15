@@ -36,6 +36,8 @@
             CNPJ obrigatório.
           } @else if (cnpjControl?.hasError('minlength')) {
             CNPJ deve ter no mínimo {{ cnpjControl?.errors?.['minlength']?.requiredLength }} caracteres.
+          } @else if (cnpjControl?.hasError('cnpjInvalid')) {
+            CNPJ inválido.
           }
         </mat-error>
       </mat-form-field>
