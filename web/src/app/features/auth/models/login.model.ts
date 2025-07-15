@@ -1,4 +1,4 @@
 export interface LoginFormValues {
-  cpf: string | null,
+  login: string | null,
   password: string | null
 }

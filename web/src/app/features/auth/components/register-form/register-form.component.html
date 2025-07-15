@@ -1,27 +1,30 @@
 <mat-card class="w-full max-w-md p-8 rounded-xl shadow-lg">
   <mat-card-header class="!flex-col !items-center mb-6">
     <mat-card-title class="text-3xl font-bold text-gray-800 mb-1">
-      Acesse sua Conta
+      Cadastrar empresa
     </mat-card-title>
   </mat-card-header>
 
   <mat-card-content class="p-6 md:p-8">
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-1">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-1">
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>E-mail/CNPJ</mat-label>
-         <input
+        <mat-label>CNPJ</mat-label>
+        <input
           matInput
           type="text"
-          formControlName="login"
-          required 
+          formControlName="cnpj"
+          required
+          mask="00.000.000/0000-00"
+          placeholder="00.000.000/0000-00"
         />
-        <mat-error *ngIf="loginControl?.invalid && loginControl?.touched">
-          @if (loginControl?.hasError('required')) {
-            E-mail/CNPJ obrigatório.
+        <mat-error *ngIf="cnpjControl?.invalid && cnpjControl?.touched">
+          @if (cnpjControl?.hasError('required')) {
+            CNPJ obrigatório.
+          } @else if (cnpjControl?.hasError('minlength')) {
+            CNPJ deve ter no mínimo {{ cnpjControl?.errors?.['minlength']?.requiredLength }} caracteres.
           }
         </mat-error>
       </mat-form-field>
-
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Senha</mat-label>
         <input 
@@ -42,21 +45,20 @@
           }
         </mat-error>
       </mat-form-field>
-
       <div class="flex items-center justify-center">
         <button mat-raised-button color="primary" class="!py-3 !text-base w-full" type="submit" [disabled]="isSubmitButtonDisabled()">
-          <span *ngIf="!isLoading">Entrar</span>
+          <span *ngIf="!isLoading">Cadastrar</span>
           <mat-spinner *ngIf="isLoading" diameter="24" class="mx-auto"></mat-spinner>
         </button>
       </div>
     </form>
   </mat-card-content>
-
+  
   <mat-card-actions class="!p-0 mt-1 justify-center">
     <p class="text-sm text-gray-600">
-      Não tem uma conta?
-      <a routerLink="/auth/register" class="font-semibold text-indigo-600 hover:text-indigo-500">
-        Cadastre-se aqui
+      Já possui uma conta?
+      <a routerLink="/auth/login" class="font-semibold text-indigo-600 hover:text-indigo-500">
+        Realize login
       </a>
     </p>
   </mat-card-actions>

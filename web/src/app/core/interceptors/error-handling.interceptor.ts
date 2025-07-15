@@ -5,15 +5,22 @@ export const errorHandlingInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       let errorMessage = 'Ocorreu um erro desconhecido.';
-      
-      // Lógica para formatar a mensagem de erro (a mesma que você já tinha)
+
+      // 1. Erro do lado do cliente (problema de rede, Angular, etc.)
       if (error.error instanceof ErrorEvent) {
-        errorMessage = `Erro no cliente: ${error.error.message}`;
+        errorMessage = `Erro de conexão: ${error.error.message}`;
       } else {
-        errorMessage = `Erro no servidor (código ${error.status}): ${error.message}`;
+        // 2. Erro do lado do servidor (a API respondeu com status 4xx ou 5xx)
+        if (error.error && typeof error.error.message === 'string') {
+          errorMessage = error.error.message;
+        } else {
+          errorMessage = `Ocorreu um erro no servidor (código ${error.status}). Por favor, tente novamente mais tarde.`;
+        }
       }
       
-      console.error('Erro capturado pelo interceptor:', errorMessage, error);
+      console.error(`Erro capturado pelo interceptor: ${errorMessage}`, error);
+      
+      // Retorna o erro para o .subscribe() do componente com a mensagem formatada.
       return throwError(() => new Error(errorMessage));
     })
   );

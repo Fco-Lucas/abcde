@@ -1,6 +1,4 @@
-<div class="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-  <app-login-form
-    [isLoading]="isLoading()"
-    (submitForm)="handleLoginSubmit($event)"
-  ></app-login-form>
-</div>
+<app-login-form
+  [isLoading]="isLoading()"
+  (submitForm)="handleLoginSubmit($event)"
+></app-login-form>

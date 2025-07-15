@@ -12,7 +12,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
   imports: [LoginFormComponent],
   templateUrl: './login-page.component.html',
 })
-export class LoginPage {
+export class LoginPageComponent {
   // 1. Usar signal para o estado de carregamento
   public isLoading = signal(false);
 
@@ -39,7 +39,7 @@ export class LoginPage {
     this.isLoading.set(true);
 
     const credentials: AuthPayload = {
-      cpf: formValues.cpf ?? "",
+      login: formValues.login ?? "",
       password: formValues.password ?? ""
     };
 

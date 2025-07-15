@@ -1,5 +1,5 @@
 export interface AuthPayload {
-  cpf: string;
+  login: string;
   password: string;
 }
 
