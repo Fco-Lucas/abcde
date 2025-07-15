@@ -1,0 +1,46 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+  border: 0;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Estilos Globais para Snackbars Customizados */
+
+// Snackbar de Sucesso (Verde)
+.success-snackbar {
+  @include mat.snack-bar-overrides((
+    container-color: #4CAF50, // token: container-color
+    supporting-text-color: #ffffff, // token: supporting-text-color
+    button-color: #ffffff // token: button-color
+  ));
+}
+
+// Snackbar de Erro (Vermelho)
+.error-snackbar {
+  @include mat.snack-bar-overrides((
+    container-color: #F44336,
+    supporting-text-color: #ffffff,
+    button-color: #ffffff
+  ));
+}
+
+// Snackbar de Aviso (Laranja)
+.warning-snackbar {
+  @include mat.snack-bar-overrides((
+    container-color: #FF9800,
+    supporting-text-color: #ffffff,
+    button-color: #ffffff
+  ));
+}
