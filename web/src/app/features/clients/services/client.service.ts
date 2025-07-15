@@ -14,7 +14,6 @@ export class ClientService {
   createClient(data: CreateClient): Observable<Client> {
     return this.http.post<Client>(`${this.apiUrl}clients`, data).pipe(
       tap(response => {
-        console.log("Cliente criado: ", response);
       })
     );
   }

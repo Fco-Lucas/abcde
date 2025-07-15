@@ -9,6 +9,16 @@ import type { AuthPayload, AuthResponse } from '../models/auth.model';
 
 const AUTH_TOKEN_COOKIE_NAME = 'jwt_auth_token';
 
+export type AuthenticatedUserRole = 'CLIENT' | 'CLIENT_USER' | null;
+
+interface TokenPayload {
+  sub: string;
+  iat: number;
+  exp: number;
+  id: string;
+  role: AuthenticatedUserRole,
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,13 +28,36 @@ export class AuthService {
   private router = inject(Router);
   private cookieService = inject(CookieService);
 
+  // Behavior para autenticação (usuário logado ou não)
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(!this.isTokenExpired());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+
+  // BehaviorSubject para o cargo
+  private currentUserRoleSubject = new BehaviorSubject<AuthenticatedUserRole>(null);
+  public currentUserRole$ = this.currentUserRoleSubject.asObservable();
+
+  constructor() {
+    this.loadAuthenticatedUserRoleFromToken();
+  }
+
+  private loadAuthenticatedUserRoleFromToken(): void {
+    const token = this.getToken();
+    if (token && !this.isTokenExpired()) {
+      try {
+        const decodedToken = jwtDecode<TokenPayload>(token);
+        this.currentUserRoleSubject.next(decodedToken.role);
+      } catch (error) {
+        this.currentUserRoleSubject.next(null);
+      }
+    } else {
+      this.currentUserRoleSubject.next(null);
+    }
+  }
 
   private storeToken(token: string): void {
     try {
       // 1. Usa jwt-decode para pegar a data de expiração.
-      const decodedToken = jwtDecode(token);
+      const decodedToken = jwtDecode<TokenPayload>(token);
       const expiresAt = new Date(decodedToken.exp! * 1000);
 
       this.cookieService.set(
@@ -38,16 +71,17 @@ export class AuthService {
         }
       );
       this.isAuthenticatedSubject.next(true);
-
+      this.currentUserRoleSubject.next(decodedToken.role);
     } catch (error) {
       console.error("Erro ao decodificar o token para armazenar no cookie:", error);
-      this.isAuthenticatedSubject.next(false);
+      this.logout();
     }
   }
 
   public removeToken(): void {
     this.cookieService.delete(AUTH_TOKEN_COOKIE_NAME, '/');
     this.isAuthenticatedSubject.next(false);
+    this.currentUserRoleSubject.next(null);
   }
 
   public getToken(): string {

@@ -1,0 +1,19 @@
+<mat-toolbar color="primary" class="flex items-center gap-1 justify-between">
+  <div class="flex text-truncate w-[25%]">
+    <a routerLink="/app/home">
+      <span>Leitor de Gabaritos</span>
+    </a>
+  </div>
+  
+  <div>
+    <ng-container *ngFor="let item of navItems">
+      <a mat-button [routerLink]="item.link" routerLinkActive="font-bold">{{ item.label }}</a>
+    </ng-container>
+  </div>
+
+  <div class="flex items-center text-truncate w-[25%] justify-end">
+    <button mat-icon-button (click)="onLogout()" aria-label="Botão de logout">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>
