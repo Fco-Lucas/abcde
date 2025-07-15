@@ -8,6 +8,20 @@
   <mat-card-content class="p-6 md:p-8">
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-1">
       <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Nome</mat-label>
+        <input 
+          matInput
+          type="text"
+          formControlName="name"
+          required
+        />
+        <mat-error *ngIf="nameControl?.invalid && nameControl?.touched">
+          @if (nameControl?.hasError('required')) {
+            Nome obrigatório.
+          }
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="w-full">
         <mat-label>CNPJ</mat-label>
         <input
           matInput

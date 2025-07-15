@@ -16,22 +16,16 @@ export class LoginPageComponent {
   // 1. Usar signal para o estado de carregamento
   public isLoading = signal(false);
 
-  private returnUrl = "/home";
+  private returnUrl = "/app/home";
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private notification = inject(NotificationService);
 
   ngOnInit(): void {
-    // Se já estiver logado, redireciona
-    if (this.authService.getToken()) {
-      this.router.navigateByUrl(this.returnUrl);
-      return;
-    }
-
     // Pega a URL de retorno de forma segura
     this.route.queryParams.pipe(take(1)).subscribe(params => {
-      this.returnUrl = params['returnUrl'] || '/home';
+      this.returnUrl = params['returnUrl'] || '/app/home';
     });
   }
 
@@ -44,7 +38,6 @@ export class LoginPageComponent {
     };
 
     this.authService.login(credentials).pipe(
-      // 2. O `finalize` executa ao final, seja sucesso ou erro
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: () => {

@@ -37,6 +37,7 @@ export class RegisterFormComponent {
   isLoading: boolean = false;
 
   registerForm = new FormGroup({
+    name: new FormControl("", [Validators.required]),
     cnpj: new FormControl("", [Validators.required, Validators.minLength(14), Validators.maxLength(14)]),
     password: new FormControl("", [Validators.required, Validators.minLength(6)])
   });
@@ -50,6 +51,10 @@ export class RegisterFormComponent {
     }
 
     this.submitForm.emit(this.registerForm.value as RegisterFormValues);
+  }
+
+  get nameControl() {
+    return this.registerForm.get("name");
   }
 
   get cnpjControl() {

@@ -6,14 +6,16 @@ import { AuthLayoutComponent } from './layout/auth-layout/auth-layout.component'
 import { HomePageComponent } from './features/home/pages/home-page/home-page.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { authGuard } from './core/guards/auth.guard';
+import { publicGuard } from './core/guards/public.guard';
 
 export const routes: Routes = [
   {
     path: 'auth',
     component: AuthLayoutComponent,
+    canActivate: [publicGuard],
     children: [
-      { path: 'login', component: LoginPageComponent },
-      { path: 'register', component: RegisterPageComponent },
+      { path: 'login', component: LoginPageComponent, title: "ABCDE | Login" },
+      { path: 'register', component: RegisterPageComponent, title: "ABCDE | Cadastro de Clientes" },
       { path: '', redirectTo: 'login', pathMatch: 'full' } 
     ]
   },
@@ -22,7 +24,7 @@ export const routes: Routes = [
     component: AppLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'home', component: HomePageComponent },
+      { path: 'home', component: HomePageComponent, title: "ABCDE | Home" },
     ]
   },
   { path: '', redirectTo: 'auth', pathMatch: 'full' }, 

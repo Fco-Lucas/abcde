@@ -1,10 +1,11 @@
-import { HttpClient, type HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { CookieService } from './cookie.service';
-import { BehaviorSubject, tap, type Observable } from 'rxjs';
-import type { AuthPayload, AuthResponse } from '../models/auth.model';
+import { BehaviorSubject, tap, Observable } from 'rxjs';
+import { CookieService } from 'ngx-cookie-service';
+import { jwtDecode } from 'jwt-decode'; // Usado para toda a lógica de token
 import { environment } from '../../../environments/environment';
+import type { AuthPayload, AuthResponse } from '../models/auth.model';
 
 const AUTH_TOKEN_COOKIE_NAME = 'jwt_auth_token';
 
@@ -17,65 +18,66 @@ export class AuthService {
   private router = inject(Router);
   private cookieService = inject(CookieService);
 
-  // BehaviorSubject para rastrear o estado de autenticação baseado na presença do token no cookie
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(!!this.getToken());
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(!this.isTokenExpired());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor() {
-    this.checkInitialAuthState();
-    console.log('AuthService initialized. Token from cookie:', this.getToken());
-  }
-
-  private checkInitialAuthState(): void {
-    const token = this.getToken();
-    this.isAuthenticatedSubject.next(!!token);
-  }
-
   private storeToken(token: string): void {
-    // Armazena o token no cookie. Expira em 7 dias.
-    this.cookieService.set(AUTH_TOKEN_COOKIE_NAME, token, 7);
-    this.isAuthenticatedSubject.next(true);
+    try {
+      // 1. Usa jwt-decode para pegar a data de expiração.
+      const decodedToken = jwtDecode(token);
+      const expiresAt = new Date(decodedToken.exp! * 1000);
+
+      this.cookieService.set(
+        AUTH_TOKEN_COOKIE_NAME,
+        token,
+        { 
+          expires: expiresAt,
+          path: '/',
+          secure: environment.production,
+          sameSite: 'Lax'
+        }
+      );
+      this.isAuthenticatedSubject.next(true);
+
+    } catch (error) {
+      console.error("Erro ao decodificar o token para armazenar no cookie:", error);
+      this.isAuthenticatedSubject.next(false);
+    }
   }
 
-  private removeToken(): void {
-    this.cookieService.delete(AUTH_TOKEN_COOKIE_NAME);
+  public removeToken(): void {
+    this.cookieService.delete(AUTH_TOKEN_COOKIE_NAME, '/');
     this.isAuthenticatedSubject.next(false);
   }
 
-  getToken(): string | null {
+  public getToken(): string {
     return this.cookieService.get(AUTH_TOKEN_COOKIE_NAME);
   }
 
+  public isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    try {
+      const decodedToken = jwtDecode(token);
+      const expirationDate = decodedToken.exp! * 1000;
+      return expirationDate < Date.now();
+    } catch (error) {
+      console.error(`JWT TOKEN inválido ou expiraado:`, error);
+      return true;
+    }
+  }
+
   login(credentials: AuthPayload): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}auth`, credentials)
-      .pipe(
-        tap(response => {
-          this.storeToken(response.token);
-          console.log('Login successful, token stored in cookie.');
-        }),
-        // catchError(this.handleError) Interceptor
-      );
+    return this.http.post<AuthResponse>(`${this.apiUrl}auth`, credentials).pipe(
+      tap(response => {
+        this.storeToken(response.token);
+      })
+    );
   }
 
   logout(): void {
     this.removeToken();
     this.router.navigate(['/auth/login']);
-    console.log('User logged out, token removed from cookie.');
   }
-
-  // private handleError(error: HttpErrorResponse) {
-  //   let errorMessage = 'Ocorreu um erro desconhecido.';
-  //   if (error.error instanceof ErrorEvent) {
-  //     errorMessage = `Erro: ${error.error.message}`;
-  //   } else {
-  //     errorMessage = `Código do erro: ${error.status}, mensagem: ${error.message || error.statusText}`;
-  //     if (error.error && typeof error.error.message === 'string') {
-  //       errorMessage += ` - ${error.error.message}`;
-  //     } else if (error.error && typeof error.error === 'object' && error.error.message) {
-  //        errorMessage += ` - ${error.error.message}`;
-  //     }
-  //   }
-  //   console.error('AuthService API error:', errorMessage, error);
-  //   return throwError(() => new Error(errorMessage));
-  // }
 }
