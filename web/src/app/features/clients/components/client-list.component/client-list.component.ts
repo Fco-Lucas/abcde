@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, ViewChild, AfterViewInit, signal, Input, type OnChanges, type SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { finalize } from 'rxjs';
+import { delay, finalize, of, type Observable } from 'rxjs';
 
 // Importações do Angular Material
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -16,6 +16,9 @@ import type { ClientFiltersFormValues } from '../client-filters/client-filters.c
 import { ConfirmationDialogService } from '../../../../core/services/confirmation-dialog.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LoadingService } from '../../../../core/services/loading.service';
+import { DialogUpdateClientComponent, type UpdateClientFormValues } from '../dialog-update-client/dialog-update-client.component';
+import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-client-list',
@@ -26,7 +29,8 @@ import { LoadingService } from '../../../../core/services/loading.service';
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatMenuModule
   ],
   templateUrl: './client-list.component.html',
 })
@@ -35,12 +39,14 @@ export class ClientListComponent implements OnInit, OnChanges {
   private clientService = inject(ClientService);
   private notification = inject(NotificationService);
   private loader = inject(LoadingService);
+  readonly dialog = inject(MatDialog);
+  private loadingService = inject(LoadingService);
 
   // Sinal para controlar o estado de carregamento
   public isLoading = signal(true);
 
   // Colunas que serão exibidas na tabela. A ordem aqui define a ordem visual.
-  public displayedColumns: string[] = ['name', 'cnpj', 'status', 'actions'];
+  public displayedColumns: string[] = ['name', 'cnpj', 'status', ' '];
   
   // Fonte de dados para a tabela
   public dataSource = new MatTableDataSource<Client>();
@@ -97,9 +103,41 @@ export class ClientListComponent implements OnInit, OnChanges {
     this.loadClientsPage();
   }
 
-  // Funções de exemplo para os botões de ação
-  editClient(client: Client) {
-    console.log('Editando cliente:', client);
+  handleOpenUpdateClientDialog(client: Client) {
+    const initialData: UpdateClientFormValues = {
+      name: client.name,
+      cnpj: client.cnpj
+    }
+    this.openUpdateClientDialog(client.id, initialData);
+  }
+
+  openUpdateClientDialog(clientId: string, initialData: UpdateClientFormValues) {
+    const dialogRef = this.dialog.open(DialogUpdateClientComponent, {
+      width: '500px',
+      data: initialData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.updateClient(clientId, result as UpdateClientFormValues);
+      }
+    });
+  }
+
+  updateClient(clientId: string, data: UpdateClientFormValues): void {
+    this.loader.showLoad("Atualizando informações do cliente...");
+    this.clientService.updateClient(clientId, data).subscribe({
+      next: () => {
+        this.loader.hideLoad();
+        this.notification.showSuccess("Informações do cliente atualizadas com sucesso!");
+        this.loadClientsPage();
+      },
+      error: (err) => {
+        this.loader.hideLoad();
+        this.notification.showError(err.message);
+        this.openUpdateClientDialog(clientId, data);
+      }
+    });
   }
 
   deleteClient(client: Client): void {

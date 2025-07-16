@@ -40,8 +40,6 @@ export class ClientsPageComponent {
   private clientService = inject(ClientService);
   private notification = inject(NotificationService);
 
-  @ViewChild('clientList') private clientListComponent!: ClientListComponent;
-
   openCreateClientDialog(enterAnimationDuration: string, exitAnimationDuration: string, initialData: CreateFormValues | null = null): void {
     const dialogRef = this.dialog.open(DialogCreateClientComponent, {
       width: '500px',
@@ -84,6 +82,8 @@ export class ClientsPageComponent {
   // Exibição da lista dos clientes
   public hasLoadError = signal(false);
   public currentFilters = signal<Partial<ClientFiltersFormValues> | null>(null);
+
+  @ViewChild('clientList') private clientListComponent!: ClientListComponent;
 
   onLoadStatusChanged(status: 'SUCCESS' | 'ERROR'): void {
     this.hasLoadError.set(status === "ERROR");
