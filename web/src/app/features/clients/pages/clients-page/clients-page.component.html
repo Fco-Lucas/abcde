@@ -1,0 +1,30 @@
+@if (hasLoadError()) {
+
+  <mat-card>
+    <mat-card-content class="flex flex-col items-center justify-center text-center text-red-700">
+      <mat-icon class="!w-[40px] !h-[40px] text-[40px] mb-1">error_outline</mat-icon>
+      <h2 class="text-2xl font-semibold mb-2">Ocorreu um Erro</h2>
+      <p class="mb-6">Não foi possível carregar as informações dos clientes.</p>
+    </mat-card-content>
+  </mat-card>
+
+} @else {
+
+  <div class="flex items-center justify-between mb-3">
+    <app-client-filters (submitForm)="onFilterSubmit($event)"></app-client-filters>
+    <button mat-flat-button color="primary" (click)="openCreateClientDialog('0ms', '0ms')">
+      <mat-icon>add</mat-icon>
+      Novo Cliente
+    </button>
+  </div>
+  <mat-card>
+    <mat-card-content>
+      <app-client-list 
+        #clientList
+        [filters]="currentFilters()"
+        (loadStatusChanged)="onLoadStatusChanged($event)">
+      </app-client-list>
+    </mat-card-content>
+  </mat-card>
+
+}

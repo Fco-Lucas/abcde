@@ -22,7 +22,7 @@ export class AppLayoutComponent {
   private getNavItemsForRole(role: AuthenticatedUserRole): NavItem[] {
     const allItems: NavItem[] = [
       { label: 'Inicio', link: '/app/home' },
-      { label: 'Clientes', link: '/app/admin' },
+      { label: 'Clientes', link: '/app/clients' },
       { label: 'Meu Perfil', link: '/app/profile' },
     ];
     

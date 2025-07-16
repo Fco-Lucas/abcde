@@ -1,3 +1,5 @@
+import type { ClientUserInterface } from "./client-user.model";
+
 export interface CreateClient {
   name: string;
   cnpj: string;
@@ -5,14 +7,31 @@ export interface CreateClient {
 }
 
 export enum ClientStatus {
-  ACTIVE,
-  INACTIVE
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE"
 }
 
 export interface Client {
   id: string;
+  name: string;
   cnpj: string;
   password: string;
   status: ClientStatus;
-  users: [];
+  users: ClientUserInterface[];
+}
+
+export interface PageableClientList {
+  content: Client[],
+  first: boolean,
+  end: boolean,
+  page: number,
+  size: number,
+  pageElements: number,
+  totalElements: number,
+  totalPages: number
+}
+
+export interface UpdateClientInterface {
+  name?: string,
+  cnpj?: string,
 }

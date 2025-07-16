@@ -7,6 +7,8 @@ import { HomePageComponent } from './features/home/pages/home-page/home-page.com
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 import { publicGuard } from './core/guards/public.guard';
+import { ClientsPageComponent } from './features/clients/pages/clients-page/clients-page.component';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -24,7 +26,8 @@ export const routes: Routes = [
     component: AppLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'home', component: HomePageComponent, title: "ABCDE | Home" },
+      { path: 'home', component: HomePageComponent, title: "ABCDE | Início" },
+      { path: 'clients', component: ClientsPageComponent, title: "ABCDE | Clientes", canActivate: [roleGuard], data: { roles: ['CLIENT', 'CLIENT_USER'] } }
     ]
   },
   { path: '', redirectTo: 'auth', pathMatch: 'full' }, 

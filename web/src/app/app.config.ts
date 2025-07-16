@@ -7,6 +7,8 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { errorHandlingInterceptor } from './core/interceptors/error-handling.interceptor';
 import { authTokenInterceptor } from './core/interceptors/auth-token.interceptor';
 import { CookieService } from 'ngx-cookie-service';
+import { CustomPaginatorIntl } from './core/services/custom-paginator-intl.service';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,5 +20,6 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([errorHandlingInterceptor, authTokenInterceptor])
     ),
     CookieService,
+    { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl },
   ]
 };
