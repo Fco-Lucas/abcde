@@ -9,6 +9,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { publicGuard } from './core/guards/public.guard';
 import { ClientsPageComponent } from './features/clients/pages/clients-page/clients-page.component';
 import { roleGuard } from './core/guards/role.guard';
+import { ClientUsersPageComponent } from './features/clientUsers/pages/client-users-page/client-users-page.component';
 
 export const routes: Routes = [
   {
@@ -27,7 +28,8 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'home', component: HomePageComponent, title: "ABCDE | Início" },
-      { path: 'clients', component: ClientsPageComponent, title: "ABCDE | Clientes", canActivate: [roleGuard], data: { roles: ['CLIENT', 'CLIENT_USER'] } }
+      { path: 'clients', component: ClientsPageComponent, title: "ABCDE | Clientes", canActivate: [roleGuard], data: { roles: ['CLIENT'] } },
+      { path: 'clientUsers/:id', component: ClientUsersPageComponent, title: 'ABCDE | Usuários do Cliente', canActivate: [roleGuard], data: { roles: ['CLIENT'] } },
     ]
   },
   { path: '', redirectTo: 'auth', pathMatch: 'full' }, 

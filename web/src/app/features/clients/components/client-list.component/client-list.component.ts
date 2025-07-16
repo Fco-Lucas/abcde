@@ -1,24 +1,25 @@
-import { Component, inject, OnInit, ViewChild, AfterViewInit, signal, Input, type OnChanges, type SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, signal, Input, type OnChanges, type SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { delay, finalize, of, type Observable } from 'rxjs';
+import { finalize } from 'rxjs';
 
 // Importações do Angular Material
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule, type PageEvent } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { ClientService } from '../../services/client.service';
-import type { Client, ClientStatus } from '../../models/client.model';
+import { Client, ClientStatus } from '../../models/client.model';
 import { NgxMaskPipe } from 'ngx-mask';
-import type { ClientFiltersFormValues } from '../client-filters/client-filters.component';
+import { ClientFiltersFormValues } from '../client-filters/client-filters.component';
 import { ConfirmationDialogService } from '../../../../core/services/confirmation-dialog.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LoadingService } from '../../../../core/services/loading.service';
-import { DialogUpdateClientComponent, type UpdateClientFormValues } from '../dialog-update-client/dialog-update-client.component';
+import { DialogUpdateClientComponent, UpdateClientFormValues } from '../dialog-update-client/dialog-update-client.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-client-list',
@@ -30,7 +31,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    RouterLink
   ],
   templateUrl: './client-list.component.html',
 })
@@ -40,7 +42,6 @@ export class ClientListComponent implements OnInit, OnChanges {
   private notification = inject(NotificationService);
   private loader = inject(LoadingService);
   readonly dialog = inject(MatDialog);
-  private loadingService = inject(LoadingService);
 
   // Sinal para controlar o estado de carregamento
   public isLoading = signal(true);

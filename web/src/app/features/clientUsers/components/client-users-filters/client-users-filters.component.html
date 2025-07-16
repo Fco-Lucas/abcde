@@ -1,0 +1,46 @@
+<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="space-x-5">
+  <mat-form-field appearance="outline">
+    <mat-label>Nome</mat-label>
+    <input
+      matInput
+      type="text"
+      formControlName="name"
+    />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>E-mail</mat-label>
+    <input
+      matInput
+      type="text"
+      formControlName="email"
+    />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Permissão</mat-label>
+    <mat-select formControlName="permission" required>
+      <mat-option value="ALL" selected>Todas</mat-option>
+      @for (permission of permissions; track permission.id) {
+        @if(permission.read_files && permission.upload_files) {
+          <mat-option [value]="permission.id">Ler e enviar arquivos</mat-option>
+        }@else if(permission.read_files && !permission.upload_files) {
+          <mat-option [value]="permission.id">Ler arquivos</mat-option>
+        }@else if(permission.upload_files && !permission.read_files) {
+          <mat-option [value]="permission.id">Enviar arquivos</mat-option>
+        }
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Situação</mat-label>
+    <mat-select formControlName="status" required>
+      <mat-option value="ALL" selected>Todas</mat-option>
+      <mat-option value="ACTIVE">Ativos</mat-option>
+      <mat-option value="INACTIVE">Desativos</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button matButton="filled" type="submit" [disabled]="isSubmitButtonDisabled()">
+    <span *ngIf="!isLoading">Filtrar resultados</span>
+    <mat-spinner *ngIf="isLoading" diameter="24" class="mx-auto"></mat-spinner>
+  </button>
+</form>

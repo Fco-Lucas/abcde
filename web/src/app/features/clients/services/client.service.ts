@@ -25,6 +25,10 @@ export class ClientService {
     return this.http.get<PageableClientList>(`${this.apiUrl}clients`, { params });
   }
 
+  getClientById(clientId: string): Observable<Client> {
+    return this.http.get<Client>(`${this.apiUrl}clients/${clientId}`);
+  }
+
   updateClient(clientId: string, data: UpdateClientInterface): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}clients/${clientId}`, data);
   }

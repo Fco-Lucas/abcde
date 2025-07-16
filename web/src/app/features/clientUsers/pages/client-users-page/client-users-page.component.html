@@ -1,0 +1,35 @@
+@if (hasLoadError()) {
+
+  <mat-card>
+    <mat-card-content class="flex flex-col items-center justify-center text-center text-red-700">
+      <mat-icon class="!w-[40px] !h-[40px] text-[40px] mb-1">error_outline</mat-icon>
+      <h2 class="text-2xl font-semibold mb-2">Ocorreu um Erro</h2>
+      <p class="mb-6">Não foi possível carregar as informações dos clientes.</p>
+    </mat-card-content>
+  </mat-card>
+
+} @else if(clientId && permissions.length > 0) {
+
+  <h2 class="text-2xl mb-3">Usuários do Cliente:</h2>
+  <div class="flex items-center justify-between mb-3">
+    <app-client-users-filters 
+      (submitForm)="onFilterSubmit($event)"
+      [permissions]="permissions"
+    ></app-client-users-filters>
+    <button matButton="filled" (click)="openCreateClientUserDialog(null)">
+      <mat-icon>add</mat-icon>
+      Novo Usuário
+    </button>
+  </div>
+  <app-client-users-list
+    #clientUsersList
+    [clientId]="clientId"
+    [filters]="currentFilters()"
+    (loadStatusChanged)="onLoadStatusChanged($event)">
+  </app-client-users-list>
+
+} @else {
+  <div class="flex justify-center items-center h-dvh">
+    <mat-spinner></mat-spinner>
+  </div>
+}
