@@ -9,7 +9,7 @@ import type { AuthPayload, AuthResponse } from '../models/auth.model';
 
 const AUTH_TOKEN_COOKIE_NAME = 'jwt_auth_token';
 
-export type AuthenticatedUserRole = 'CLIENT' | 'CLIENT_USER' | null;
+export type AuthenticatedUserRole = 'COMPUTEX' | 'CLIENT' | 'CLIENT_USER' | null;
 
 interface TokenPayload {
   sub: string;

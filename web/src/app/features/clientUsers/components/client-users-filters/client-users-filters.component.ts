@@ -6,7 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import type { PermissionInterface } from '../../../permissions/models/permission.model';
+import { PermissionInterface } from '../../../permissions/models/permission.model';
+import { MatIconModule } from '@angular/material/icon';
 
 export type ClientUsersStatusTypeFiltersForm = "ALL" | "ACTIVE" | "INACTIVE";
 
@@ -26,7 +27,8 @@ export interface ClientUsersFiltersFormInterface {
     ReactiveFormsModule,
     MatSelectModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
   templateUrl: './client-users-filters.component.html',
 })

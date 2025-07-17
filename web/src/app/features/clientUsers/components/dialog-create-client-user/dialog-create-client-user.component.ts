@@ -8,6 +8,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { PermissionInterface } from '../../../permissions/models/permission.model';
 import { MatSelectModule } from '@angular/material/select';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { ClientUsersService } from '../../services/client-users.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import type { CreateClientUserInterface } from '../../model/clientUsers.model';
+import { finalize } from 'rxjs';
 
 export interface ClientUsersCreateFormValues {
   clientId: string,
@@ -34,17 +39,21 @@ export interface CreateUserDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatSelectModule
+    MatSelectModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './dialog-create-client-user.component.html',
 })
 export class DialogCreateClientUserComponent implements OnInit {
   private fb = inject(FormBuilder);
   readonly dialogRef = inject(MatDialogRef<DialogCreateClientUserComponent>);
+  private clientUserService = inject(ClientUsersService);
+  private notification = inject(NotificationService);
 
   public clientId: string = "";
   public clientName: string = "";
-  public permissions: PermissionInterface[] = []; 
+  public permissions: PermissionInterface[] = [];
+  public isLoading = signal(false);
   createForm!: FormGroup;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: CreateUserDialogData | null) {}
@@ -60,19 +69,8 @@ export class DialogCreateClientUserComponent implements OnInit {
       name: ["", [Validators.required]],
       email: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
-      permission: ["", [Validators.required]],
+      permission: [this.permissions[0].id, [Validators.required]],
     });
-  }
-
-  onSubmit() {
-    this.createForm.markAllAsTouched;
-
-    if(!this.createForm.valid) {
-      console.error(this.createForm.errors);
-      return;
-    }
-
-    this.dialogRef.close(this.createForm.value as ClientUsersCreateFormValues);
   }
 
   get clientIdControl() { return this.createForm.get("clientId"); }
@@ -80,13 +78,48 @@ export class DialogCreateClientUserComponent implements OnInit {
   get emailControl() { return this.createForm.get('email'); }
   get passwordControl() { return this.createForm.get('password'); }
   get permissionControl() { return this.createForm.get('permission'); }
-
-  isSubmitButtonDisabled(): boolean {
-    return this.createForm.invalid;
-  }
-
+  
   hidePassword = signal(true);
   togglePasswordVisibility() {
     this.hidePassword.set(!this.hidePassword());
+  }
+
+  onSubmit() {
+    this.createForm.markAllAsTouched;
+    if(!this.createForm.valid) {
+      console.error(this.createForm.errors);
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.createForm.disable();
+
+    const formValues = this.createForm.getRawValue() as ClientUsersCreateFormValues;
+    const data: CreateClientUserInterface = {
+      clientId: formValues.clientId,
+      name: formValues.name,
+      email: formValues.email,
+      password: formValues.password,
+      permission: Number(formValues.permission),
+    }
+
+    this.clientUserService.createClientUser(data).pipe(
+      finalize(() => {
+        this.isLoading.set(false);
+        this.createForm.enable();
+      })
+    ).subscribe({
+      next: () => {
+        this.notification.showSuccess("Usuário criado com sucesso!");
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        this.notification.showError(err.message);
+      }
+    });
+  }
+
+  isSubmitButtonDisabled(): boolean {
+    return this.createForm.invalid || this.isLoading();
   }
 }

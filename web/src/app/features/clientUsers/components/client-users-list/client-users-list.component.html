@@ -13,36 +13,45 @@
       <!-- Coluna Nome -->
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Nome</th>
-        <td mat-cell *matCellDef="let client"> {{client.name}} </td>
+        <td mat-cell *matCellDef="let clientUser"> {{ clientUser.name }} </td>
       </ng-container>
 
       <!-- Coluna E-mail -->
       <ng-container matColumnDef="email">
         <th mat-header-cell *matHeaderCellDef>E-mail</th>
-        <td mat-cell *matCellDef="let client"> {{ client.email }}  </td>
+        <td mat-cell *matCellDef="let clientUser"> {{ clientUser.email }}  </td>
       </ng-container>
 
       <ng-container matColumnDef="permission">
         <th mat-header-cell *matHeaderCellDef>Permissão</th>
-        <td mat-cell *matCellDef="let client"> {{ client.permission }}  </td>
+        <td mat-cell *matCellDef="let clientUser"> 
+          @if(clientUser.permission.read_files && clientUser.permission.upload_files) {
+            Ler e enviar arquivos
+          }@else if(clientUser.permission.read_files && !clientUser.permission.upload_files) {
+            Ler arquivos
+          }@else if(clientUser.permission.upload_files && !clientUser.permission.read_files) {
+            Enviar arquivos
+          }
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Situação</th>
-        <td mat-cell *matCellDef="let client">{{ client.status === "ACTIVE" ? "ATIVO" : "INATIVO" }}</td>
+        <td mat-cell *matCellDef="let clientUser">{{ clientUser.status === "ACTIVE" ? "ATIVO" : "INATIVO" }}</td>
       </ng-container>
 
       <!-- Coluna Ações -->
       <ng-container matColumnDef=" ">
         <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let client">
+        <td mat-cell *matCellDef="let clientUser">
+          @if (clientUser.status === "ACTIVE") {
           <button matButton="outlined" [matMenuTriggerFor]="afterMenu">Ações</button>
           <mat-menu #afterMenu="matMenu" xPosition="after">
-            @if (client.status === "ACTIVE") {
-              <button mat-menu-item  aria-label="Editar cliente">Atualizar</button>
-              <button mat-menu-item aria-label="Desativar cliente">Desativar</button>
-            }
+            <button mat-menu-item aria-label="Editar cliente" (click)="openUpdateClientUserDialog(clientUser)">Atualizar</button>
+            <button mat-menu-item aria-label="Desativar cliente" (click)="deleteClientUser(clientUser)">Desativar</button>
+            <button mat-menu-item aria-label="Restaurar senha do cliente" (click)="restorePassword(clientUser)">Restaurar senha</button>
           </mat-menu>
+          }
         </td>
       </ng-container>
 
@@ -63,7 +72,7 @@
       [length]="totalElements"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
-      [pageSizeOptions]="[1, 5, 10, 20]" 
+      [pageSizeOptions]="[5, 10, 20]" 
       showFirstLastButtons
       aria-label="Selecione a página de clientes">
     </mat-paginator>

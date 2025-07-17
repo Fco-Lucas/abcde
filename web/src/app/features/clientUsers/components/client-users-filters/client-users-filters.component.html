@@ -1,5 +1,5 @@
 <form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="space-x-5">
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Nome</mat-label>
     <input
       matInput
@@ -7,7 +7,7 @@
       formControlName="name"
     />
   </mat-form-field>
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>E-mail</mat-label>
     <input
       matInput
@@ -15,7 +15,7 @@
       formControlName="email"
     />
   </mat-form-field>
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Permissão</mat-label>
     <mat-select formControlName="permission" required>
       <mat-option value="ALL" selected>Todas</mat-option>
@@ -30,7 +30,7 @@
       }
     </mat-select>
   </mat-form-field>
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Situação</mat-label>
     <mat-select formControlName="status" required>
       <mat-option value="ALL" selected>Todas</mat-option>
@@ -39,7 +39,8 @@
     </mat-select>
   </mat-form-field>
 
-  <button matButton="filled" type="submit" [disabled]="isSubmitButtonDisabled()">
+  <button mat-flat-button type="submit" [disabled]="isSubmitButtonDisabled()">
+    <mat-icon *ngIf="!isLoading">search</mat-icon>
     <span *ngIf="!isLoading">Filtrar resultados</span>
     <mat-spinner *ngIf="isLoading" diameter="24" class="mx-auto"></mat-spinner>
   </button>

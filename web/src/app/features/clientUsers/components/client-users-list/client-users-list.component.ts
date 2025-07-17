@@ -10,10 +10,12 @@ import { ConfirmationDialogService } from '../../../../core/services/confirmatio
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LoadingService } from '../../../../core/services/loading.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ClientUserInterface } from '../../model/clientUsers.model';
+import { ClientUserInterface, type ClientUserStatus } from '../../model/clientUsers.model';
 import { ClientUsersService } from '../../services/client-users.service';
 import { finalize } from 'rxjs';
 import { ClientUsersFiltersFormInterface } from '../client-users-filters/client-users-filters.component';
+import type { PermissionInterface } from '../../../permissions/models/permission.model';
+import { DialogUpdateClientUserComponent, type DialogUpdateClientUserData, type UpdateClientUserFormValues } from '../dialog-update-client-user/dialog-update-client-user.component';
 
 @Component({
   selector: 'app-client-users-list',
@@ -31,7 +33,6 @@ import { ClientUsersFiltersFormInterface } from '../client-users-filters/client-
 export class ClientUsersListComponent implements OnInit, OnChanges {
   private confirmationDialogService = inject(ConfirmationDialogService);
   private notification = inject(NotificationService);
-  private loader = inject(LoadingService);
   readonly dialog = inject(MatDialog);
   private clientUsersService = inject(ClientUsersService);
 
@@ -47,7 +48,9 @@ export class ClientUsersListComponent implements OnInit, OnChanges {
 
   @Output() loadStatusChanged = new EventEmitter<'SUCCESS' | 'ERROR'>();
 
-  @Input() clientId: string = "";
+  @Input() clientId!: string;
+  @Input() clientName!: string;
+  @Input() permissions!: PermissionInterface[];
   @Input() filters: Partial<ClientUsersFiltersFormInterface> | null = null;
 
   // Pega uma referência ao componente paginador do template
@@ -70,8 +73,8 @@ export class ClientUsersListComponent implements OnInit, OnChanges {
 
   loadClientUsersPage(): void {
     this.isLoading.set(true);
-    // const statusFilter = this.filters?.status === "ALL" ? "" : this.filters?.status as ClientStatus;
-    this.clientUsersService.getAllClientsUserPageable(this.clientId, this.pageIndex, this.pageSize).pipe(
+    const statusFilter = this.filters?.status === "ALL" ? "" : this.filters?.status as ClientUserStatus;
+    this.clientUsersService.getAllClientsUserPageable(this.clientId, this.pageIndex, this.pageSize, this.filters?.name, this.filters?.email, statusFilter).pipe(
       // O finalize garante que o isLoading será false ao final, seja sucesso ou erro.
       finalize(() => this.isLoading.set(false))
     ).subscribe({
@@ -92,5 +95,80 @@ export class ClientUsersListComponent implements OnInit, OnChanges {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
     this.loadClientUsersPage();
+  }
+
+  openUpdateClientUserDialog(clientUser: ClientUserInterface): void {
+    const initialData: UpdateClientUserFormValues = {
+      clientId: this.clientId,
+      name: clientUser.name,
+      email: clientUser.email,
+      permission: clientUser.permission.id
+    };
+
+    const dialogData: DialogUpdateClientUserData = {
+      initialData: initialData,
+      userId: clientUser.id,
+      clientId: this.clientId,
+      clientName: this.clientName,
+      permissions: this.permissions
+    };
+
+    const dialogRef = this.dialog.open(DialogUpdateClientUserComponent, {
+      width: '500px',
+      data: dialogData,
+    });
+
+    // 2. Escuta o evento de fechamento
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadClientUsersPage();
+    });
+  }
+
+  deleteClientUser(clientUser: ClientUserInterface): void {
+    const dialogData = {
+      title: 'Tem certeza?',
+      message: `Você realmente deseja desativar o usuário "${clientUser.name}"? Esta ação não pode ser desfeita.`,
+      confirmButtonText: 'Excluir'
+    };
+    this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
+      if(confirmed) this.proceedWithDeletion(clientUser.id);
+    });
+  }
+
+  proceedWithDeletion(clientUserId: string): void {
+    this.clientUsersService.deleteClientUser(clientUserId).pipe(
+      finalize(() => {
+        this.loadClientUsersPage();
+      })
+    ).subscribe({
+      next: (_) => {
+        this.notification.showSuccess("Usuário excluído com sucesso!");
+      },
+      error: (err) => {
+        this.notification.showError(err.message);
+      }
+    });
+  }
+
+  restorePassword(clientUser: ClientUserInterface): void {
+    const dialogData = {
+      title: 'Tem certeza?',
+      message: `Você realmente deseja restaurar a senha do usuário "${clientUser.name}" para "abcdefgh"? Esta ação não pode ser desfeita.`,
+      confirmButtonText: 'Restaurar'
+    };
+    this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
+      if(confirmed) this.proceedWithRestorePassword(clientUser.id);
+    });
+  }
+
+  proceedWithRestorePassword(clientUserId: string): void {
+    this.clientUsersService.restorePasswordClientUser(clientUserId).subscribe({
+      next: (_) => {
+        this.notification.showSuccess("Senha do usuário restaurada para 'abcdefgh' com sucesso!");
+      },
+      error: (err) => {
+        this.notification.showError(err.message);
+      }
+    });
   }
 }

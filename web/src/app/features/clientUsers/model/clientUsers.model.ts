@@ -1,3 +1,5 @@
+import type { PermissionInterface } from "../../permissions/models/permission.model";
+
 export interface CreateClientUserInterface {
   clientId: string;
   name: string;
@@ -16,7 +18,7 @@ export interface ClientUserInterface {
   clientId: string;
   name: string;
   email: string;
-  permission: number;
+  permission: PermissionInterface;
   status: ClientUserStatus
 }
 
@@ -35,5 +37,5 @@ export interface UpdateClientUserInterface {
   clientId: string,
   name: string,
   email: string,
-  permission: string,
+  permission: number,
 }

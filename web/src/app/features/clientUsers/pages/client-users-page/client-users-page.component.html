@@ -24,6 +24,8 @@
   <app-client-users-list
     #clientUsersList
     [clientId]="clientId"
+    [clientName]="clientName"
+    [permissions]="permissions"
     [filters]="currentFilters()"
     (loadStatusChanged)="onLoadStatusChanged($event)">
   </app-client-users-list>

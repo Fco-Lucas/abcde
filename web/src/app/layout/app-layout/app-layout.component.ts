@@ -21,19 +21,12 @@ export class AppLayoutComponent {
 
   private getNavItemsForRole(role: AuthenticatedUserRole): NavItem[] {
     const allItems: NavItem[] = [
-      { label: 'Inicio', link: '/app/home' },
-      { label: 'Clientes', link: '/app/clients' },
-      { label: 'Meu Perfil', link: '/app/profile' },
+      { label: 'Inicio', link: '/app/home', roles: ['COMPUTEX', 'CLIENT', 'CLIENT_USER'] },
+      { label: 'Clientes', link: '/app/clients', roles: ['COMPUTEX'] },
+      { label: 'Meu Perfil', link: '/app/profile', roles: ['COMPUTEX', 'CLIENT', 'CLIENT_USER'] },
     ];
     
-    if (role === 'CLIENT') {
-      return allItems;
-    }
-    if (role === 'CLIENT_USER') {
-      return allItems.filter(item => item.label === 'Home' || item.label === 'Meu Perfil');
-    }
-    // Se não tiver cargo ou for anônimo, não vê nada
-    return [];
+    return allItems.filter(item => item.roles.includes(role));
   }
 
   onLogout(): void {

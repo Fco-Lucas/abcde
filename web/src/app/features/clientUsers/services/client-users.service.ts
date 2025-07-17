@@ -15,13 +15,13 @@ export class ClientUsersService {
     return this.http.post<ClientUserInterface>(`${this.apiUrl}clientsUsers`, data);
   }
 
-  getAllClientsUserPageable(clientId: string, page: number = 1, size: number = 10, name: string = "", cnpj: string = "", status: ClientUserStatus | "" = ""): Observable<PageableClientUsersList> {
+  getAllClientsUserPageable(clientId: string, page: number = 1, size: number = 10, name: string = "", email: string = "", status: ClientUserStatus | "" = ""): Observable<PageableClientUsersList> {
     const params = new HttpParams()
       .set("clientId", clientId.toString())
       .set("page", page.toString())
       .set("size", size.toString())
       .set("name", name.toString())
-      .set("cnpj", cnpj.toString())
+      .set("email", email.toString())
       .set("status", status.toString());
 
     return this.http.get<PageableClientUsersList>(`${this.apiUrl}clientsUsers`, { params });
@@ -37,5 +37,9 @@ export class ClientUsersService {
 
   deleteClientUser(clientUserId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}clientsUsers/${clientUserId}`);
+  }
+
+  restorePasswordClientUser(clientUserId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}clientsUsers/restorePassword/${clientUserId}`, {  });
   }
 }

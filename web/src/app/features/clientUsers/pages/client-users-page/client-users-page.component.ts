@@ -9,10 +9,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DialogCreateClientUserComponent, type ClientUsersCreateFormValues, type CreateUserDialogData } from '../../components/dialog-create-client-user/dialog-create-client-user.component';
+import { DialogCreateClientUserComponent, ClientUsersCreateFormValues, CreateUserDialogData } from '../../components/dialog-create-client-user/dialog-create-client-user.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ClientService } from '../../../clients/services/client.service';
-import type { Client } from '../../../clients/models/client.model';
+import { Client } from '../../../clients/models/client.model';
 
 @Component({
   selector: 'app-client-users-page',
@@ -31,9 +31,13 @@ export class ClientUsersPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private permissionService = inject(PermissionsService);
   private clientService = inject(ClientService);
+
   public clientId: string = "";
   public clientData: Client | null = null;
+  public clientName: string = "";
   public permissions: PermissionInterface[] = [];
+  public hasLoadError = signal(false);
+  public currentFilters = signal<Partial<ClientUsersFiltersFormInterface> | null>(null);
   readonly dialog = inject(MatDialog);
 
   ngOnInit(): void {
@@ -55,12 +59,15 @@ export class ClientUsersPageComponent implements OnInit {
     this.clientService.getClientById(this.clientId).subscribe({
       next: (client) => {
         this.clientData = client;
+        this.clientName = client.name;
       },
       error: (error) => {
         console.error(error.message);
       }
     })
   }
+
+  @ViewChild('clientUsersList') private clientUsersListComponent!: ClientUsersListComponent;
 
   openCreateClientUserDialog(initialData: ClientUsersCreateFormValues | null = null): void {
     const dialogData = {
@@ -77,29 +84,15 @@ export class ClientUsersPageComponent implements OnInit {
 
     // 2. Escuta o evento de fechamento
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.createClientUser(result as ClientUsersCreateFormValues);
-      }
+      if (result) this.clientUsersListComponent.loadClientUsersPage();
     });
   }
-
-  // Criação dos usuários
-  createClientUser(data: ClientUsersCreateFormValues): void {
-    console.log(data);
-  }
-
-  // Exibição da lista dos usuários
-  public hasLoadError = signal(false);
-  public currentFilters = signal<Partial<ClientUsersFiltersFormInterface> | null>(null);
-
-  @ViewChild('clientList') private clientUsersListComponent!: ClientUsersListComponent;
 
   onLoadStatusChanged(status: 'SUCCESS' | 'ERROR'): void {
     this.hasLoadError.set(status === "ERROR");
   }
 
   onFilterSubmit(filters: ClientUsersFiltersFormInterface): void {
-    // Atualiza o signal com os novos filtros
     this.currentFilters.set(filters);
   }
 }

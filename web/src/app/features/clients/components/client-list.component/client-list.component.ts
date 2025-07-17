@@ -129,18 +129,14 @@ export class ClientListComponent implements OnInit, OnChanges {
   }
 
   deleteClient(client: Client): void {
-    // 1. Prepara os dados para o dialog
     const dialogData = {
       title: 'Tem certeza?',
       message: `Você realmente deseja desativar o cliente "${client.name}"? Esta ação não pode ser desfeita.`,
       confirmButtonText: 'Excluir'
     };
 
-    // 2. Abre o dialog através do serviço e se inscreve no resultado
     this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
-      // 3. O código aqui dentro só executa DEPOIS que o usuário clica em um dos botões
       if (confirmed) {
-        // Se o usuário clicou em "Confirmar" (que retorna true)...
         this.proceedWithDeletion(client.id);
       }
     });

@@ -4,11 +4,13 @@ import { RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import type { AuthenticatedUserRole } from '../../../core/services/auth.service';
 
 // Interface para definir a estrutura de um item de navegação
 export interface NavItem {
   label: string;
   link: string;
+  roles: AuthenticatedUserRole[]
 }
 
 @Component({
