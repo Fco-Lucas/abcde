@@ -9,16 +9,7 @@ import { DialogCreateClientComponent } from '../../components/dialog-create-clie
 
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
-import { LoadingService } from '../../../../core/services/loading.service';
-import { ClientService } from '../../services/client.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import type { CreateClient } from '../../models/client.model';
 
-interface CreateFormValues {
-  name: string,
-  cnpj: string,
-  password: string
-}
 
 @Component({
   selector: 'app-clients-page.component',
@@ -36,46 +27,17 @@ interface CreateFormValues {
 export class ClientsPageComponent {
   // Criação de um novo cliente
   readonly dialog = inject(MatDialog);
-  private loadingService = inject(LoadingService);
-  private clientService = inject(ClientService);
-  private notification = inject(NotificationService);
 
-  openCreateClientDialog(enterAnimationDuration: string, exitAnimationDuration: string, initialData: CreateFormValues | null = null): void {
+  openCreateClientDialog(enterAnimationDuration: string, exitAnimationDuration: string): void {
     const dialogRef = this.dialog.open(DialogCreateClientComponent, {
       width: '500px',
-      data: initialData,
       enterAnimationDuration: enterAnimationDuration,
       exitAnimationDuration: exitAnimationDuration,
     });
 
     // 2. Escuta o evento de fechamento
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.createClient(result as CreateFormValues);
-      }
-    });
-  }
-
-  createClient(formValues: CreateFormValues): void {
-    this.loadingService.showLoad('Criando cliente, por favor aguarde...');
-
-    const data: CreateClient = {
-      name: formValues.name || "",
-      cnpj: formValues.cnpj || "",
-      password: formValues.password || ""
-    }
-
-    this.clientService.createClient(data).subscribe({
-      next: (_) => {
-        this.clientListComponent.loadClientsPage();
-        this.loadingService.hideLoad();
-        this.notification.showSuccess("Cliente criado com sucesso!");
-      },
-      error: (err) => {
-        this.loadingService.hideLoad();
-        this.notification.showError(err.message);
-        this.openCreateClientDialog('0ms', '0ms', formValues);
-      }
+      if (result) this.clientListComponent.loadClientsPage();
     });
   }
 

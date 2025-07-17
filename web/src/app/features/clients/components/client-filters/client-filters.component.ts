@@ -7,8 +7,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgxMaskDirective } from 'ngx-mask';
+import { MatIconModule } from '@angular/material/icon';
 
 export type ClientStatusFilterType = 'ALL' | 'ACTIVE' | 'INACTIVE';
 
@@ -27,14 +28,15 @@ export interface ClientFiltersFormValues {
     ReactiveFormsModule,
     MatSelectModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
   templateUrl: './client-filters.component.html',
 })
 export class ClientFiltersComponent {
   filterForm = new FormGroup({
     cnpj: new FormControl("", []),
-    status: new FormControl("ALL", [])
+    status: new FormControl("ALL", [Validators.required])
   });
 
   @Output()

@@ -1,5 +1,5 @@
 <form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="space-x-5">
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>CNPJ</mat-label>
     <input
       matInput
@@ -9,17 +9,20 @@
       placeholder="00.000.000/0000-00"
     />
   </mat-form-field>
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Situação</mat-label>
-    <mat-select formControlName="status">
+    <mat-select formControlName="status" required>
       <mat-option value="ALL" selected>Todas</mat-option>
       <mat-option value="ACTIVE">Ativos</mat-option>
       <mat-option value="INACTIVE">Desativos</mat-option>
     </mat-select>
   </mat-form-field>
 
-  <button matButton="filled" type="submit" [disabled]="isSubmitButtonDisabled()">
-    <span *ngIf="!isLoading">Filtrar resultados</span>
+  <button mat-flat-button type="submit" [disabled]="isSubmitButtonDisabled()">
+    <mat-icon *ngIf="!isLoading">search</mat-icon>
+    <span *ngIf="!isLoading">
+      Filtrar resultados
+    </span>
     <mat-spinner *ngIf="isLoading" diameter="24" class="mx-auto"></mat-spinner>
   </button>
 </form>

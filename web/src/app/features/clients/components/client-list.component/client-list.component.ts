@@ -16,7 +16,7 @@ import { ClientFiltersFormValues } from '../client-filters/client-filters.compon
 import { ConfirmationDialogService } from '../../../../core/services/confirmation-dialog.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LoadingService } from '../../../../core/services/loading.service';
-import { DialogUpdateClientComponent, UpdateClientFormValues } from '../dialog-update-client/dialog-update-client.component';
+import { DialogUpdateClientComponent, UpdateClientFormValues, type DialogUpdateClientData } from '../dialog-update-client/dialog-update-client.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
@@ -108,36 +108,23 @@ export class ClientListComponent implements OnInit, OnChanges {
     const initialData: UpdateClientFormValues = {
       name: client.name,
       cnpj: client.cnpj
-    }
-    this.openUpdateClientDialog(client.id, initialData);
+    };
+    const data: DialogUpdateClientData = {
+      clientId: client.id,
+      data: initialData,
+    };
+    this.openUpdateClientDialog(data);
   }
 
-  openUpdateClientDialog(clientId: string, initialData: UpdateClientFormValues) {
+  openUpdateClientDialog(data: DialogUpdateClientData) {
     const dialogRef = this.dialog.open(DialogUpdateClientComponent, {
       width: '500px',
-      data: initialData
+      data: data
     });
 
+    // Evento de escuta ao fechar a modal
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.updateClient(clientId, result as UpdateClientFormValues);
-      }
-    });
-  }
-
-  updateClient(clientId: string, data: UpdateClientFormValues): void {
-    this.loader.showLoad("Atualizando informações do cliente...");
-    this.clientService.updateClient(clientId, data).subscribe({
-      next: () => {
-        this.loader.hideLoad();
-        this.notification.showSuccess("Informações do cliente atualizadas com sucesso!");
-        this.loadClientsPage();
-      },
-      error: (err) => {
-        this.loader.hideLoad();
-        this.notification.showError(err.message);
-        this.openUpdateClientDialog(clientId, data);
-      }
+      if (result) this.loadClientsPage();
     });
   }
 
