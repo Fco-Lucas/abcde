@@ -39,7 +39,7 @@ export class ClientUsersFiltersComponent {
     name: ["", []],
     email: ["", []],
     permission: ["ALL", [Validators.required]],
-    status: ["ALL", [Validators.required]]
+    status: ["ACTIVE", [Validators.required]]
   });
 
   @Input() isLoading: boolean = false;

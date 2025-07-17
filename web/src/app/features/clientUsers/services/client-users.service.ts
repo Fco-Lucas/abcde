@@ -15,7 +15,7 @@ export class ClientUsersService {
     return this.http.post<ClientUserInterface>(`${this.apiUrl}clientsUsers`, data);
   }
 
-  getAllClientsUserPageable(clientId: string, page: number = 1, size: number = 10, name: string = "", email: string = "", status: ClientUserStatus | "" = ""): Observable<PageableClientUsersList> {
+  getAllClientsUserPageable(clientId: string, page: number = 1, size: number = 10, name: string = "", email: string = "", status: ClientUserStatus | "" = ClientUserStatus.ACTIVE): Observable<PageableClientUsersList> {
     const params = new HttpParams()
       .set("clientId", clientId.toString())
       .set("page", page.toString())

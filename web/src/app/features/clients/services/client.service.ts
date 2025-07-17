@@ -15,7 +15,7 @@ export class ClientService {
     return this.http.post<Client>(`${this.apiUrl}clients`, data);
   }
 
-  getAllClientsPageable(page: number = 0, size: number = 10, cnpj: string = "", status: ClientStatus | "" = ""): Observable<PageableClientList> {
+  getAllClientsPageable(page: number = 0, size: number = 10, cnpj: string = "", status: ClientStatus | "" = ClientStatus.ACTIVE): Observable<PageableClientList> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())

@@ -36,7 +36,7 @@ export interface ClientFiltersFormValues {
 export class ClientFiltersComponent {
   filterForm = new FormGroup({
     cnpj: new FormControl("", []),
-    status: new FormControl("ALL", [Validators.required])
+    status: new FormControl("ACTIVE", [Validators.required])
   });
 
   @Output()

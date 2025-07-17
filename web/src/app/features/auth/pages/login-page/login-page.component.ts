@@ -41,7 +41,6 @@ export class LoginPageComponent {
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: () => {
-        this.notification.showSuccess('Login realizado com sucesso!');
         this.router.navigateByUrl(this.returnUrl);
       },
       error: (err: Error) => {

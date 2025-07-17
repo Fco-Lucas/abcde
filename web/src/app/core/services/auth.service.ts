@@ -36,6 +36,10 @@ export class AuthService {
   private currentUserRoleSubject = new BehaviorSubject<AuthenticatedUserRole>(null);
   public currentUserRole$ = this.currentUserRoleSubject.asObservable();
 
+  // BehaviorSubject para o id do usuário autenticado
+  private currentUserIdSubject = new BehaviorSubject<string | null>(null);
+  public currentUserId$ = this.currentUserIdSubject.asObservable();
+
   constructor() {
     this.loadAuthenticatedUserRoleFromToken();
   }
@@ -45,12 +49,15 @@ export class AuthService {
     if (token && !this.isTokenExpired()) {
       try {
         const decodedToken = jwtDecode<TokenPayload>(token);
+
+        this.isAuthenticatedSubject.next(true);
         this.currentUserRoleSubject.next(decodedToken.role);
+        this.currentUserIdSubject.next(decodedToken.id);
       } catch (error) {
-        this.currentUserRoleSubject.next(null);
+        this.removeToken();
       }
     } else {
-      this.currentUserRoleSubject.next(null);
+      this.removeToken();
     }
   }
 
@@ -72,6 +79,7 @@ export class AuthService {
       );
       this.isAuthenticatedSubject.next(true);
       this.currentUserRoleSubject.next(decodedToken.role);
+      this.currentUserIdSubject.next(decodedToken.id);
     } catch (error) {
       console.error("Erro ao decodificar o token para armazenar no cookie:", error);
       this.logout();
@@ -82,6 +90,7 @@ export class AuthService {
     this.cookieService.delete(AUTH_TOKEN_COOKIE_NAME, '/');
     this.isAuthenticatedSubject.next(false);
     this.currentUserRoleSubject.next(null);
+    this.currentUserIdSubject.next(null);
   }
 
   public getToken(): string {
@@ -93,7 +102,7 @@ export class AuthService {
     if (!token) return true;
 
     try {
-      const decodedToken = jwtDecode(token);
+      const decodedToken = jwtDecode<TokenPayload>(token);
       const expirationDate = decodedToken.exp! * 1000;
       return expirationDate < Date.now();
     } catch (error) {
