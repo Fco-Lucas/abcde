@@ -37,6 +37,7 @@
             @if (client.status === "ACTIVE") {
               <button mat-menu-item (click)="handleOpenUpdateClientDialog(client)" aria-label="Editar cliente">Atualizar</button>
               <button mat-menu-item (click)="deleteClient(client)" aria-label="Desativar cliente">Desativar</button>
+              <button mat-menu-item (click)="restorePassword(client)" aria-label="Restaurar senha do cliente">Restaurar senha</button>
             }
           </mat-menu>
         </td>

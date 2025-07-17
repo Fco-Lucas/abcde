@@ -21,14 +21,18 @@
       Novo Usuário
     </button>
   </div>
-  <app-client-users-list
-    #clientUsersList
-    [clientId]="clientId"
-    [clientName]="clientName"
-    [permissions]="permissions"
-    [filters]="currentFilters()"
-    (loadStatusChanged)="onLoadStatusChanged($event)">
-  </app-client-users-list>
+  <mat-card>
+    <mat-card-content>
+        <app-client-users-list
+          #clientUsersList
+          [clientId]="clientId"
+          [clientName]="clientName"
+          [permissions]="permissions"
+          [filters]="currentFilters()"
+          (loadStatusChanged)="onLoadStatusChanged($event)">
+        </app-client-users-list>
+    </mat-card-content>
+  </mat-card>
 
 } @else {
   <div class="flex justify-center items-center h-dvh">

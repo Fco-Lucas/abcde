@@ -10,7 +10,7 @@ import { ConfirmationDialogService } from '../../../../core/services/confirmatio
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LoadingService } from '../../../../core/services/loading.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ClientUserInterface, type ClientUserStatus } from '../../model/clientUsers.model';
+import { ClientUserInterface, type ClientUserStatus } from '../../models/clientUsers.model';
 import { ClientUsersService } from '../../services/client-users.service';
 import { finalize } from 'rxjs';
 import { ClientUsersFiltersFormInterface } from '../client-users-filters/client-users-filters.component';
@@ -131,12 +131,12 @@ export class ClientUsersListComponent implements OnInit, OnChanges {
       confirmButtonText: 'Excluir'
     };
     this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
-      if(confirmed) this.proceedWithDeletion(clientUser.id);
+      if(confirmed) this.proceedWithDeletion(clientUser.clientId, clientUser.id);
     });
   }
 
-  proceedWithDeletion(clientUserId: string): void {
-    this.clientUsersService.deleteClientUser(clientUserId).pipe(
+  proceedWithDeletion(clientId: string, clientUserId: string): void {
+    this.clientUsersService.deleteClientUser(clientId, clientUserId).pipe(
       finalize(() => {
         this.loadClientUsersPage();
       })
@@ -157,12 +157,12 @@ export class ClientUsersListComponent implements OnInit, OnChanges {
       confirmButtonText: 'Restaurar'
     };
     this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
-      if(confirmed) this.proceedWithRestorePassword(clientUser.id);
+      if(confirmed) this.proceedWithRestorePassword(clientUser.clientId, clientUser.id);
     });
   }
 
-  proceedWithRestorePassword(clientUserId: string): void {
-    this.clientUsersService.restorePasswordClientUser(clientUserId).subscribe({
+  proceedWithRestorePassword(clientId: string, clientUserId: string): void {
+    this.clientUsersService.restorePasswordClientUser(clientId, clientUserId).subscribe({
       next: (_) => {
         this.notification.showSuccess("Senha do usuário restaurada para 'abcdefgh' com sucesso!");
       },

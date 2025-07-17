@@ -1,4 +1,4 @@
-import type { PermissionInterface } from "../../permissions/models/permission.model";
+import { PermissionInterface } from "../../permissions/models/permission.model";
 
 export interface CreateClientUserInterface {
   clientId: string;

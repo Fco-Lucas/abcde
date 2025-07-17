@@ -1,4 +1,4 @@
-import { ClientUserInterface } from "../../clientUsers/model/clientUsers.model";
+import { ClientUserInterface } from "./clientUsers.model";
 
 export interface CreateClient {
   name: string;

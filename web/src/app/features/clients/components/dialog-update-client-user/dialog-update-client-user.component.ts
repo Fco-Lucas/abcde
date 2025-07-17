@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
-import { UpdateClientUserInterface } from '../../model/clientUsers.model';
+import { UpdateClientUserInterface } from '../../models/clientUsers.model';
 
 export interface UpdateClientUserFormValues {
   clientId: string;
@@ -96,7 +96,7 @@ export class DialogUpdateClientUserComponent {
       permission: Number(formValues.permission)
     };
 
-    this.clientUserService.updateClientUser(this.userId, data).pipe(
+    this.clientUserService.updateClientUser(this.clientId, this.userId, data).pipe(
       finalize(() => {
         this.isLoading.set(false);
         this.updateForm.enable();

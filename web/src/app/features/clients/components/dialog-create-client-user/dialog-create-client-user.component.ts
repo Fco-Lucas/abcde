@@ -11,7 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ClientUsersService } from '../../services/client-users.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import type { CreateClientUserInterface } from '../../model/clientUsers.model';
+import type { CreateClientUserInterface } from '../../models/clientUsers.model';
 import { finalize } from 'rxjs';
 
 export interface ClientUsersCreateFormValues {
@@ -103,7 +103,7 @@ export class DialogCreateClientUserComponent implements OnInit {
       permission: Number(formValues.permission),
     }
 
-    this.clientUserService.createClientUser(data).pipe(
+    this.clientUserService.createClientUser(this.clientId, data).pipe(
       finalize(() => {
         this.isLoading.set(false);
         this.createForm.enable();

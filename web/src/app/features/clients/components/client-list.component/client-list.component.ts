@@ -159,4 +159,26 @@ export class ClientListComponent implements OnInit, OnChanges {
       }
     });
   }
+
+  restorePassword(client: Client): void {
+      const dialogData = {
+        title: 'Tem certeza?',
+        message: `Você realmente deseja restaurar a senha do cliente "${client.name}" para "abcdefgh"? Esta ação não pode ser desfeita.`,
+        confirmButtonText: 'Restaurar'
+      };
+      this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
+        if(confirmed) this.proceedWithRestorePassword(client.id);
+      });
+    }
+  
+    proceedWithRestorePassword(clientId: string): void {
+      this.clientService.restorePasswordClient(clientId).subscribe({
+        next: (_) => {
+          this.notification.showSuccess("Senha do cliente restaurada para 'abcdefgh' com sucesso!");
+        },
+        error: (err) => {
+          this.notification.showError(err.message);
+        }
+      });
+    }
 }
