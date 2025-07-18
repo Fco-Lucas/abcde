@@ -1,40 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-*{
-  border: 0;
-}
 html {
-  // Define o tema claro como padrão.
-  color-scheme: light;
+  color-scheme: light; // Padrão light
   @include mat.theme((
-    color: (
-      primary: mat.$blue-palette,
-      tertiary: mat.$orange-palette,
-    ),
-    typography: (
-      plain-family: 'Roboto',
-      brand-family: 'Roboto',
-      bold-weight: 700,
-      medium-weight: 500,
-      regular-weight: 400
-    ),
-    density: 0
+    color: mat.$azure-palette,
+    typography: Roboto,
   ));
 }
 
-body {
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  height: 100%;
-}
 body.dark-theme {
   color-scheme: dark;
+}
+
+*{
+  border: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  margin: 0;
 }
 
 // Snackbar de Sucesso (Verde)

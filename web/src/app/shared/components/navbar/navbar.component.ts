@@ -18,6 +18,7 @@ export interface NavItem {
   standalone: true,
   imports: [CommonModule, RouterModule, MatToolbarModule, MatButtonModule, MatIconModule],
   templateUrl: './navbar.component.html',
+  styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
   @Input() navItems: NavItem[] | null = []; // Recebe a lista de links para exibir
