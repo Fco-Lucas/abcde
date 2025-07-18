@@ -34,8 +34,14 @@ export interface PageableClientUsersList {
 }
 
 export interface UpdateClientUserInterface {
-  clientId: string,
-  name: string,
-  email: string,
-  permission: number,
+  clientId?: string,
+  name?: string,
+  email?: string,
+  permission?: number,
+}
+
+export interface UpdateClientUserPasswordInterface {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }

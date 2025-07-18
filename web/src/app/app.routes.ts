@@ -5,7 +5,6 @@ import { HomePageComponent } from './features/home/pages/home-page/home-page.com
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 import { publicGuard } from './core/guards/public.guard';
-import { ProfilePageComponent } from './features/profile/pages/profile-page.component/profile-page.component';
 
 export const routes: Routes = [
   {
@@ -20,7 +19,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'home', component: HomePageComponent, title: "ABCDE | Início" },
-      { path: 'profile', component: ProfilePageComponent, title: "ABCDE | Perfil" },
+      { path: 'profile', loadChildren: () => import('./features/profile/profile.routes') },
       { path: 'clients', loadChildren: () => import('./features/clients/clients.routes') }
     ]
   },

@@ -35,3 +35,9 @@ export interface UpdateClientInterface {
   name?: string,
   cnpj?: string,
 }
+
+export interface UpdateClientPasswordInterface {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}

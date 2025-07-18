@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { ClientUserInterface, ClientUserStatus, CreateClientUserInterface, PageableClientUsersList, UpdateClientUserInterface } from '../models/clientUsers.model';
+import { ClientUserInterface, ClientUserStatus, CreateClientUserInterface, PageableClientUsersList, UpdateClientUserInterface, type UpdateClientUserPasswordInterface } from '../models/clientUsers.model';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
@@ -37,6 +37,10 @@ export class ClientUsersService {
 
   deleteClientUser(clientId: string, clientUserId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}clients/${clientId}/users/${clientUserId}`);
+  }
+
+  updatePasswordClientUser(clientId: string, clientUserId: string, data: UpdateClientUserPasswordInterface): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}clients/${clientId}/users/updatePassword/${clientUserId}`, data);
   }
 
   restorePasswordClientUser(clientId: string, clientUserId: string): Observable<void> {

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { Client, ClientStatus, CreateClient, type PageableClientList, type UpdateClientInterface } from '../models/client.model';
+import { Client, ClientStatus, CreateClient, type PageableClientList, type UpdateClientInterface, type UpdateClientPasswordInterface } from '../models/client.model';
 import { Observable, tap } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
@@ -35,6 +35,10 @@ export class ClientService {
   
   deleteClient(clientId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}clients/${clientId}`);
+  }
+
+  updatePasswordClient(clientId: string, data: UpdateClientPasswordInterface): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}clients/updatePassword/${clientId}`, data);
   }
 
   restorePasswordClient(clientId: string): Observable<void> {

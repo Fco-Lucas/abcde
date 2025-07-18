@@ -1,0 +1,46 @@
+@if(client) {
+  <h2 class="text-2xl font-semibold mb-3">Meu Perfil</h2>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="flex justify-between items-center gap-1 mb-5">
+        <div class="flex flex-col">
+          <span class="text-xl">{{ client.name }}</span>
+          <span class="text-lg text-gray-600">Cargo: {{ getClientRole() }}</span>
+        </div>
+        <button matButton="filled" (click)="openDialogUpdateClientInfo()">Atualizar informações</button>
+      </div>
+      <form class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div class="w-full">
+          <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Nome</mat-label>
+            <input
+              matInput
+              type="text"
+              disabled
+              [value]="client.name"
+            />
+          </mat-form-field>
+        </div>
+        <div class="w-full">
+          <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>CNPJ</mat-label>
+            <input
+              matInput
+              type="text"
+              [value]="client.cnpj | mask: '00.000.000/0000-00'"
+              placeholder="00.000.000/0000-00"
+              disabled
+            />
+          </mat-form-field>
+        </div>
+        <div class="w-full">
+          <h3 class="text-2xl mb-1">Senha</h3>
+          <button matButton="filled" type="button" (click)="openDialogUpdateClientPassword()">Alterar senha de acesso</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}@else {
+
+}
