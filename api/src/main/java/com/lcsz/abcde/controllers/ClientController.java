@@ -118,28 +118,28 @@ public class ClientController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('CLIENT')")
+    @PreAuthorize("hasAuthority('COMPUTEX')")
     public ResponseEntity<Void> updateClient(@PathVariable UUID id, @RequestBody @Valid ClientUpdateDto dto) {
         this.service.updateClient(id, dto);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('CLIENT')")
+    @PreAuthorize("hasAuthority('COMPUTEX')")
     public ResponseEntity<Void> deleteClient(@PathVariable UUID id) {
         this.service.deleteClient(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/updatePassword/{id}")
-    @PreAuthorize("hasAuthority('CLIENT') or #id == principal.id")
+    @PreAuthorize("hasAuthority('COMPUTEX') or #id == principal.id")
     public ResponseEntity<Void> updatePasswordClient(@PathVariable UUID id, @RequestBody @Valid ClientUpdatePasswordDto dto) {
         this.service.updatePassword(id, dto);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/restorePassword/{id}")
-    @PreAuthorize("hasAuthority('CLIENT')")
+    @PreAuthorize("hasAuthority('COMPUTEX')")
     public ResponseEntity<Void> restorePasswordClient(@PathVariable UUID id) {
         this.service.restorePassword(id);
         return ResponseEntity.noContent().build();

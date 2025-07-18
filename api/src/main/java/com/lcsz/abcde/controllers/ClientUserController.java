@@ -5,8 +5,8 @@ import com.lcsz.abcde.dtos.clients_users.ClientUserCreateDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserResponseDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserUpdateDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserUpdatePasswordDto;
+import com.lcsz.abcde.enums.clientUser.ClientUserStatus;
 import com.lcsz.abcde.mappers.PageableMapper;
-import com.lcsz.abcde.repositorys.projection.ClientUserProjection;
 import com.lcsz.abcde.services.ClientUserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,64 +19,78 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "ClientUser Controller", description = "Contém todas as operações relacionadas aos recursos dos usuários dos clientes do ABCDE")
+@Tag(name = "ClientUser Controller", description = "Contém todas as operações relacionadas aos usuários de clientes do sistema ABCDE")
 @RestController
-@RequestMapping("api/v1/clientsUsers")
+@RequestMapping("api/v1/clients/{clientId}/users")
 public class ClientUserController {
+
     private final ClientUserService service;
 
-    ClientUserController(ClientUserService service) {
+    public ClientUserController(ClientUserService service) {
         this.service = service;
     }
 
-    @PostMapping()
-    @PreAuthorize("hasAuthority('CLIENT')")
-    public ResponseEntity<ClientUserResponseDto> createClientUser(@RequestBody @Valid ClientUserCreateDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.service.create(dto));
+    @PostMapping
+    @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT')")
+    public ResponseEntity<ClientUserResponseDto> createClientUser(
+            @PathVariable UUID clientId,
+            @RequestBody @Valid ClientUserCreateDto dto
+    ) {
+        dto.setClientId(clientId);
+        ClientUserResponseDto created = service.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @GetMapping()
+    @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PageableDto> getAllClientsUserPageable(
-        Pageable pageable,
-        @RequestParam(required = false) String name,
-        @RequestParam(required = false) String email
+            Pageable pageable,
+            @PathVariable UUID clientId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) ClientUserStatus status
     ) {
-        Page<ClientUserProjection> clientUsers = this.service.getAllPageable(pageable, name, email);
-        return ResponseEntity.status(HttpStatus.OK).body(PageableMapper.toDto(clientUsers));
+        Page<ClientUserResponseDto> page = service.getAllPageable(pageable, clientId, name, email, status);
+        return ResponseEntity.ok(PageableMapper.toDto(page));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ClientUserResponseDto> getClientUserById(@PathVariable UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.service.getByIdDto(id));
+        return ResponseEntity.ok(service.getByIdDto(id));
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('CLIENT') or #id == principal.id")
-    public ResponseEntity<Void> updateClientUser(@PathVariable UUID id, @RequestBody @Valid ClientUserUpdateDto dto) {
-        this.service.update(id, dto);
+    @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT') or #id == principal.id")
+    public ResponseEntity<Void> updateClientUser(
+            @PathVariable UUID id,
+            @RequestBody @Valid ClientUserUpdateDto dto
+    ) {
+        service.update(id, dto);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('CLIENT')")
+    @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT')")
     public ResponseEntity<Void> deleteClientUser(@PathVariable UUID id) {
-        this.service.delete(id);
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/updatePassword/{id}")
-    @PreAuthorize("hasAuthority('CLIENT') or #id == principal.id")
-    public ResponseEntity<Void> updatePasswordClientUser(@PathVariable UUID id, @RequestBody @Valid ClientUserUpdatePasswordDto dto) {
-        this.service.updatePassword(id, dto);
+    @PreAuthorize("hasAuthority('COMPUTEX') or #id == principal.id")
+    public ResponseEntity<Void> updatePasswordClientUser(
+            @PathVariable UUID id,
+            @RequestBody @Valid ClientUserUpdatePasswordDto dto
+    ) {
+        service.updatePassword(id, dto);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/restorePassword/{id}")
-    @PreAuthorize("hasAuthority('CLIENT')")
+    @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT')")
     public ResponseEntity<Void> restorePasswordClientUser(@PathVariable UUID id) {
-        this.service.restorePassword(id);
+        service.restorePassword(id);
         return ResponseEntity.noContent().build();
     }
 }

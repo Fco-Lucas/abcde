@@ -1,6 +1,8 @@
 package com.lcsz.abcde.dtos.clients_users;
 
+import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.enums.clientUser.ClientUserStatus;
+import com.lcsz.abcde.models.Permission;
 
 import java.util.UUID;
 
@@ -9,13 +11,13 @@ public class ClientUserResponseDto {
     private UUID clientId;
     private String name;
     private String email;
-    private Long permission;
+    private PermissionResponseDto permission;
     ClientUserStatus status;
 
     public ClientUserResponseDto() {
     }
 
-    public ClientUserResponseDto(UUID id, UUID clientId, String name, String email, Long permission, ClientUserStatus status) {
+    public ClientUserResponseDto(UUID id, UUID clientId, String name, String email, PermissionResponseDto permission, ClientUserStatus status) {
         this.id = id;
         this.clientId = clientId;
         this.name = name;
@@ -56,11 +58,11 @@ public class ClientUserResponseDto {
         this.email = email;
     }
 
-    public Long getPermission() {
+    public PermissionResponseDto getPermission() {
         return permission;
     }
 
-    public void setPermission(Long permission) {
+    public void setPermission(PermissionResponseDto permission) {
         this.permission = permission;
     }
 

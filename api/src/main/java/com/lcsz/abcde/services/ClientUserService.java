@@ -4,11 +4,11 @@ import com.lcsz.abcde.dtos.clients_users.ClientUserCreateDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserResponseDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserUpdateDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserUpdatePasswordDto;
+import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.enums.clientUser.ClientUserStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.ClientUserMapper;
-import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.models.ClientUser;
 import com.lcsz.abcde.repositorys.ClientUserRepository;
 import com.lcsz.abcde.repositorys.projection.ClientUserProjection;
@@ -27,11 +27,13 @@ import java.util.UUID;
 public class ClientUserService {
     private final ClientUserRepository repository;
     private final ClientService clientService;
+    private final PermissionService permissionService;
     private final PasswordEncoder passwordEncoder;
 
-    ClientUserService(ClientUserRepository repository, @Lazy ClientService clientService, PasswordEncoder passwordEncoder) {
+    ClientUserService(ClientUserRepository repository, @Lazy ClientService clientService, PermissionService permissionService, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.clientService = clientService;
+        this.permissionService = permissionService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -60,15 +62,33 @@ public class ClientUserService {
 
         ClientUser saved = this.repository.save(clientUser);
 
-        return ClientUserMapper.toDto(saved);
+        PermissionResponseDto permissions = this.permissionService.getPermissionByIdDto(saved.getPermission());
+
+        ClientUserResponseDto responseDto = ClientUserMapper.toDto(saved);
+        responseDto.setPermission(permissions);
+
+        return responseDto;
     }
 
-    public Page<ClientUserProjection> getAllPageable(
+    public Page<ClientUserResponseDto> getAllPageable(
             Pageable pageable,
-            String filterName,
-            String filterEmail
+            UUID clientId,
+            String name,
+            String email,
+            ClientUserStatus status
     ) {
-        return this.repository.findAllPageable(pageable, filterName, filterEmail);
+        String nameParam = (name == null || name.isBlank()) ? null : "%" + name + "%";
+        String emailParam = (email == null || email.isBlank()) ? null : "%" + email + "%";
+
+        Page<ClientUserProjection> clientUsers = this.repository.findAllPageable(pageable, clientId, nameParam, emailParam, status);
+
+        return clientUsers.map(clientUser -> {
+            ClientUser entity = this.getById(clientUser.getId());
+            ClientUserResponseDto responseDto = ClientUserMapper.toDto(entity);
+            PermissionResponseDto permission = this.permissionService.getPermissionByIdDto(clientUser.getPermission());
+            responseDto.setPermission(permission);
+            return responseDto;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +101,13 @@ public class ClientUserService {
     @Transactional(readOnly = true)
     public ClientUserResponseDto getByIdDto(UUID id) {
         ClientUser clientUser = this.getById(id);
-        return ClientUserMapper.toDto(clientUser);
+
+        PermissionResponseDto permission = this.permissionService.getPermissionByIdDto(clientUser.getPermission());
+
+        ClientUserResponseDto responseDto = ClientUserMapper.toDto(clientUser);
+        responseDto.setPermission(permission);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = false)
@@ -142,6 +168,16 @@ public class ClientUserService {
     @Transactional(readOnly = true)
     public List<ClientUserResponseDto> getUsersByClientId(UUID clientId) {
         List<ClientUser> users = this.repository.findAllByClientIdAndStatus(clientId, ClientUserStatus.ACTIVE);
-        return ClientUserMapper.toListDto(users);
+
+        return users.stream()
+            .map(user -> {
+                PermissionResponseDto permissionDto = this.permissionService.getPermissionByIdDto(user.getPermission());
+
+                ClientUserResponseDto dto = ClientUserMapper.toDto(user);
+                dto.setPermission(permissionDto);
+
+                return dto;
+            })
+            .toList();
     }
 }

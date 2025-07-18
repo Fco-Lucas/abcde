@@ -12,11 +12,11 @@ public class JwtUserDetails extends User {
     private final Client client;
     private final ClientUser clientUser;
 
-    public JwtUserDetails(Client client) {
+    public JwtUserDetails(Client client, String role) {
         super(
                 client.getCnpj(),
                 client.getPassword(),
-                List.of(new SimpleGrantedAuthority("CLIENT")) // ou outro nome que quiser
+                List.of(new SimpleGrantedAuthority(role))
         );
         this.client = client;
         this.clientUser = null;
@@ -37,7 +37,10 @@ public class JwtUserDetails extends User {
     }
 
     public String getRole() {
-        return client != null ? "CLIENT" : "CLIENT_USER";
+        if(client != null)
+            return client.getCnpj().equals("12302493000101") ? "COMPUTEX" : "CLIENT";
+
+        return "CLIENT_USER";
     }
 
     public boolean isClient() {

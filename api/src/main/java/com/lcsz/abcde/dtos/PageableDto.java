@@ -30,7 +30,7 @@ public class PageableDto {
     }
 
     public int getNumber() {
-        return number;
+        return number + 1;
     }
 
     public int getSize() {

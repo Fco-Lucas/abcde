@@ -15,10 +15,15 @@ import java.util.UUID;
 public interface ClientRepository extends JpaRepository<Client, UUID> {
     Optional<Client> findByCnpjAndStatus(String cnpj, ClientStatus status);
 
-    @Query("SELECT c FROM Client c WHERE c.cnpj LIKE CONCAT('%', :cnpj, '%') AND c.status = :status")
+    @Query("""
+        SELECT c FROM Client c
+        WHERE (:cnpj IS NULL OR c.cnpj ILIKE :cnpj)
+          AND (:status IS NULL OR c.status = :status)
+        ORDER BY c.createdAt DESC
+    """)
     Page<ClientProjection> findAllPageable(
-            Pageable pageable,
-            @Param("cnpj") String cnpj,
-            @Param("status") ClientStatus status
+        Pageable pageable,
+        @Param("cnpj") String cnpj,
+        @Param("status") ClientStatus status
     );
 }

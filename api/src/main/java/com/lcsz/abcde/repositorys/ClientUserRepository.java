@@ -18,13 +18,18 @@ public interface ClientUserRepository extends JpaRepository<ClientUser, UUID> {
 
     @Query("""
         SELECT u FROM ClientUser u
-        WHERE (:name IS NULL OR u.name LIKE CONCAT('%', COALESCE(:name, ''), '%'))
-          AND (:email IS NULL OR u.email LIKE CONCAT('%', COALESCE(:email, ''), '%'))
+        WHERE u.clientId = :clientId
+          AND (:name IS NULL OR u.name ILIKE :name)
+          AND (:email IS NULL OR u.email ILIKE :email)
+          AND (:status IS NULL OR u.status = :status)
+        ORDER BY u.createdAt DESC
     """)
     Page<ClientUserProjection> findAllPageable(
         Pageable pageable,
+        @Param("clientId") UUID clientId,
         @Param("name") String name,
-        @Param("email") String email
+        @Param("email") String email,
+        @Param("status") ClientUserStatus status
     );
 
     List<ClientUser> findAllByClientIdAndStatus(UUID clientId, ClientUserStatus status);

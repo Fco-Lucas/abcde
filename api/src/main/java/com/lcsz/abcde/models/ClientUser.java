@@ -2,13 +2,17 @@ package com.lcsz.abcde.models;
 
 import com.lcsz.abcde.enums.clientUser.ClientUserStatus;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "clients_users")
+@EntityListeners(AuditingEntityListener.class)
 public class ClientUser implements Serializable {
     @Id
     @GeneratedValue
@@ -27,11 +31,14 @@ public class ClientUser implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ClientUserStatus status = ClientUserStatus.ACTIVE;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public ClientUser() {
     }
 
-    public ClientUser(UUID id, UUID clientId, String name, String email, String password, Long permission, ClientUserStatus status) {
+    public ClientUser(UUID id, UUID clientId, String name, String email, String password, Long permission, ClientUserStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.clientId = clientId;
         this.name = name;
@@ -39,6 +46,7 @@ public class ClientUser implements Serializable {
         this.password = password;
         this.permission = permission;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {
@@ -97,6 +105,14 @@ public class ClientUser implements Serializable {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -119,6 +135,7 @@ public class ClientUser implements Serializable {
                 ", password='" + password + '\'' +
                 ", permission=" + permission +
                 ", status=" + status +
+                ", clientId=" + clientId +
                 '}';
     }
 }

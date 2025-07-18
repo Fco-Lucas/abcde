@@ -61,11 +61,13 @@ public class ClientService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ClientResponseDto> getAllPageable(Pageable pageable, String filterCnpj, ClientStatus filterStatus) {
-        Page<ClientProjection> clients = this.repository.findAllPageable(pageable, filterCnpj, filterStatus);
+    public Page<ClientResponseDto> getAllPageable(Pageable pageable, String cnpj, ClientStatus filterStatus) {
+        String cnpjParam = (cnpj == null || cnpj.isBlank()) ? null : "%" + cnpj + "%";
+
+        Page<ClientProjection> clients = this.repository.findAllPageable(pageable, cnpjParam, filterStatus);
         return clients.map(client -> {
             List<ClientUserResponseDto> users = this.clientUserService.getUsersByClientId(client.getId());
-            Client clientEntity = new Client(client.getId(), client.getName(), client.getCnpj(), "", client.getStatus());
+            Client clientEntity = this.getClientById(client.getId());
             ClientResponseDto responseDto = ClientMapper.toDto(clientEntity);
             responseDto.setUsers(users);
             return responseDto;

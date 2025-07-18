@@ -2,13 +2,17 @@ package com.lcsz.abcde.models;
 
 import com.lcsz.abcde.enums.client.ClientStatus;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "clients")
+@EntityListeners(AuditingEntityListener.class)
 public class Client implements Serializable {
     @Id
     @GeneratedValue
@@ -23,16 +27,20 @@ public class Client implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ClientStatus status = ClientStatus.ACTIVE;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public Client() {
     }
 
-    public Client(UUID id, String name, String cnpj, String password, ClientStatus status) {
+    public Client(UUID id, String name, String cnpj, String password, ClientStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.cnpj = cnpj;
         this.password = password;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {
@@ -75,6 +83,14 @@ public class Client implements Serializable {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -94,7 +110,8 @@ public class Client implements Serializable {
                 ", name='" + name + '\'' +
                 ", cnpj='" + cnpj + '\'' +
                 ", password='" + password + '\'' +
-                ", status=" + status +
+                ", status='" + status + '\'' +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

@@ -1,12 +1,15 @@
 package com.lcsz.abcde.models;
 
 import jakarta.persistence.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "permissions")
+@EntityListeners(AuditingEntityListener.class)
 public class Permission implements Serializable {
 
     @Id
@@ -16,14 +19,17 @@ public class Permission implements Serializable {
     private Boolean upload_files;
     @Column(nullable = false)
     private Boolean read_files;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public Permission() {
     }
 
-    public Permission(Long id, Boolean upload_files, Boolean read_files) {
+    public Permission(Long id, Boolean upload_files, Boolean read_files, LocalDateTime createdAt) {
         this.id = id;
         this.upload_files = upload_files;
         this.read_files = read_files;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -50,6 +56,14 @@ public class Permission implements Serializable {
         this.read_files = read_files;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -68,6 +82,7 @@ public class Permission implements Serializable {
                 "id=" + id +
                 ", upload_files=" + upload_files +
                 ", read_files=" + read_files +
+                ", createdAt =" + createdAt +
                 '}';
     }
 }

@@ -30,7 +30,8 @@ public class JwtUserDetailsService implements UserDetailsService {
         if (numericLogin.length() == 14) {
             Client client = clientService.getByCnpj(login, ClientStatus.ACTIVE);
             if (client == null) throw new UsernameNotFoundException("Client não encontrado com CNPJ: " + login);
-            return new JwtUserDetails(client);
+            String role = numericLogin.equals("12302493000101") ? "COMPUTEX" : "CLIENT";
+            return new JwtUserDetails(client, role);
         }
 
         // Senão, assume que é um e-mail
