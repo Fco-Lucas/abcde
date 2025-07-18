@@ -5,6 +5,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { AuthenticatedUserRole } from '../../../core/services/auth.service';
+import { MatMenuModule } from '@angular/material/menu';
 
 // Interface para definir a estrutura de um item de navegação
 export interface NavItem {
@@ -16,7 +17,7 @@ export interface NavItem {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })

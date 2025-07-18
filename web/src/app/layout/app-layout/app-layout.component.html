@@ -1,5 +1,7 @@
 <app-navbar [navItems]="navItems$ | async" (logoutClicked)="onLogout()"></app-navbar>
 
-<main class="px-[20%] py-4">
-  <router-outlet></router-outlet>
+<main>
+  <div class="max-w-screen-xl mx-auto px-4 md:px-8 py-4">
+    <router-outlet></router-outlet>
+  </div>
 </main>
