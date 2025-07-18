@@ -1,0 +1,7 @@
+<button mat-icon-button (click)="onToggle()" aria-label="Alternar tema">
+  @if (themeService.isDarkTheme()) {
+    <mat-icon>dark_mode</mat-icon>
+  } @else {
+    <mat-icon>light_mode</mat-icon>
+  }
+</button>

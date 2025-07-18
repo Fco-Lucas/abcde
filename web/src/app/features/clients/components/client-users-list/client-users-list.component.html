@@ -1,0 +1,83 @@
+<!-- Container principal com controle de estado de carregamento -->
+<div class="mat-elevation-z8 rounded-lg overflow-hidden">
+  
+  <!-- Spinner de carregamento -->
+  <div *ngIf="isLoading()" class="flex justify-center items-center p-16">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <!-- Tabela (só é exibida quando o carregamento termina) -->
+  <div [hidden]="isLoading()">
+    <div class="overflow-x-auto">
+      <table mat-table [dataSource]="dataSource">
+
+        <!-- Coluna Nome -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nome</th>
+          <td mat-cell *matCellDef="let clientUser"> {{ clientUser.name }} </td>
+        </ng-container>
+
+        <!-- Coluna E-mail -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>E-mail</th>
+          <td mat-cell *matCellDef="let clientUser"> {{ clientUser.email }}  </td>
+        </ng-container>
+
+        <ng-container matColumnDef="permission">
+          <th mat-header-cell *matHeaderCellDef>Permissão</th>
+          <td mat-cell *matCellDef="let clientUser"> 
+            @if(clientUser.permission.read_files && clientUser.permission.upload_files) {
+              Ler e enviar arquivos
+            }@else if(clientUser.permission.read_files && !clientUser.permission.upload_files) {
+              Ler arquivos
+            }@else if(clientUser.permission.upload_files && !clientUser.permission.read_files) {
+              Enviar arquivos
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Situação</th>
+          <td mat-cell *matCellDef="let clientUser">{{ clientUser.status === "ACTIVE" ? "ATIVO" : "INATIVO" }}</td>
+        </ng-container>
+
+        <!-- Coluna Ações -->
+        <ng-container matColumnDef=" ">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let clientUser">
+            @if (clientUser.status === "ACTIVE") {
+            <button matButton="outlined" [matMenuTriggerFor]="afterMenu">Ações</button>
+            <mat-menu #afterMenu="matMenu" xPosition="after">
+              <button mat-menu-item aria-label="Editar cliente" (click)="openUpdateClientUserDialog(clientUser)">Atualizar</button>
+              <button mat-menu-item aria-label="Desativar cliente" (click)="deleteClientUser(clientUser)">Desativar</button>
+              <button mat-menu-item aria-label="Restaurar senha do cliente" (click)="restorePassword(clientUser)">Restaurar senha</button>
+            </mat-menu>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Definição das linhas do cabeçalho e do corpo -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell text-center p-4" [attr.colspan]="displayedColumns.length">
+            Nenhum usuário do cliente encontrado
+          </td>
+        </tr>
+      </table>
+
+      <!-- Paginador -->
+      <mat-paginator 
+        (page)="handlePageEvent($event)"
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[5, 10, 20]" 
+        showFirstLastButtons
+        aria-label="Selecione a página de clientes">
+      </mat-paginator>
+    </div>
+  </div>
+ 
+</div>

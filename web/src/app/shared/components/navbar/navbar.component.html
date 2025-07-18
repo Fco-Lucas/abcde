@@ -1,0 +1,48 @@
+<mat-toolbar class="toolbar">
+
+  <div class="flex items-center w-full max-w-screen-xl mx-auto md:px-8">
+
+    <div>
+      <div class="md:hidden">
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu" aria-label="Abrir menu de navegação">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <ng-container *ngFor="let item of navItems">
+            <button mat-menu-item [routerLink]="item.link">
+              <span>{{ item.label }}</span>
+            </button>
+          </ng-container>
+        </mat-menu>
+      </div>
+
+      <div class="hidden md:block text-truncate">
+        <a routerLink="/app/home">
+          <span>Leitor de Gabaritos</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="flex-1">
+      <div class="md:hidden text-center text-truncate">
+        <a routerLink="/app/home">
+          <span>Leitor de Gabaritos</span>
+        </a>
+      </div>
+
+      <div class="hidden md:flex justify-center gap-2">
+        <ng-container *ngFor="let item of navItems">
+          <a mat-button [routerLink]="item.link" routerLinkActive="font-bold">{{ item.label }}</a>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-1">
+      <app-theme-toggle></app-theme-toggle>
+      <button mat-icon-button (click)="onLogout()" aria-label="Botão de logout">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+
+  </div> 
+</mat-toolbar>

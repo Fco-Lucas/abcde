@@ -1,0 +1,66 @@
+@use '@angular/material' as mat;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: light; // Padrão light
+  @include mat.theme((
+    color: mat.$azure-palette,
+    typography: Roboto,
+  ));
+}
+
+body.dark-theme {
+  color-scheme: dark;
+}
+
+*{
+  border: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  margin: 0;
+}
+
+// Snackbar de Sucesso (Verde)
+.success-snackbar {
+  @include mat.snack-bar-overrides((
+    container-color: #4CAF50, // token: container-color
+    supporting-text-color: #ffffff, // token: supporting-text-color
+    button-color: #ffffff // token: button-color
+  ));
+}
+
+// Snackbar de Erro (Vermelho)
+.error-snackbar {
+  @include mat.snack-bar-overrides((
+    container-color: #F44336,
+    supporting-text-color: #ffffff,
+    button-color: #ffffff
+  ));
+}
+
+// Snackbar de Aviso (Laranja)
+.warning-snackbar {
+  @include mat.snack-bar-overrides((
+    container-color: #FF9800,
+    supporting-text-color: #ffffff,
+    button-color: #ffffff
+  ));
+}
+
+// src/styles.scss
+.loading-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: transparent;
+  box-shadow: none;
+}

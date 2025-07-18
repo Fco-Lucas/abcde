@@ -1,0 +1,60 @@
+<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="grid grid-cols-2 md:grid-cols-5 items-center gap-3">
+  <div class="col-span-1">
+    <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Nome</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="name"
+      />
+    </mat-form-field>
+  </div>
+  
+  <div class="col-span-1">
+    <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>E-mail</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="email"
+      />
+    </mat-form-field>
+  </div>
+
+  <div class="col-span-1">
+    <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Permissão</mat-label>
+      <mat-select formControlName="permission" required>
+        <mat-option value="ALL" selected>Todas</mat-option>
+        @for (permission of permissions; track permission.id) {
+          @if(permission.read_files && permission.upload_files) {
+            <mat-option [value]="permission.id">Ler e enviar arquivos</mat-option>
+          }@else if(permission.read_files && !permission.upload_files) {
+            <mat-option [value]="permission.id">Ler arquivos</mat-option>
+          }@else if(permission.upload_files && !permission.read_files) {
+            <mat-option [value]="permission.id">Enviar arquivos</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  
+  <div class="col-span-1">
+    <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Situação</mat-label>
+      <mat-select formControlName="status" required>
+        <mat-option value="ALL">Todas</mat-option>
+        <mat-option value="ACTIVE" selected>Ativos</mat-option>
+        <mat-option value="INACTIVE">Desativos</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="col-span-2 md:col-span-1">
+    <button matButton="filled" class="w-full md:w-auto" type="submit" [disabled]="isSubmitButtonDisabled()">
+      <mat-icon *ngIf="!isLoading">search</mat-icon>
+      <span *ngIf="!isLoading">Filtrar resultados</span>
+      <mat-spinner *ngIf="isLoading" diameter="24" class="mx-auto"></mat-spinner>
+    </button>
+  </div>
+</form>
