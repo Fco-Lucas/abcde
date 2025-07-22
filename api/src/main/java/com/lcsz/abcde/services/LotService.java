@@ -21,6 +21,7 @@ import java.util.Optional;
 
 @Service
 public class LotService {
+
     private final LotRepository lotRepository;
     private final ClientService clientService;
     private final ClientUserService clientUserService;
