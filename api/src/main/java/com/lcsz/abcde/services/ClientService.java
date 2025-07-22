@@ -146,4 +146,9 @@ public class ClientService {
     public Client getByCnpj(String cnpj, ClientStatus status) {
         return this.findClientIfExists(cnpj, status).orElse(null);
     }
+
+    @Transactional(readOnly = true)
+    public Client getByIdOrNull(UUID id) {
+        return this.repository.findById(id).orElse(null);
+    }
 }

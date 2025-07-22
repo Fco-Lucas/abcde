@@ -180,4 +180,9 @@ public class ClientUserService {
             })
             .toList();
     }
+
+    @Transactional(readOnly = true)
+    public ClientUser getByIdOrNull(UUID id) {
+        return this.repository.findById(id).orElse(null);
+    }
 }
