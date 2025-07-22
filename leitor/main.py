@@ -7,7 +7,7 @@ import sys
 
 debugMode = True
 debugPath = "debug"
-IMAGE_PATH = "imagens/100/100_peb.png"
+IMAGE_PATH = "imagens/450/450_peb.png"
 
 if __name__ == "__main__":
   # Cria o diretório de debug se necessário
