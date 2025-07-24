@@ -5,6 +5,7 @@ import { HomePageComponent } from './features/home/pages/home-page/home-page.com
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 import { publicGuard } from './core/guards/public.guard';
+import { LotDetailsPageComponent } from './features/home/pages/lot-details-page/lot-details-page.component';
 
 export const routes: Routes = [
   {
@@ -19,6 +20,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'home', component: HomePageComponent, title: "ABCDE | Início" },
+      { path: 'loteDetails', component: LotDetailsPageComponent, title: "ABCDE | Informações do lote" },
       { path: 'profile', loadChildren: () => import('./features/profile/profile.routes') },
       { path: 'clients', loadChildren: () => import('./features/clients/clients.routes') }
     ]

@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Filtrar imagens</h2>
+
+<form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content class="space-y-1">
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Aluno(a)</mat-label>
+      <input 
+        matInput
+        type="text"
+        formControlName="student"
+        placeholder="Matricula/Nome"
+      />
+      <!-- <mat-error *ngIf="nameControl?.hasError('required') && nameControl?.touched">
+        Nome é obrigatório.
+      </mat-error> -->
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close type="button">Cancelar</button>
+    <button type="submit" mat-raised-button color="primary" [disabled]="isSubmitButtonDisabled()">
+      @if (isLoading) {
+        <mat-spinner diameter="24"></mat-spinner>
+      } @else {
+        <span>Salvar</span>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>
