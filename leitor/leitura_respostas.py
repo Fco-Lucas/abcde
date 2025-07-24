@@ -57,7 +57,7 @@ def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath):
                 resposta = 'Z'
                 cor = (255, 255, 0)
             elif len(opcoes_marcadas) > 1:
-                resposta = 'Y'
+                resposta = 'W'
                 cor = (0, 255, 255)
             else:
                 resposta = chr(ord('A') + opcoes_marcadas[0])
