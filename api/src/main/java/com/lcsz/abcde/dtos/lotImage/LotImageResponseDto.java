@@ -8,17 +8,31 @@ import java.util.List;
 public class LotImageResponseDto {
     private Long id;
     private Long lotId;
-    private String key;
+    private String url;
+    private String originalName;
+    private Integer matricula;
+    private String nomeAluno;
+    private String etapa;
+    private Integer prova;
+    private String gabarito;
+    private Integer presenca;
     private LotImageStatus status;
     private List<LotImageQuestionResponseDto> questions;
 
     public LotImageResponseDto() {
     }
 
-    public LotImageResponseDto(Long id, Long lotId, String key, LotImageStatus status, List<LotImageQuestionResponseDto> questions) {
+    public LotImageResponseDto(Long id, Long lotId, String url, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, LotImageStatus status, List<LotImageQuestionResponseDto> questions) {
         this.id = id;
         this.lotId = lotId;
-        this.key = key;
+        this.url = url;
+        this.originalName = originalName;
+        this.matricula = matricula;
+        this.nomeAluno = nomeAluno;
+        this.etapa = etapa;
+        this.prova = prova;
+        this.gabarito = gabarito;
+        this.presenca = presenca;
         this.status = status;
         this.questions = questions;
     }
@@ -39,12 +53,68 @@ public class LotImageResponseDto {
         this.lotId = lotId;
     }
 
-    public String getKey() {
-        return key;
+    public String getUrl() {
+        return url;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
+    }
+
+    public Integer getMatricula() {
+        return matricula;
+    }
+
+    public void setMatricula(Integer matricula) {
+        this.matricula = matricula;
+    }
+
+    public String getNomeAluno() {
+        return nomeAluno;
+    }
+
+    public void setNomeAluno(String nomeAluno) {
+        this.nomeAluno = nomeAluno;
+    }
+
+    public String getEtapa() {
+        return etapa;
+    }
+
+    public void setEtapa(String etapa) {
+        this.etapa = etapa;
+    }
+
+    public Integer getProva() {
+        return prova;
+    }
+
+    public void setProva(Integer prova) {
+        this.prova = prova;
+    }
+
+    public String getGabarito() {
+        return gabarito;
+    }
+
+    public void setGabarito(String gabarito) {
+        this.gabarito = gabarito;
+    }
+
+    public Integer getPresenca() {
+        return presenca;
+    }
+
+    public void setPresenca(Integer presenca) {
+        this.presenca = presenca;
     }
 
     public LotImageStatus getStatus() {
@@ -68,8 +138,14 @@ public class LotImageResponseDto {
         return "LotImageResponseDto{" +
                 "id=" + id +
                 ", lotId=" + lotId +
-                ", key='" + key + '\'' +
-                ", status='" + status + '\'' +
+                ", url=" + url +
+                ", originalName='" + originalName + '\'' +
+                ", matricula=" + matricula +
+                ", etapa='" + etapa + '\'' +
+                ", prova=" + prova +
+                ", gabarito='" + gabarito + '\'' +
+                ", presenca=" + presenca +
+                ", status=" + status +
                 ", questions=" + questions +
                 '}';
     }

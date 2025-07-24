@@ -21,13 +21,14 @@ import java.util.Optional;
 
 @Service
 public class LotService {
-
     private final LotRepository lotRepository;
+    private final LotImageService lotImageService;
     private final ClientService clientService;
     private final ClientUserService clientUserService;
 
-    LotService(LotRepository lotRepository, ClientService clientService, ClientUserService clientUserService) {
+    LotService(LotRepository lotRepository, LotImageService lotImageService, ClientService clientService, ClientUserService clientUserService) {
         this.lotRepository = lotRepository;
+        this.lotImageService = lotImageService;
         this.clientService = clientService;
         this.clientUserService = clientUserService;
     }
@@ -38,8 +39,8 @@ public class LotService {
 
         ClientUser clientUser = this.clientUserService.getByIdOrNull(dto.getUserId());
         client = clientUser == null ? this.clientService.getByIdOrNull(dto.getUserId()) : this.clientService.getByIdOrNull(clientUser.getClientId());
-
         if(client == null) throw new EntityNotFoundException("Cliente não encontrado com base no id do usuário informado");
+        String userName = clientUser == null ? client.getName() : clientUser.getName();
 
         // Verifica se já existe um lote criado com o nome informado pro cliente
         Optional<Lot> lotExistis = this.lotRepository.findByNameAndUserId(dto.getName(), client.getCnpj());
@@ -54,18 +55,24 @@ public class LotService {
 
         Lot saved = this.lotRepository.save(lot);
 
-        return LotMapper.toDto(saved);
+        LotResponseDto responseDto = LotMapper.toDto(saved);
+        responseDto.setUserName(userName);
+        responseDto.setNumberImages(0);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
-    public Page<LotProjection> getAllPageable(
+    public Page<LotResponseDto> getAllPageable(
             Pageable pageable,
             String name,
             LotStatus status
     ) {
         String nameParam = (name == null || name.isBlank()) ? null : "%" + name + "%";
         Page<LotProjection> lots = this.lotRepository.findAllPageable(pageable, nameParam, status);
-        return lots;
+        return lots.map(lot -> {
+           return this.getLotByIdDto(lot.getId());
+        });
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +85,18 @@ public class LotService {
     @Transactional(readOnly = true)
     public LotResponseDto getLotByIdDto(Long id) {
         Lot lot = this.getLotById(id);
-        return LotMapper.toDto(lot);
+
+        Client client = this.clientService.getByIdOrNull(lot.getUserId());
+        ClientUser clientUser = this.clientUserService.getByIdOrNull(lot.getUserId());
+        String userName = client != null ? client.getName() : clientUser.getName();
+
+        Integer numberImages = this.lotImageService.getQtdImagesLot(lot.getId());
+
+        LotResponseDto responseDto = LotMapper.toDto(lot);
+        responseDto.setUserName(userName);
+        responseDto.setNumberImages(numberImages);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = false)

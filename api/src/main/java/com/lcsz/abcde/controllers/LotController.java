@@ -38,7 +38,7 @@ public class LotController {
         @RequestParam(required = false) String name,
         @RequestParam(required = false) LotStatus status
     ) {
-        Page<LotProjection> lots = this.lotService.getAllPageable(pageable, name, status);
+        Page<LotResponseDto> lots = this.lotService.getAllPageable(pageable, name, status);
         return ResponseEntity.status(HttpStatus.OK).body(PageableMapper.toDto(lots));
     }
 
