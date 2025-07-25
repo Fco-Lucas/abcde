@@ -1,0 +1,27 @@
+<div class="flex items-center justify-center space-x-2 p-2">
+  <!-- Botão para a primeira página -->
+  <button mat-icon-button (click)="goToFirstPage()" [disabled]="isFirstPage" aria-label="Primeira página">
+    <mat-icon>first_page</mat-icon>
+  </button>
+
+  <!-- Botão para a página anterior -->
+  <button mat-icon-button (click)="goToPreviousPage()" [disabled]="isFirstPage" aria-label="Página anterior">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+
+  <!-- Mostra o número da página atual e o total de páginas -->
+  <span class="text-gray-700 font-medium text-sm px-2">
+    <!-- Exibe (página atual + 1) para ser 1-indexado para o usuário -->
+    {{ totalPages > 0 ? (currentPage + 1) : 0 }} / {{ totalPages }}
+  </span>
+
+  <!-- Botão para a próxima página -->
+  <button mat-icon-button (click)="goToNextPage()" [disabled]="isLastPage" aria-label="Próxima página">
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+
+  <!-- Botão para a última página -->
+  <button mat-icon-button (click)="goToLastPage()" [disabled]="isLastPage" aria-label="Última página">
+    <mat-icon>last_page</mat-icon>
+  </button>
+</div>

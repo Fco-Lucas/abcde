@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>
+  <span>{{ title() }}</span>
+</h2>
+<mat-dialog-content>
+  <p class="mb-4">{{ statusMessage() }}</p>
+  @if(!hasError()) {
+    <mat-progress-bar mode="determinate" [value]="progressPercentage()"></mat-progress-bar>
+  } @else {
+    <div class="p-4 bg-red-100 text-red-800 rounded-md">
+      <p>Ocorreu um erro e nem todas as imagens puderam ser enviadas</p>
+    </div>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  @if(isDone() || hasError()) {
+    <button mat-raised-button color="primary" [mat-dialog-close]="true">Fechar</button>
+  }
+</mat-dialog-actions>

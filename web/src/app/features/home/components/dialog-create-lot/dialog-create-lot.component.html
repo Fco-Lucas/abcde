@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>Novo Lote</h2>
+
+<form [formGroup]="createForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content class="space-y-4">
+    <!-- Campo de Nome -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Nome do Lote</mat-label>
+      <input 
+        matInput
+        type="text"
+        formControlName="name"
+        required
+      />
+      <mat-error *ngIf="nameControl?.hasError('required') && nameControl?.touched">
+        Nome é obrigatório.
+      </mat-error>
+    </mat-form-field>
+    
+    <!-- Input de arquivo escondido -->
+    <input 
+      type="file" 
+      class="hidden" 
+      #inputFile 
+      multiple
+      accept="image/*"
+      (change)="onFileSelected($event)">
+
+    <!-- Botão customizado que aciona o input -->
+    <button 
+      mat-stroked-button 
+      type="button" 
+      class="w-full !py-6"
+      (click)="inputFile.click()">
+      <mat-icon>add_photo_alternate</mat-icon>
+      <span>{{ buttonText() }}</span>
+    </button>
+
+    <!-- Lista para mostrar os arquivos selecionados (melhora a UX) -->
+    <div *ngIf="imagesControl?.value as files">
+      <mat-list dense>
+        <div mat-subheader class="flex justify-between items-center w-full">
+          <span>Arquivos Selecionados:</span>
+          <button mat-icon-button type="button" color="warn" (click)="clearFileSelection()" matTooltip="Limpar seleção">
+            <mat-icon class="text-red-700">delete_forever</mat-icon>
+          </button>
+        </div>
+        
+        <mat-list-item *ngFor="let file of files">
+          <mat-icon matListItemIcon>image</mat-icon>
+          <div matListItemTitle>{{ file.name }}</div>
+          <div matListItemLine>{{ (file.size / 1024) | number:'1.0-2' }} KB</div>
+        </mat-list-item>
+      </mat-list>
+    </div>
+
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close type="button">Cancelar</button>
+    <button type="submit" mat-raised-button color="primary" [disabled]="isSubmitButtonDisabled()">
+      @if (isLoading()) {
+        <mat-spinner diameter="24"></mat-spinner>
+      } @else {
+        <span>Concluir</span>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,215 @@
+@if(this.lote) {
+  <div class="flex flex-col md:flex-row h-screen pt-16 w-screen overflow-x-hidden">
+    <!-- left -->
+    <div class="w-screen md:w-1/4 h-auto md:h-full px-6 md:px-4 pt-2 md:pt-6 pb-2 flex flex-col md:overflow-y-auto">
+      <div class="flex justify-between gap-3 items-center mb-3">
+        <button matMiniFab class="fabButtons" routerLink="/app/home">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <button class="w-full md:w-auto" matButton="filled" [matMenuTriggerFor]="afterMenu">
+          Ações
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </button>
+        <mat-menu #afterMenu="matMenu" xPosition="after">
+          @if(this.lote.status === "COMPLETED") {
+            <button mat-menu-item aria-label="Baixar .txt" class="w-full" aria-label="Baixar .txt" (click)="onDownloadTxt()">
+              <mat-icon>download</mat-icon>
+              Baixar .txt
+            </button>
+          }@else if(this.lote.status === "INCOMPLETED") {
+            <button mat-menu-item aria-label="Processar novos gabaritos" (click)="openDialogProcessImages()">
+              <mat-icon>image_arrow_up</mat-icon>
+              Processar novos gabaritos
+            </button>
+            <button mat-menu-item aria-label="Finalizar lote" (click)="finalizeLot()">
+              <mat-icon>check</mat-icon>
+              Finalizar lote
+            </button>
+          }
+          <button mat-menu-item aria-label="Filtrar gabaritos" class="w-full" (click)="openDialogFilterImages()">
+            <mat-icon>search</mat-icon>
+            Filtrar gabaritos
+          </button>
+        </mat-menu>
+      </div>
+
+      <div class="flex-grow">
+        <app-images-list
+          #imagesListComponent
+          [lote]="this.lote"
+          [filters]="this.currentFilters()"
+          [currentPage]="this.currentPage()"
+          [pageSize]="this.pageSize"
+          (totalPagesChange)="onTotalPagesChange($event)"
+          [selectedImageId]="this.selectedImageId()"
+          (imageSelected)="onImageSelected($event)"
+          (imagesLoaded)="onImagesLoaded($event)"
+        ></app-images-list>
+      </div>
+
+      <div class="mt-4">
+        <app-images-list-pagination
+          [currentPage]="this.currentPage()"
+          [totalPages]="this.totalPages()"
+          (pageChange)="onPageChange($event)"
+        ></app-images-list-pagination>
+      </div>
+
+    </div>
+
+    <!-- Right -->
+    <div class="w-screen md:w-3/4 h-auto md:h-full px-6 md:px-4 pt-0 md:p-6 pb-2 md:overflow-y-auto">
+
+      @if (selectedImageDetails()) {
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 w-full mb-3">
+          @if(this.selectedImageDetails()?.haveModification) {
+            <div class="flex items-center gap-3 p-3 bg-yellow-400 rounded-lg text-gray-800 w-full md:w-auto">
+              <mat-icon>error</mat-icon>
+              <span>Este gabarito possui alterações manuais</span>
+            </div>
+          }@else {
+            <span></span>
+          }
+
+          @if(this.lote.status === "INCOMPLETED") {
+            <button matButton="filled" class="!bg-red-700" aria-label="Excluir gabarito" (click)="deleteSelectedImage()">
+              <mat-icon>delete</mat-icon>
+              Excluir gabarito
+            </button>
+          }
+        </div>
+
+        <div class="flex flex-col md:flex-row md:justify-between w-full gap-5">
+          <div class="flex-1">
+            <div class="flex items-center justify-center overflow-hidden">
+              <img [src]="selectedImageDetails()!.url" [alt]="selectedImageDetails()!.matricula" class="w-full object-contain">
+            </div>
+          </div>
+
+          <mat-card>
+            <mat-card-content>
+              <mat-tab-group dynamicHeight>
+                <mat-tab>
+                  <ng-template mat-tab-label>
+                    <span class="font-bold text-lg">1 - 30</span>
+                  </ng-template>
+                  <!-- Grid para as questões desta aba -->
+                  <!-- AGORA 6 COLUNAS: 1 para número, 5 para A,B,C,D,E, 1 para Z -->
+                  <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
+                    <!-- Cabeçalho das Opções -->
+                    <div class="col-span-1"></div>
+                    <div class="flex justify-center items-center font-bold text-lg me-1">A</div>
+                    <div class="flex justify-center items-center font-bold text-lg me-1">B</div>
+                    <div class="flex justify-center items-center font-bold text-lg me-1">C</div>
+                    <div class="flex justify-center items-center font-bold text-lg me-1">D</div>
+                    <div class="flex justify-center items-center font-bold text-lg me-1">E</div>
+                    <!-- REMOVIDO: W -->
+                    <div class="flex justify-center items-center font-bold text-lg me-1">Z</div>
+
+                    <!-- Loop para Questões 1-30 -->
+                    @for (question of selectedImageDetails()!.questions; track question.id; let i = $index) {
+                      @if (question.number >= 1 && question.number <= 30) {
+                        <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number | number: '2.0' }}</p>
+                        <!-- NOVO: Usando formGroup para cada questão e mat-checkbox -->
+                        <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
+                          <mat-checkbox formControlName="A" value="A"></mat-checkbox>
+                          <mat-checkbox formControlName="B" value="B"></mat-checkbox>
+                          <mat-checkbox formControlName="C" value="C"></mat-checkbox>
+                          <mat-checkbox formControlName="D" value="D"></mat-checkbox>
+                          <mat-checkbox formControlName="E" value="E"></mat-checkbox>
+                          <!-- REMOVIDO: W -->
+                          <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
+                        </div>
+                      }
+                    }
+                  </div>
+                </mat-tab>
+
+                <mat-tab>
+                  <ng-template mat-tab-label>
+                    <span class="font-bold text-lg">31 - 60</span>
+                  </ng-template>
+                  <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
+                    <!-- Cabeçalho das Opções (repetir para cada tab) -->
+                    <div class="col-span-1"></div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">A</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">B</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">C</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">D</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">E</div>
+                    <!-- REMOVIDO: W -->
+                    <div class="flex justify-center items-center font-bold text-sm me-1">Z</div>
+
+                    <!-- Loop para Questões 31-60 -->
+                    @for (question of selectedImageDetails()!.questions; track question.id; let i = $index) {
+                      @if (question.number >= 31 && question.number <= 60) {
+                        <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number }}</p>
+                        <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
+                          <mat-checkbox formControlName="A" value="A"></mat-checkbox>
+                          <mat-checkbox formControlName="B" value="B"></mat-checkbox>
+                          <mat-checkbox formControlName="C" value="C"></mat-checkbox>
+                          <mat-checkbox formControlName="D" value="D"></mat-checkbox>
+                          <mat-checkbox formControlName="E" value="E"></mat-checkbox>
+                          <!-- REMOVIDO: W -->
+                          <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
+                        </div>
+                      }
+                    }
+                  </div>
+                </mat-tab>
+
+                <mat-tab>
+                  <ng-template mat-tab-label>
+                    <span class="font-bold text-lg">61 - 90</span>
+                  </ng-template>
+                  <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
+                    <!-- Cabeçalho das Opções (repetir para cada tab) -->
+                    <div class="col-span-1"></div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">A</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">B</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">C</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">D</div>
+                    <div class="flex justify-center items-center font-bold text-sm me-1">E</div>
+                    <!-- REMOVIDO: W -->
+                    <div class="flex justify-center items-center font-bold text-sm me-1">Z</div>
+
+                    <!-- Loop para Questões 61-90 -->
+                    @for (question of selectedImageDetails()!.questions; track question.id; let i = $index) {
+                      @if (question.number >= 61 && question.number <= 90) {
+                        <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number }}</p>
+                        <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
+                          <mat-checkbox formControlName="A" value="A"></mat-checkbox>
+                          <mat-checkbox formControlName="B" value="B"></mat-checkbox>
+                          <mat-checkbox formControlName="C" value="C"></mat-checkbox>
+                          <mat-checkbox formControlName="D" value="D"></mat-checkbox>
+                          <mat-checkbox formControlName="E" value="E"></mat-checkbox>
+                          <!-- REMOVIDO: W -->
+                          <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
+                        </div>
+                      }
+                    }
+                  </div>
+                </mat-tab>
+              </mat-tab-group>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      } @else {
+        <div class="text-center text-gray-500 py-8">
+          Selecione uma imagem na lista à esquerda para visualizar os detalhes.
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (shouldShowSaveFab) {
+    <button
+      matFab
+      class="!fixed !bottom-6 !right-6 z-50 shadow-lg fabButtons"
+      (click)="saveAnswers()"
+      aria-label="Salvar respostas"
+    >
+      <mat-icon>save</mat-icon>
+    </button>
+  }
+}

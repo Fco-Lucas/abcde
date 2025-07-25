@@ -1,0 +1,26 @@
+<mat-card
+  *ngFor="let image of images"
+  class="mb-3 cursor-pointer"
+  [ngClass]="{
+    'active': isActive(image.id),
+    'border-l-4 border-l-gray-300': !isActive(image.id),
+    'transition-colors duration-200': true
+  }"
+  (click)="onImageClick(image.id)"
+>
+  <div class="h-full"> 
+    <mat-card-header class="text-truncate">
+      <div class="flex items-center justify-center" mat-card-avatar>
+        <mat-icon>image</mat-icon>
+      </div>
+      <mat-card-title class="overflow-hidden whitespace-nowrap text-ellipsis">{{ image.matricula }}</mat-card-title>
+      <mat-card-subtitle class="overflow-hidden whitespace-nowrap text-ellipsis">Gabarito com {{ image.questions.length }} questões</mat-card-subtitle>
+    </mat-card-header>
+  </div>
+</mat-card>
+
+@if (images.length === 0) {
+  <div class="text-center text-gray-500 py-4">
+    Nenhuma imagem encontrada para os critérios de busca.
+  </div>
+}

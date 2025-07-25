@@ -1,15 +1,25 @@
 package com.lcsz.abcde.dtos.lotImageQuestion;
 
 public class LotImageQuestionResponseDto {
+    private Long id;
     private Integer number;
     private String alternative;
 
     public LotImageQuestionResponseDto() {
     }
 
-    public LotImageQuestionResponseDto(Integer number, String alternative) {
+    public LotImageQuestionResponseDto(Long id, Integer number, String alternative) {
+        this.id = id;
         this.number = number;
         this.alternative = alternative;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Integer getNumber() {
@@ -31,7 +41,8 @@ public class LotImageQuestionResponseDto {
     @Override
     public String toString() {
         return "lotImageQuestionCreateDto{" +
-                "number=" + number +
+                "id=" + id +
+                ", number='" + number + '\'' +
                 ", alternative='" + alternative + '\'' +
                 '}';
     }

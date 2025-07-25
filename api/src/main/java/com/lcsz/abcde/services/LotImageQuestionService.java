@@ -44,7 +44,7 @@ public class LotImageQuestionService {
 
     @Transactional(readOnly = true)
     public List<LotImageQuestionResponseDto> getAllByImageId(Long imageId) {
-        List<LotImageQuestion> questions = this.lotImageQuestionRepository.findAllByImageId(imageId);
+        List<LotImageQuestion> questions = this.lotImageQuestionRepository.findAllByImageIdOrderByNumberAsc(imageId);
         return LotImageQuestionMapper.toListDto(questions);
     }
 

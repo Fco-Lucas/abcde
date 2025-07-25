@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface LotImageQuestionRepository extends JpaRepository<LotImageQuestion, Long> {
     Optional<LotImageQuestion> findByImageIdAndNumber(Long imageId, Integer number);
 
-    List<LotImageQuestion> findAllByImageId(Long imageId);
+    List<LotImageQuestion> findAllByImageIdOrderByNumberAsc(Long imageId);
 }

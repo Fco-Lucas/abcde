@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@
 
 import { MatIconModule } from '@angular/material/icon';
 import { ClientFiltersComponent, type ClientFiltersFormValues } from '../../components/client-filters/client-filters.component';
-import { ClientListComponent } from '../../components/client-list.component/client-list.component';
+import { ClientListComponent } from '../../components/client-list/client-list.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { DialogCreateClientComponent } from '../../components/dialog-create-client/dialog-create-client.component';

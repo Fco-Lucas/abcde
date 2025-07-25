@@ -35,4 +35,12 @@ public class PermissionService {
         Permission permission = this.getPermissionById(id);
         return PermissionMapper.toDto(permission);
     }
+
+    @Transactional(readOnly = true)
+    public PermissionResponseDto getMainPermission() {
+        Permission permission = this.repository.findMainPermission().orElseThrow(
+                () -> new EntityNotFoundException("Permissão main não encontrada")
+        );
+        return PermissionMapper.toDto(permission);
+    }
 }

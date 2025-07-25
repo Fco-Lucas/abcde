@@ -8,7 +8,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ConfirmationDialogService } from '../../../../core/services/confirmation-dialog.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { LoadingService } from '../../../../core/services/loading.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ClientUserInterface, type ClientUserStatus } from '../../models/clientUsers.model';
 import { ClientUsersService } from '../../services/client-users.service';
@@ -35,6 +34,7 @@ export class ClientUsersListComponent implements OnInit, OnChanges {
   private notification = inject(NotificationService);
   readonly dialog = inject(MatDialog);
   private clientUsersService = inject(ClientUsersService);
+
 
   public isLoading = signal(true);
 

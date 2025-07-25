@@ -64,3 +64,9 @@ body {
   background-color: transparent;
   box-shadow: none;
 }
+
+.text-truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

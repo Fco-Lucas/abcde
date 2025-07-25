@@ -1,0 +1,6 @@
+@use '@angular/material' as mat;
+
+.active {
+  border-left-width: 8px !important;
+  border-left-color: var(--mat-sys-primary) !important;
+}

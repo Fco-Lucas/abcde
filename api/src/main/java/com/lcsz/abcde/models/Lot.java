@@ -2,13 +2,17 @@ package com.lcsz.abcde.models;
 
 import com.lcsz.abcde.enums.lot.LotStatus;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "lots")
+@EntityListeners(AuditingEntityListener.class)
 public class Lot implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,16 +26,20 @@ public class Lot implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LotStatus status;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public Lot() {
     }
 
-    public Lot(Long id, UUID userId, String userCnpj, String name, LotStatus status) {
+    public Lot(Long id, UUID userId, String userCnpj, String name, LotStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.userCnpj = userCnpj;
         this.name = name;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -74,6 +82,14 @@ public class Lot implements Serializable {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -93,7 +109,8 @@ public class Lot implements Serializable {
                 ", userId=" + userId +
                 ", userCnpj=" + userCnpj +
                 ", name='" + name + '\'' +
-                ", status=" + status +
+                ", status='" + status + '\'' +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

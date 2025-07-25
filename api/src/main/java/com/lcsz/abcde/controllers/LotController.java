@@ -11,7 +11,9 @@ import com.lcsz.abcde.services.LotService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +40,7 @@ public class LotController {
         @RequestParam(required = false) String name,
         @RequestParam(required = false) LotStatus status
     ) {
-        Page<LotProjection> lots = this.lotService.getAllPageable(pageable, name, status);
+        Page<LotResponseDto> lots = this.lotService.getAllPageable(pageable, name, status);
         return ResponseEntity.status(HttpStatus.OK).body(PageableMapper.toDto(lots));
     }
 
@@ -64,5 +66,18 @@ public class LotController {
     ) {
         this.lotService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/download-txt")
+    public ResponseEntity<byte[]> downloadTxt(@PathVariable Long id) {
+        byte[] contentBytes = this.lotService.generateTxt(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"gabarito-lote-" + id + ".txt\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(contentBytes);
     }
 }

@@ -1,11 +1,9 @@
 import cv2
 import numpy as np
 
-def alinhar_pagina(path_da_imagem, debugMode, debugPath):
-    print(f"[INFO] Etapa 1: Carregando a imagem '{path_da_imagem}'...")
-    image = cv2.imread(path_da_imagem)
+def alinhar_pagina(image, debugMode, debugPath):
     if image is None:
-        print(f"[ERRO] Não foi possível carregar a imagem. Verifique o caminho.")
+        print(f"[ERRO] A imagem fornecida para alinhamento é inválida.")
         return None
     
     original_image = image.copy()
@@ -24,8 +22,8 @@ def alinhar_pagina(path_da_imagem, debugMode, debugPath):
     
     # Salva a imagem de debug para ver o efeito do fechamento
     if debugMode:
-        cv2.imwrite(f"{debugPath}/debug_etapa1_bordas_fechadas.png", closed_edges)
-        print("[DEBUG] Imagem 'debug_etapa1_bordas_fechadas.png' salva.")
+        cv2.imwrite(f"{debugPath}/debug_etapa2_bordas_fechadas.png", closed_edges)
+        print("[DEBUG] Imagem 'debug_etapa2_bordas_fechadas.png' salva.")
 
     # ### MUDANÇA 2: Lógica de busca de contorno mais inteligente ###
     print("[INFO] Procurando o contorno da página de forma inteligente...")
@@ -79,8 +77,8 @@ def alinhar_pagina(path_da_imagem, debugMode, debugPath):
         cv2.drawContours(debug_image, [page_contour], -1, (0, 255, 0), 3)
         for point in rect:
             cv2.circle(debug_image, tuple(point.astype(int)), 20, (0, 0, 255), -1)
-        cv2.imwrite(f"{debugPath}/debug_etapa1_cantos_detectados.png", debug_image)
-        print("[DEBUG] Imagem 'debug_etapa1_cantos_detectados.png' salva.")
+        cv2.imwrite(f"{debugPath}/debug_etapa2_cantos_detectados.png", debug_image)
+        print("[DEBUG] Imagem 'debug_etapa2_cantos_detectados.png' salva.")
 
     # Aplica a correção de perspectiva
     print("[INFO] Aplicando correção de perspectiva...")

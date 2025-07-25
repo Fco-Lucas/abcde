@@ -3,6 +3,7 @@ package com.lcsz.abcde.services;
 import com.lcsz.abcde.dtos.lot.LotCreateDto;
 import com.lcsz.abcde.dtos.lot.LotResponseDto;
 import com.lcsz.abcde.dtos.lot.LotUpdateDto;
+import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.enums.lot.LotStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
@@ -10,6 +11,7 @@ import com.lcsz.abcde.mappers.LotMapper;
 import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.models.ClientUser;
 import com.lcsz.abcde.models.Lot;
+import com.lcsz.abcde.models.LotImage;
 import com.lcsz.abcde.repositorys.LotRepository;
 import com.lcsz.abcde.repositorys.projection.LotProjection;
 import org.springframework.data.domain.Page;
@@ -17,17 +19,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class LotService {
-
     private final LotRepository lotRepository;
+    private final LotImageService lotImageService;
     private final ClientService clientService;
     private final ClientUserService clientUserService;
 
-    LotService(LotRepository lotRepository, ClientService clientService, ClientUserService clientUserService) {
+    LotService(LotRepository lotRepository, LotImageService lotImageService, ClientService clientService, ClientUserService clientUserService) {
         this.lotRepository = lotRepository;
+        this.lotImageService = lotImageService;
         this.clientService = clientService;
         this.clientUserService = clientUserService;
     }
@@ -38,8 +43,8 @@ public class LotService {
 
         ClientUser clientUser = this.clientUserService.getByIdOrNull(dto.getUserId());
         client = clientUser == null ? this.clientService.getByIdOrNull(dto.getUserId()) : this.clientService.getByIdOrNull(clientUser.getClientId());
-
         if(client == null) throw new EntityNotFoundException("Cliente não encontrado com base no id do usuário informado");
+        String userName = clientUser == null ? client.getName() : clientUser.getName();
 
         // Verifica se já existe um lote criado com o nome informado pro cliente
         Optional<Lot> lotExistis = this.lotRepository.findByNameAndUserId(dto.getName(), client.getCnpj());
@@ -54,18 +59,24 @@ public class LotService {
 
         Lot saved = this.lotRepository.save(lot);
 
-        return LotMapper.toDto(saved);
+        LotResponseDto responseDto = LotMapper.toDto(saved);
+        responseDto.setUserName(userName);
+        responseDto.setNumberImages(0);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
-    public Page<LotProjection> getAllPageable(
+    public Page<LotResponseDto> getAllPageable(
             Pageable pageable,
             String name,
             LotStatus status
     ) {
         String nameParam = (name == null || name.isBlank()) ? null : "%" + name + "%";
         Page<LotProjection> lots = this.lotRepository.findAllPageable(pageable, nameParam, status);
-        return lots;
+        return lots.map(lot -> {
+           return this.getLotByIdDto(lot.getId());
+        });
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +89,18 @@ public class LotService {
     @Transactional(readOnly = true)
     public LotResponseDto getLotByIdDto(Long id) {
         Lot lot = this.getLotById(id);
-        return LotMapper.toDto(lot);
+
+        Client client = this.clientService.getByIdOrNull(lot.getUserId());
+        ClientUser clientUser = this.clientUserService.getByIdOrNull(lot.getUserId());
+        String userName = client != null ? client.getName() : clientUser.getName();
+
+        Integer numberImages = this.lotImageService.getAllImagesLot(lot.getId()).size();
+
+        LotResponseDto responseDto = LotMapper.toDto(lot);
+        responseDto.setUserName(userName);
+        responseDto.setNumberImages(numberImages);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = false)
@@ -96,5 +118,52 @@ public class LotService {
         Lot lot = this.getLotById(lotId);
         lot.setStatus(LotStatus.DELETED);
         this.lotRepository.save(lot);
+    }
+
+    public byte[] generateTxt(Long lotId) {
+        Lot lot = this.getLotById(lotId);
+        List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
+
+        StringBuilder content = new StringBuilder("imagem,matricula");
+
+        // Sempre seta 90 colunas para as questões
+        for (int i = 1; i <= 90; i++) {
+            content.append(",").append(i);
+        }
+
+        for (LotImage lotImage : lotImages) {
+            String matricula = String.format("%08d", lotImage.getMatricula()); // 8 dígitos com 0 à esquerda
+            String etapa = lotImage.getEtapa();
+            String prova = String.format("%02d", lotImage.getProva());         // 2 dígitos com 0 à esquerda
+            String gabarito = lotImage.getGabarito();
+            Integer presenca = lotImage.getPresenca();                         // 1 ou 0
+
+            // Linha: nome da imagem + dados do QR Code
+            String linha = "\n" + lotImage.getOriginalName() + "," +
+                    matricula + etapa + prova + gabarito + presenca;
+
+            content.append(linha);
+
+            // Adiciona respostas das questões se o aluno está presente, caso contrário somente as vírgulas
+            if(presenca == 1) {
+                List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
+                for (LotImageQuestionResponseDto question : questions) {
+                    content.append(",").append(question.getAlternative());
+                }
+
+                // Completa com 'Z' o que falta
+                int quantidadeRespondida = questions.size();
+                int quantidadeFaltante = 90 - quantidadeRespondida;
+
+                for (int i = 0; i < quantidadeFaltante; i++) {
+                    content.append(",Z");
+                }
+            }else {
+                content.append(",".repeat(90));
+            }
+
+        }
+
+        return content.toString().getBytes(StandardCharsets.UTF_8);
     }
 }
