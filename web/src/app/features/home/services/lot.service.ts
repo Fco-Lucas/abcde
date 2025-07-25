@@ -24,15 +24,21 @@ export class LotService {
     return this.http.get<PageableLotList>(`${this.apiUrl}lots`, { params });
   }
 
-  getLotById(id: string): Observable<LotInterface> {
+  getLotById(id: number): Observable<LotInterface> {
     return this.http.get<LotInterface>(`${this.apiUrl}lots/${id}`);
   }
 
-  updateLot(id: string, data: LotUpdateInterface): Observable<void> {
+  updateLot(id: number, data: LotUpdateInterface): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}lots/${id}`, data);
   }
 
-  deleteLot(id: string): Observable<void> {
+  deleteLot(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}lots/${id}`);
+  }
+
+  downloadTxt(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}lots/${id}/download-txt`, {
+      responseType: 'blob'
+    });
   }
 }

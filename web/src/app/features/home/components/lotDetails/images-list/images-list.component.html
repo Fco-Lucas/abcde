@@ -2,9 +2,9 @@
   *ngFor="let image of images"
   class="mb-3 cursor-pointer"
   [ngClass]="{
-    '!border-l-8 !border-l-blue-700': isActive(image.id),
+    'active': isActive(image.id),
     'border-l-4 border-l-gray-300': !isActive(image.id),
-    'hover:bg-gray-100 transition-colors duration-200': true
+    'transition-colors duration-200': true
   }"
   (click)="onImageClick(image.id)"
 >

@@ -32,10 +32,13 @@
         <ng-container matColumnDef=" ">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let client">
-            <button matButton="outlined" [matMenuTriggerFor]="afterMenu">Ações</button>
+            <button matButton="outlined" [matMenuTriggerFor]="afterMenu">
+              Ações
+              <mat-icon>keyboard_arrow_down</mat-icon>
+            </button>
             <mat-menu #afterMenu="matMenu" xPosition="after">
               <button mat-menu-item [routerLink]="['/app', 'clients', client.id, 'users']" aria-label="Ver usuários do cliente">Usuários</button>
-              @if (client.status === "ACTIVE") {
+              @if (client.status === "ACTIVE" && client.id !== clientId()) {
                 <button mat-menu-item (click)="handleOpenUpdateClientDialog(client)" aria-label="Editar cliente">Atualizar</button>
                 <button mat-menu-item (click)="deleteClient(client)" aria-label="Desativar cliente">Desativar</button>
                 <button mat-menu-item (click)="restorePassword(client)" aria-label="Restaurar senha do cliente">Restaurar senha</button>

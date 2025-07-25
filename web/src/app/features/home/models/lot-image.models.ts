@@ -1,5 +1,5 @@
 export interface LotImageQuestionInterface {
-  id: string;
+  id: number;
   number: number;
   alternative: string;
 }
@@ -20,6 +20,8 @@ export interface lotImageInterface {
   prova: number;
   gabarito: string;
   presenca: number;
+  qtdQuestoes: number;
+  haveModification: boolean;
   status: LotImageStatusEnum;
   questions: LotImageQuestionInterface[];
 }
@@ -33,4 +35,9 @@ export interface PageableLotImagesList {
   pageElements: number,
   totalElements: number,
   totalPages: number
+}
+
+export interface UpdateLotImageQuetionInterface {
+  lotImageQuestionId: number;
+  alternative: string;
 }

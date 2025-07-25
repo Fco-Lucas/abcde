@@ -20,6 +20,8 @@ import { DialogUpdateClientComponent, UpdateClientFormValues, type DialogUpdateC
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-client-list',
@@ -38,10 +40,13 @@ import { RouterLink } from '@angular/router';
 })
 export class ClientListComponent implements OnInit, OnChanges {
   private confirmationDialogService = inject(ConfirmationDialogService);
+  private authService = inject(AuthService);
   private clientService = inject(ClientService);
   private notification = inject(NotificationService);
   private loader = inject(LoadingService);
   readonly dialog = inject(MatDialog);
+
+  clientId = toSignal(this.authService.currentUserId$);
 
   // Sinal para controlar o estado de carregamento
   public isLoading = signal(true);

@@ -14,7 +14,8 @@ import type { LotImagesFiltersFormValues } from '../dialog-filter-images/dialog-
     MatCardModule,
     MatIconModule
   ],
-  templateUrl: './images-list.component.html'
+  templateUrl: './images-list.component.html',
+  styleUrl: './images-list.component.scss'
 })
 export class ImagesListComponent implements OnChanges {
   private lotImageService = inject(LotImageService);
@@ -29,6 +30,7 @@ export class ImagesListComponent implements OnChanges {
 
   @Output() totalPagesChange = new EventEmitter<number>()
   @Output() imageSelected = new EventEmitter<number>();
+  @Output() imagesLoaded = new EventEmitter<lotImageInterface[]>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['filters'] || changes['lote'] || changes['currentPage'] || changes['pageSize']) {
@@ -50,16 +52,13 @@ export class ImagesListComponent implements OnChanges {
       next: (response) => {
         this.images = response.content;
         this.totalPagesChange.emit(response.totalPages);
-
-        // Se houver imagens e nenhuma estiver selecionada, selecione a primeira por padrão
-        if (this.images.length > 0 && !this.selectedImageId) {
-          this.imageSelected.emit(this.images[0].id);
-        }
+        this.imagesLoaded.emit(this.images);
       },
       error: (err) => {
         console.error("Erro ao carregar imagens do lote:", err);
-        this.images = [];
         this.totalPagesChange.emit(0);
+        this.images = [];
+        this.imagesLoaded.emit(this.images);
       }
     });
   }

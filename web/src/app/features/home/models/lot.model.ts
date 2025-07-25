@@ -30,6 +30,6 @@ export interface PageableLotList {
 }
 
 export interface LotUpdateInterface {
-  name: string;
-  status: LotStatusEnum
+  name?: string;
+  status?: LotStatusEnum
 }

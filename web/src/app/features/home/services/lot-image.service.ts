@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { lotImageInterface, PageableLotImagesList } from '../models/lot-image.models';
+import { lotImageInterface, PageableLotImagesList, type UpdateLotImageQuetionInterface } from '../models/lot-image.models';
 
 @Injectable({
   providedIn: 'root'
@@ -26,5 +26,13 @@ export class LotImageService {
 
   getLotImageById(lotId: number, lotImageId: number): Observable<lotImageInterface> {
     return this.http.get<lotImageInterface>(`${this.apiUrl}lots/${lotId}/images/${lotImageId}`);
+  }
+
+  deleteLotImage(lotId: number, lotImageId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}lots/${lotId}/images/${lotImageId}`);
+  }
+
+  updateLotImageQuestions(lotId: number, lotImageId: number, data: UpdateLotImageQuetionInterface[]): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}lots/${lotId}/images/${lotImageId}`, data);
   }
 }

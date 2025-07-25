@@ -1,0 +1,10 @@
+@use "@angular/material" as mat;
+
+.fabButtons {
+  @include mat.fab-overrides((
+    container-color: var(--mat-sys-primary),
+    foreground-color: var(--mat-sys-on-primary),
+    small-container-color: var(--mat-sys-primary),
+    small-foreground-color: var(--mat-sys-on-primary)
+  ));
+}
