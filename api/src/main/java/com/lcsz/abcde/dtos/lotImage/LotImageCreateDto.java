@@ -10,11 +10,12 @@ public class LotImageCreateDto {
     private Integer prova;
     private String gabarito;
     private Integer presenca;
+    private Integer qtdQuestoes;
 
     public LotImageCreateDto() {
     }
 
-    public LotImageCreateDto(Long lotId, String key, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca) {
+    public LotImageCreateDto(Long lotId, String key, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes) {
         this.lotId = lotId;
         this.key = key;
         this.originalName = originalName;
@@ -24,6 +25,7 @@ public class LotImageCreateDto {
         this.prova = prova;
         this.gabarito = gabarito;
         this.presenca = presenca;
+        this.qtdQuestoes = qtdQuestoes;
     }
 
     public Long getLotId() {
@@ -98,6 +100,14 @@ public class LotImageCreateDto {
         this.presenca = presenca;
     }
 
+    public Integer getQtdQuestoes() {
+        return qtdQuestoes;
+    }
+
+    public void setQtdQuestoes(Integer qtdQuestoes) {
+        this.qtdQuestoes = qtdQuestoes;
+    }
+
     @Override
     public String toString() {
         return "LotImageCreateDto{" +
@@ -109,7 +119,8 @@ public class LotImageCreateDto {
                 ", etapa='" + etapa + '\'' +
                 ", prova=" + prova +
                 ", gabarito='" + gabarito + '\'' +
-                ", presenca=" + presenca +
+                ", presenca='" + presenca + '\'' +
+                ", qtdQuestoes=" + qtdQuestoes +
                 '}';
     }
 }

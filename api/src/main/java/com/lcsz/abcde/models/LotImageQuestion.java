@@ -14,7 +14,7 @@ public class LotImageQuestion {
     private Long imageId;
     @Column(nullable = false)
     private Integer number;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     private String alternative;
 
     public LotImageQuestion() {

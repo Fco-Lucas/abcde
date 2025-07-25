@@ -1,5 +1,6 @@
 package com.lcsz.abcde.repositorys;
 
+import com.lcsz.abcde.enums.lot_image.LotImageStatus;
 import com.lcsz.abcde.models.LotImage;
 import com.lcsz.abcde.repositorys.projection.LotImageProjection;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ public interface LotImageRepository extends JpaRepository<LotImage, Long> {
             CAST(l.matricula AS string) ILIKE :student OR 
             l.nomeAluno ILIKE :student
           )
+          AND l.status = 'ACTIVE'
         ORDER BY l.id DESC
     """)
     Page<LotImageProjection> findAllPageable(
@@ -27,5 +29,5 @@ public interface LotImageRepository extends JpaRepository<LotImage, Long> {
             @Param("student") String student
     );
 
-    List<LotImage> findAllByLotId(Long lotId);
+    List<LotImage> findAllByLotIdAndStatus(Long lotId, LotImageStatus status);
 }

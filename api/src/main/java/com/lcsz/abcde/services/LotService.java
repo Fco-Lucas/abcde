@@ -3,6 +3,7 @@ package com.lcsz.abcde.services;
 import com.lcsz.abcde.dtos.lot.LotCreateDto;
 import com.lcsz.abcde.dtos.lot.LotResponseDto;
 import com.lcsz.abcde.dtos.lot.LotUpdateDto;
+import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.enums.lot.LotStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
@@ -10,6 +11,7 @@ import com.lcsz.abcde.mappers.LotMapper;
 import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.models.ClientUser;
 import com.lcsz.abcde.models.Lot;
+import com.lcsz.abcde.models.LotImage;
 import com.lcsz.abcde.repositorys.LotRepository;
 import com.lcsz.abcde.repositorys.projection.LotProjection;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -90,7 +94,7 @@ public class LotService {
         ClientUser clientUser = this.clientUserService.getByIdOrNull(lot.getUserId());
         String userName = client != null ? client.getName() : clientUser.getName();
 
-        Integer numberImages = this.lotImageService.getQtdImagesLot(lot.getId());
+        Integer numberImages = this.lotImageService.getAllImagesLot(lot.getId()).size();
 
         LotResponseDto responseDto = LotMapper.toDto(lot);
         responseDto.setUserName(userName);
@@ -114,5 +118,52 @@ public class LotService {
         Lot lot = this.getLotById(lotId);
         lot.setStatus(LotStatus.DELETED);
         this.lotRepository.save(lot);
+    }
+
+    public byte[] generateTxt(Long lotId) {
+        Lot lot = this.getLotById(lotId);
+        List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
+
+        StringBuilder content = new StringBuilder("imagem,matricula");
+
+        // Sempre seta 90 colunas para as questões
+        for (int i = 1; i <= 90; i++) {
+            content.append(",").append(i);
+        }
+
+        for (LotImage lotImage : lotImages) {
+            String matricula = String.format("%08d", lotImage.getMatricula()); // 8 dígitos com 0 à esquerda
+            String etapa = lotImage.getEtapa();
+            String prova = String.format("%02d", lotImage.getProva());         // 2 dígitos com 0 à esquerda
+            String gabarito = lotImage.getGabarito();
+            Integer presenca = lotImage.getPresenca();                         // 1 ou 0
+
+            // Linha: nome da imagem + dados do QR Code
+            String linha = "\n" + lotImage.getOriginalName() + "," +
+                    matricula + etapa + prova + gabarito + presenca;
+
+            content.append(linha);
+
+            // Adiciona respostas das questões se o aluno está presente, caso contrário somente as vírgulas
+            if(presenca == 1) {
+                List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
+                for (LotImageQuestionResponseDto question : questions) {
+                    content.append(",").append(question.getAlternative());
+                }
+
+                // Completa com 'Z' o que falta
+                int quantidadeRespondida = questions.size();
+                int quantidadeFaltante = 90 - quantidadeRespondida;
+
+                for (int i = 0; i < quantidadeFaltante; i++) {
+                    content.append(",Z");
+                }
+            }else {
+                content.append(",".repeat(90));
+            }
+
+        }
+
+        return content.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

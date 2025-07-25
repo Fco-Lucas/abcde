@@ -6,17 +6,19 @@ public class ScanImageDadosResponseDto {
     private String etapa;
     private Integer prova;
     private String gabarito;
+    private Integer qtdQuestoes;
     private Integer presenca;
 
     public ScanImageDadosResponseDto() {
     }
 
-    public ScanImageDadosResponseDto(Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca) {
+    public ScanImageDadosResponseDto(Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer qtdQuestoes, Integer presenca) {
         this.matricula = matricula;
         this.nomeAluno = nomeAluno;
         this.etapa = etapa;
         this.prova = prova;
         this.gabarito = gabarito;
+        this.qtdQuestoes = qtdQuestoes;
         this.presenca = presenca;
     }
 
@@ -56,6 +58,14 @@ public class ScanImageDadosResponseDto {
         return gabarito;
     }
 
+    public Integer getQtdQuestoes() {
+        return qtdQuestoes;
+    }
+
+    public void setQtdQuestoes(Integer qtdQuestoes) {
+        this.qtdQuestoes = qtdQuestoes;
+    }
+
     public void setGabarito(String gabarito) {
         this.gabarito = gabarito;
     }
@@ -75,6 +85,7 @@ public class ScanImageDadosResponseDto {
                 ", nomeAluno='" + nomeAluno + '\'' +
                 ", etapa='" + etapa + '\'' +
                 ", prova=" + prova +
+                ", qtdQuestoes='" + qtdQuestoes + '\'' +
                 ", gabarito='" + gabarito + '\'' +
                 ", presenca=" + presenca +
                 '}';

@@ -14,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/lots/{lotId}/images")
 public class LotImageController {
@@ -58,11 +60,11 @@ public class LotImageController {
 
     @PatchMapping("/{lotImageId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> updateLotImageQuestion(
+    public ResponseEntity<Void> updateLotImageQuestions(
             @PathVariable Long lotImageId,
-            @RequestBody @Valid LotImageUpdateQuestionDto dto
-            ) {
-        this.lotImageService.updateImageQuestion(dto);
+            @RequestBody @Valid List<LotImageUpdateQuestionDto> dto
+    ) {
+        this.lotImageService.updateImageQuestions(lotImageId, dto);
         return ResponseEntity.noContent().build();
     }
 

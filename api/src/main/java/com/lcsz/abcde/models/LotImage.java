@@ -33,6 +33,10 @@ public class LotImage {
     private String gabarito;
     @Column(nullable = false)
     private Integer presenca;
+    @Column(nullable = false, name = "qtd_questoes")
+    private Integer qtdQuestoes;
+    @Column(nullable = false, name = "have_modification")
+    private Boolean haveModification = false;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LotImageStatus status;
@@ -43,7 +47,7 @@ public class LotImage {
     public LotImage() {
     }
 
-    public LotImage(Long id, Long lotId, String key, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, LotImageStatus status, LocalDateTime createdAt) {
+    public LotImage(Long id, Long lotId, String key, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.lotId = lotId;
         this.key = key;
@@ -54,6 +58,8 @@ public class LotImage {
         this.prova = prova;
         this.gabarito = gabarito;
         this.presenca = presenca;
+        this.qtdQuestoes = qtdQuestoes;
+        this.haveModification = haveModification;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -142,6 +148,22 @@ public class LotImage {
         return status;
     }
 
+    public Integer getQtdQuestoes() {
+        return qtdQuestoes;
+    }
+
+    public void setQtdQuestoes(Integer qtdQuestoes) {
+        this.qtdQuestoes = qtdQuestoes;
+    }
+
+    public Boolean getHaveModification() {
+        return haveModification;
+    }
+
+    public void setHaveModification(Boolean haveModification) {
+        this.haveModification = haveModification;
+    }
+
     public void setStatus(LotImageStatus status) {
         this.status = status;
     }
@@ -179,6 +201,8 @@ public class LotImage {
                 ", prova=" + prova +
                 ", gabarito='" + gabarito + '\'' +
                 ", presenca=" + presenca +
+                ", qtdQuestoes=" + qtdQuestoes +
+                ", haveModification=" + haveModification +
                 ", status=" + status +
                 ", createdAt=" + createdAt +
                 '}';

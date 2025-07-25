@@ -16,13 +16,15 @@ public class LotImageResponseDto {
     private Integer prova;
     private String gabarito;
     private Integer presenca;
+    private Integer qtdQuestoes;
+    private Boolean haveModification;
     private LotImageStatus status;
     private List<LotImageQuestionResponseDto> questions;
 
     public LotImageResponseDto() {
     }
 
-    public LotImageResponseDto(Long id, Long lotId, String url, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, LotImageStatus status, List<LotImageQuestionResponseDto> questions) {
+    public LotImageResponseDto(Long id, Long lotId, String url, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, List<LotImageQuestionResponseDto> questions) {
         this.id = id;
         this.lotId = lotId;
         this.url = url;
@@ -33,6 +35,8 @@ public class LotImageResponseDto {
         this.prova = prova;
         this.gabarito = gabarito;
         this.presenca = presenca;
+        this.qtdQuestoes = qtdQuestoes;
+        this.haveModification = haveModification;
         this.status = status;
         this.questions = questions;
     }
@@ -125,6 +129,22 @@ public class LotImageResponseDto {
         this.status = status;
     }
 
+    public Integer getQtdQuestoes() {
+        return qtdQuestoes;
+    }
+
+    public void setQtdQuestoes(Integer qtdQuestoes) {
+        this.qtdQuestoes = qtdQuestoes;
+    }
+
+    public Boolean getHaveModification() {
+        return haveModification;
+    }
+
+    public void setHaveModification(Boolean haveModification) {
+        this.haveModification = haveModification;
+    }
+
     public List<LotImageQuestionResponseDto> getQuestions() {
         return questions;
     }
@@ -145,6 +165,8 @@ public class LotImageResponseDto {
                 ", prova=" + prova +
                 ", gabarito='" + gabarito + '\'' +
                 ", presenca=" + presenca +
+                ", qtdQuestoes=" + qtdQuestoes +
+                ", haveModification=" + haveModification +
                 ", status=" + status +
                 ", questions=" + questions +
                 '}';

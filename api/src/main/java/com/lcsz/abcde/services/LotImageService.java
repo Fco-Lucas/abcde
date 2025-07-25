@@ -8,12 +8,17 @@ import com.lcsz.abcde.dtos.lotImage.LotImageUpdateQuestionDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionCreateDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionUpdateDto;
+import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.enums.lot_image.LotImageStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.LotImageMapper;
+import com.lcsz.abcde.models.Lot;
 import com.lcsz.abcde.models.LotImage;
+import com.lcsz.abcde.models.LotImageQuestion;
 import com.lcsz.abcde.repositorys.LotImageRepository;
 import com.lcsz.abcde.repositorys.projection.LotImageProjection;
+import com.lcsz.abcde.security.AuthenticatedUserProvider;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -28,21 +33,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class LotImageService {
     private final Path raiz = Paths.get("uploads/gabaritos/");
 
     private final LotImageRepository lotImageRepository;
+    private final LotService lotService;
     private final LotImageQuestionService lotImageQuestionService;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
-    LotImageService(LotImageRepository lotImageRepository, LotImageQuestionService lotImageQuestionService) {
+    LotImageService(LotImageRepository lotImageRepository, @Lazy LotService lotService, LotImageQuestionService lotImageQuestionService, AuthenticatedUserProvider authenticatedUserProvider) {
         this.lotImageRepository = lotImageRepository;
+        this.lotService = lotService;
         this.lotImageQuestionService = lotImageQuestionService;
+        this.authenticatedUserProvider = authenticatedUserProvider;
     }
 
     private String getImageUrl(Long lotId, String key) {
@@ -65,6 +71,8 @@ public class LotImageService {
         lotImage.setProva(dto.getProva());
         lotImage.setGabarito(dto.getGabarito());
         lotImage.setPresenca(dto.getPresenca());
+        lotImage.setQtdQuestoes(dto.getQtdQuestoes());
+        lotImage.setHaveModification(false);
         lotImage.setStatus(LotImageStatus.ACTIVE);
 
         LotImage saved = this.lotImageRepository.save(lotImage);
@@ -117,6 +125,10 @@ public class LotImageService {
 
     @Transactional(readOnly = false)
     public void delete(Long id) {
+        // Busca e verifica as permissões do usuário autenticado
+        PermissionResponseDto permission = this.authenticatedUserProvider.getAuthenticatedUserPermissions();
+        if(!permission.getUpload_files()) throw new RuntimeException("Você não tem permissão para excluir gabaritos");
+
         LotImage lotImage = this.getById(id);
         lotImage.setStatus(LotImageStatus.INACTIVE);
         this.lotImageRepository.save(lotImage);
@@ -128,7 +140,7 @@ public class LotImageService {
 
         Map<String, Object> request = new HashMap<>();
         request.put("path_image", pathImage);
-        request.put("debug", true);
+        request.put("debug", false);
 
         String url = "http://localhost:8000/scanImage";
 
@@ -149,6 +161,14 @@ public class LotImageService {
 
     @Transactional(readOnly = false)
     public LotImageResponseDto processImage(MultipartFile file, Long lotId) throws IOException {
+        // Busca e verifica as permissões do usuário autenticado
+        PermissionResponseDto permission = this.authenticatedUserProvider.getAuthenticatedUserPermissions();
+        if(!permission.getUpload_files()) throw new RuntimeException("Você não tem permissão para processar gabaritos");
+
+        // Verifica se o lote da imagem já está fechado
+        Lot lot = this.lotService.getLotById(lotId);
+        if(Objects.equals(lot.getStatus().toString(), "COMPLETED")) throw new RuntimeException("O lote já está concluido portanto não é possível enviar novas imagens");
+
         // Cria pasta do lote
         Path pastaLote = raiz.resolve(lotId.toString());
         Files.createDirectories(pastaLote);
@@ -181,7 +201,8 @@ public class LotImageService {
                 dados.getEtapa(),
                 dados.getProva(),
                 dados.getGabarito(),
-                dados.getPresenca()
+                dados.getPresenca(),
+                dados.getQtdQuestoes()
         );
         LotImageResponseDto lotImage = this.create(lotImageCreateDto);
 
@@ -198,12 +219,31 @@ public class LotImageService {
         return this.getByIdDto(lotImage.getId());
     }
 
-    public Integer getQtdImagesLot(Long lotId) {
-        return this.lotImageRepository.findAllByLotId(lotId).size();
+    public List<LotImage> getAllImagesLot(Long lotId) {
+        return this.lotImageRepository.findAllByLotIdAndStatus(lotId, LotImageStatus.ACTIVE);
     }
 
-    public void updateImageQuestion(LotImageUpdateQuestionDto dto) {
-        LotImageQuestionUpdateDto updateDto = new LotImageQuestionUpdateDto(dto.getAlternative());
-        this.lotImageQuestionService.update(dto.getLotImageQuestionId(), updateDto);
+    public void updateImageQuestions(Long lotImageId, List<LotImageUpdateQuestionDto> dto) {
+        LotImage lotImage = this.getById(lotImageId);
+
+        // Busca e verifica as permissões do usuário autenticado
+        PermissionResponseDto permission = this.authenticatedUserProvider.getAuthenticatedUserPermissions();
+        if(!permission.getUpload_files()) throw new RuntimeException("Você não tem permissão para atualizar as respotas do gabarito");
+
+        // Verifica se o lote da imagem já está fechado
+        Lot lot = this.lotService.getLotById(lotImage.getLotId());
+        if(Objects.equals(lot.getStatus().toString(), "COMPLETED")) throw new RuntimeException("O lote já está concluido portanto não é possível alterar suas questões");
+
+        dto.forEach((question) -> {
+            LotImageQuestionUpdateDto updateDto = new LotImageQuestionUpdateDto(question.getAlternative());
+            this.lotImageQuestionService.update(question.getLotImageQuestionId(), updateDto);
+        });
+
+        lotImage.setHaveModification(true);
+        this.lotImageRepository.save(lotImage);
+    }
+
+    public List<LotImageQuestionResponseDto> getAllQuestionsLotImage(Long lotImageId) {
+        return this.lotImageQuestionService.getAllByImageId(lotImageId);
     }
 }

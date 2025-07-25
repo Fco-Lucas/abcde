@@ -9,6 +9,8 @@ CREATE TABLE lots_images (
     prova SMALLINT NOT NULL, -- 0 a 99
     gabarito VARCHAR(1) NOT NULL,
     presenca SMALLINT NOT NULL,
+    qtd_questoes INTEGER NOT NULL,
+    have_modification BOOLEAN NOT NULL DEFAULT false,
     status VARCHAR(12) NOT NULL CHECK (status IN ('ACTIVE', 'INACTIVE')) DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
