@@ -30,7 +30,7 @@ def verificar_falta_aluno(imagem, bbox_qr_code, debugMode=False, debugPath="."):
     # Largura da ROI (em % da largura do QR)
     W_ROI_PCT = 0.15
     # Limiar de preenchimento para considerar a marcação como "feita"
-    FILL_RATIO_THRESHOLD = 0.20
+    FILL_RATIO_THRESHOLD = 0.50 # 50% da imagem tem que está marcada no mínimo
 
     # Calcula a posição e o tamanho da ROI com base nos parâmetros
     y_inicio_roi = y_qr + h_qr + int(h_qr * Y_OFFSET_PCT)

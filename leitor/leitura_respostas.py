@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath):
+def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath, pathFileToSave):
     print("\n[INFO] Etapa 5: Lendo respostas com controle total...")
     respostas = []
     gray = cv2.cvtColor(imagem_alinhada, cv2.COLOR_BGR2GRAY)
@@ -53,15 +53,22 @@ def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath):
                     opcoes_marcadas.append(coluna)
 
             # Determina a resposta
+            # if len(opcoes_marcadas) == 0:
+            #     resposta = 'Z'
+            #     cor = (255, 255, 0)
+            # elif len(opcoes_marcadas) > 1:
+            #     resposta = 'W'
+            #     cor = (0, 255, 255)
+            # else:
+            #     resposta = chr(ord('A') + opcoes_marcadas[0])
+            #     cor = (0, 255, 0)
             if len(opcoes_marcadas) == 0:
                 resposta = 'Z'
                 cor = (255, 255, 0)
-            elif len(opcoes_marcadas) > 1:
-                resposta = 'W'
-                cor = (0, 255, 255)
             else:
-                resposta = chr(ord('A') + opcoes_marcadas[0])
-                cor = (0, 255, 0)
+                # Converte índices para letras (ex: 0 → A, 1 → B, etc.)
+                resposta = ''.join([chr(ord('A') + i) for i in opcoes_marcadas])
+                cor = (0, 255, 0) if len(opcoes_marcadas) == 1 else (0, 255, 255)
 
             respostas.append(resposta)
 
@@ -81,5 +88,8 @@ def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath):
     if debugMode:
         cv2.imwrite(f"{debugPath}/resultado_etapa5_debug_visual.png", debug_image)
         print("[DEBUG] Imagem 'resultado_etapa5_debug_visual.png' gerada com controle total.")
+
+    # Substitui a imagem enviada pela nova imagem 
+    cv2.imwrite(pathFileToSave, debug_image);
 
     return respostas
