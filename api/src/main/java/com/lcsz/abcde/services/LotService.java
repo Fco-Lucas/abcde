@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class LotService {
@@ -69,11 +70,44 @@ public class LotService {
     @Transactional(readOnly = true)
     public Page<LotResponseDto> getAllPageable(
             Pageable pageable,
-            String name,
-            LotStatus status
+            String filterName,
+            String filterClientUser,
+            String filterClient,
+            LotStatus status,
+            UUID authUserId
     ) {
-        String nameParam = (name == null || name.isBlank()) ? null : "%" + name + "%";
-        Page<LotProjection> lots = this.lotRepository.findAllPageable(pageable, nameParam, status);
+        // Inicia as variáveis necessárias
+        final String COMPUTEX_CNPJ = "12302493000101";
+        Page<LotProjection> lots;
+        String clientCnpj;
+        boolean isComputexUser;
+        boolean isClient;
+
+        // Parametros para filtragem
+        String nameParam = (filterName == null || filterName.isBlank()) ? null : "%" + filterName + "%";
+        String clientUserParam = (filterClientUser == null || filterClientUser.isBlank()) ? null : "%" + filterClientUser + "%";
+        String clientParam = (filterClient == null || filterClient.isBlank()) ? null : "%" + filterClient + "%";
+
+        // Verifica o tipo e seta as variáveis necessárias
+        ClientUser clientUser = this.clientUserService.getByIdOrNull(authUserId);
+        if (clientUser != null) {
+            Client client = this.clientService.getByIdOrNull(clientUser.getClientId());
+
+            clientCnpj = client.getCnpj();
+            isComputexUser = COMPUTEX_CNPJ.equals(client.getCnpj());
+            isClient = false;
+        }else {
+            Client client = this.clientService.getByIdOrNull(authUserId);
+
+            clientCnpj = client.getCnpj();
+            isComputexUser = COMPUTEX_CNPJ.equals(client.getCnpj());
+            isClient = true;
+        }
+
+        if(isComputexUser) lots = this.lotRepository.findAllPageableComputex(pageable, nameParam, clientParam, status);
+        else if(isClient) lots = this.lotRepository.findAllPageableClient(pageable, nameParam, clientCnpj, clientUserParam, status);
+        else lots = this.lotRepository.findAllPageableClientUser(pageable, nameParam, clientCnpj, authUserId, status);
+
         return lots.map(lot -> {
            return this.getLotByIdDto(lot.getId());
         });
@@ -148,7 +182,9 @@ public class LotService {
             if(presenca == 1) {
                 List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
                 for (LotImageQuestionResponseDto question : questions) {
-                    content.append(",").append(question.getAlternative());
+                    String alt = question.getAlternative();
+                    String alternative = (alt != null && alt.length() == 1) ? alt : "W";
+                    content.append(",").append(alternative);
                 }
 
                 // Completa com 'Z' o que falta

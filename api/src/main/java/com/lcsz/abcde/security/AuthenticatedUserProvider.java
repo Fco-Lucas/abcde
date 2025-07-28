@@ -44,7 +44,14 @@ public class AuthenticatedUserProvider {
 
     public PermissionResponseDto getAuthenticatedUserPermissions() {
         UUID userId = this.getAuthenticatedUserId();
+        return this.getPermissionForUser(userId);
+    }
 
+    public PermissionResponseDto getAuthenticatedUserPermissions(UUID userId) {
+        return this.getPermissionForUser(userId);
+    }
+
+    private PermissionResponseDto getPermissionForUser(UUID userId) {
         // Verifica se o usuário é cliente ou clientUser
         Client client = this.clientService.getByIdOrNull(userId);
 

@@ -2,6 +2,7 @@ package com.lcsz.abcde.controllers;
 
 import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.exceptions.ExceptionMessage;
+import com.lcsz.abcde.security.AuthenticatedUserProvider;
 import com.lcsz.abcde.services.PermissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,21 +12,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Permission Controller", description = "Contém todas as operações relacionadas aos recursos de permissões do ABCDE")
 @RestController
 @RequestMapping("api/v1/permissions")
 public class PermissionController {
     private final PermissionService service;
+    private final AuthenticatedUserProvider provider;
 
-    PermissionController(PermissionService service) {
+    PermissionController(PermissionService service, AuthenticatedUserProvider provider) {
         this.service = service;
+        this.provider = provider;
     }
 
     @Operation(
@@ -82,5 +83,13 @@ public class PermissionController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PermissionResponseDto> getPermissionById(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(this.service.getPermissionByIdDto(id));
+    }
+
+    @GetMapping("/getUserPermissions")
+    @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT') or #userId == authentication.principal.id")
+    public ResponseEntity<PermissionResponseDto> getUserPermissions(
+            @RequestParam(required = true, name = "userId") UUID userId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.provider.getAuthenticatedUserPermissions(userId));
     }
 }

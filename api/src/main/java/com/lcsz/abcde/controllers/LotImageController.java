@@ -3,7 +3,9 @@ package com.lcsz.abcde.controllers;
 import com.lcsz.abcde.dtos.PageableDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageUpdateQuestionDto;
+import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.mappers.PageableMapper;
+import com.lcsz.abcde.security.AuthenticatedUserProvider;
 import com.lcsz.abcde.services.LotImageService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -20,9 +22,11 @@ import java.util.List;
 @RequestMapping("api/v1/lots/{lotId}/images")
 public class LotImageController {
     private final LotImageService lotImageService;
+    private final AuthenticatedUserProvider userProvider;
 
-    LotImageController(LotImageService lotImageService) {
+    LotImageController(LotImageService lotImageService, AuthenticatedUserProvider userProvider) {
         this.lotImageService = lotImageService;
+        this.userProvider = userProvider;
     }
 
     @PostMapping("/process_image")
@@ -31,6 +35,10 @@ public class LotImageController {
             @RequestParam("file") MultipartFile file,
             @PathVariable("lotId") Long lotId
     ) {
+        // Verifica se o usuário possui permissão para processar lote
+        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
+        if(!userPermission.getUpload_files()) throw new RuntimeException("Usuário sem autorização para processar imagens");
+
         try {
             LotImageResponseDto lotImage = this.lotImageService.processImage(file, lotId);
             return ResponseEntity.status(HttpStatus.CREATED).body(lotImage);
@@ -46,6 +54,10 @@ public class LotImageController {
             @PathVariable Long lotId,
             @RequestParam(required = false) String student
     ) {
+        // Verifica se o usuário possui permissão para visualizar imagens
+        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
+        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar imagens");
+
         Page<LotImageResponseDto> lotImages = this.lotImageService.getAllPageable(pageable, lotId, student);
         return ResponseEntity.status(HttpStatus.OK).body(PageableMapper.toDto(lotImages));
     }
@@ -55,6 +67,10 @@ public class LotImageController {
     public ResponseEntity<LotImageResponseDto> getLotImageById(
             @PathVariable Long lotImageId
     ) {
+        // Verifica se o usuário possui permissão para visualizar imagens
+        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
+        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar imagens");
+
         return ResponseEntity.status(HttpStatus.OK).body(this.lotImageService.getByIdDto(lotImageId));
     }
 
@@ -64,6 +80,10 @@ public class LotImageController {
             @PathVariable Long lotImageId,
             @RequestBody @Valid List<LotImageUpdateQuestionDto> dto
     ) {
+        // Verifica se o usuário possui permissão para atualizar questões
+        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
+
+        if(!userPermission.getUpload_files()) throw new RuntimeException("Usuário sem autorização para atualizar as questões");
         this.lotImageService.updateImageQuestions(lotImageId, dto);
         return ResponseEntity.noContent().build();
     }
@@ -73,6 +93,10 @@ public class LotImageController {
     public ResponseEntity<Void> deleteLotImage(
             @PathVariable Long lotImageId
     ) {
+        // Verifica se o usuário possui permissão para excluir imagens
+        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
+        if(!userPermission.getUpload_files()) throw new RuntimeException("Usuário sem autorização para excluir imagens");
+
         this.lotImageService.delete(lotImageId);
         return ResponseEntity.noContent().build();
     }
