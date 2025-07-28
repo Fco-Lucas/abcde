@@ -1,7 +1,7 @@
-<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="grid grid-cols-2 md:grid-cols-3 items-center gap-3">
+<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="grid grid-cols-2 md:grid-cols-4 items-center gap-3">
   <div class="col-span-1">
     <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Nome</mat-label>
+      <mat-label>Nome do lote</mat-label>
       <input
         matInput
         type="text"
@@ -9,6 +9,34 @@
       />
     </mat-form-field>
   </div>
+
+  @if (this.userRole === "COMPUTEX") {
+    <div class="col-span-1">
+      <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Cliente</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="client"
+          placeholder="Nome/CNPJ"
+        />
+      </mat-form-field>
+    </div>
+  }
+
+  @if (this.userRole === "CLIENT") {
+    <div class="col-span-1">
+      <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Usuário</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="clientUser"
+          placeholder="Nome/E-mail/CNPJ"
+        />
+      </mat-form-field>
+    </div>
+  }
 
   <div class="col-span-1">
     <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
@@ -21,7 +49,7 @@
     </mat-form-field>
   </div>
 
-  <div class="col-span-2 md:col-span-1">
+  <div class="col-span-1">
     <button matButton="filled" class="w-full md:w-auto" type="submit" [disabled]="isSubmitButtonDisabled()">
       <mat-icon *ngIf="!isLoading">search</mat-icon>
       <span *ngIf="!isLoading">

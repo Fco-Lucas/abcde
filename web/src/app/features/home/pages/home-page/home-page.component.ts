@@ -10,9 +10,11 @@ import { LotFiltersComponent, LotFiltersFormValues } from '../../components/lot-
 import { LotListComponent } from '../../components/lot-list/lot-list.component';
 import { DialogCreateLotComponent, DialogCreateLotData } from '../../components/dialog-create-lot/dialog-create-lot.component';
 import { DialogImageUploadProgressComponent, DialogImageUploadProgressData } from '../../components/dialog-image-upload-progress/dialog-image-upload-progress.component';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService, type AuthenticatedUserRole } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LotInterface } from '../../models/lot.model';
+import { PermissionsService } from '../../../permissions/services/permissions.service';
+import type { PermissionInterface } from '../../../permissions/models/permission.model';
 
 @Component({
   selector: 'app-home-page',
@@ -32,10 +34,16 @@ export class HomePageComponent implements OnInit {
   readonly dialog = inject(MatDialog);
   private authService = inject(AuthService);
   private notification = inject(NotificationService); // Injetar para notificações
+  private permissionsService = inject(PermissionsService);
 
   // Sinais e propriedades
   userIdSignal = toSignal(this.authService.currentUserId$);
   userId!: string;
+
+  userRoleSignal = toSignal(this.authService.currentUserRole$);
+  userRole!: AuthenticatedUserRole;
+
+  userPermissions!: PermissionInterface;
   public hasLoadError = signal(false);
   public currentFilters = signal<Partial<LotFiltersFormValues> | null>(null);
 
@@ -43,12 +51,27 @@ export class HomePageComponent implements OnInit {
 
   ngOnInit(): void {
     const userId = this.userIdSignal();
-    if (!userId) {
+    if(!userId) {
       console.error(`Erro ao encontrar ID do usuário`);
-      // Você pode querer redirecionar ou mostrar uma mensagem de erro aqui
-    } else {
-      this.userId = userId;
+      return;
     }
+    this.userId = userId;
+
+    const userRole = this.userRoleSignal();
+    if(!userRole) {
+      console.error(`Erro ao encontrar cargo do usuário`);
+      return;
+    }
+    this.userRole = userRole;
+
+    this.permissionsService.getUserPermission(this.userId).subscribe({
+      next: (permissions) => {
+        this.userPermissions = permissions;
+      },
+      error: (err) => {
+        console.error(`Erro ao buscar as permissões do usuário autenticado: ${err.message}`);
+      }
+    });
   }
 
   /**

@@ -19,8 +19,8 @@ export const routes: Routes = [
     component: AppLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'home', component: HomePageComponent, title: "ABCDE | Início" },
-      { path: 'loteDetails', component: LotDetailsPageComponent, title: "ABCDE | Informações do lote" },
+      { path: 'home', component: HomePageComponent, title: "Início | ABCDE" },
+      { path: 'loteDetails', component: LotDetailsPageComponent, title: "Informações do lote | ABCDE" },
       { path: 'profile', loadChildren: () => import('./features/profile/profile.routes') },
       { path: 'clients', loadChildren: () => import('./features/clients/clients.routes') }
     ]

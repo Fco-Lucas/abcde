@@ -14,14 +14,14 @@ const PROFILE_ROUTES: Routes = [
     component: ProfileClientPageComponent,
     canActivate: [roleGuard],
     data: { roles: ['COMPUTEX', 'CLIENT'] },
-    title: 'ABCDE | Perfil do cliente'
+    title: 'Perfil do cliente | ABCDE'
   },
   {
     path: 'user', 
     component: ProfileUserPageComponent,
     canActivate: [roleGuard],
     data: { roles: ['CLIENT_USER'] },
-    title: 'ABCDE | Perfil do usuário'
+    title: 'Perfil do usuário | ABCDE'
   }
 ];
 

@@ -15,12 +15,22 @@ export class LotService {
     return this.http.post<LotInterface>(`${this.apiUrl}lots`, data);
   }
 
-  getAllLotsUserPageable(page: number = 1, size: number = 10, name: string = "", status: LotStatusEnum | "" = ""): Observable<PageableLotList> {
+  getAllLotsUserPageable(
+    page: number = 1,
+    size: number = 10,
+    name: string = "",
+    client: string = "",
+    clientUser: string = "",
+    status: LotStatusEnum | "" = ""
+  ): Observable<PageableLotList> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
-      .set('name', name.toString())
+      .set('name', name)
+      .set('client', client)
+      .set('clientUser', clientUser)
       .set('status', status.toString());
+      
     return this.http.get<PageableLotList>(`${this.apiUrl}lots`, { params });
   }
 

@@ -6,12 +6,12 @@ const AUTH_ROUTES: Routes = [
   { 
     path: 'login', 
     component: LoginPageComponent, 
-    title: "ABCDE | Login" 
+    title: "Login | ABCDE" 
   },
   { 
     path: 'register',
     component: RegisterPageComponent,
-    title: "ABCDE | Cadastro de Clientes"
+    title: "Cadastro de Clientes | ABCDE"
   },
   { path: '', redirectTo: 'login', pathMatch: 'full' } 
 ];

@@ -13,6 +13,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { LotStatusBadgeComponent } from '../lot-status-badge/lot-status-badge.component';
 import { LotStateService } from '../../services/lot-state.service';
 import { Router } from '@angular/router';
+import type { PermissionInterface } from '../../../permissions/models/permission.model';
 
 @Component({
   selector: 'app-lot-list',
@@ -40,11 +41,12 @@ export class LotListComponent implements OnInit, OnChanges {
 
   // Propriedades da paginação
   public totalElements = 0;
-  public pageSize = 12; // Um bom número para exibição em cards
+  public pageSize = 10;
   public pageIndex = 0;
 
   // Inputs e Outputs
   @Input() filters: Partial<LotFiltersFormValues> | null = null;
+  @Input() userPermissions!: PermissionInterface;
   @Output() loadStatusChanged = new EventEmitter<'SUCCESS' | 'ERROR'>();
 
   // Referência ao paginador no template
@@ -70,7 +72,14 @@ export class LotListComponent implements OnInit, OnChanges {
     this.lots.set([]); // Limpa os dados antigos para evitar mostrar dados incorretos durante o carregamento
 
     const filterStatus = this.filters?.status === "ALL" ? "" : this.filters?.status;
-    this.lotService.getAllLotsUserPageable(this.pageIndex, this.pageSize, this.filters?.name, filterStatus).pipe(
+    this.lotService.getAllLotsUserPageable(
+      this.pageIndex, 
+      this.pageSize, 
+      this.filters?.name, 
+      this.filters?.client, 
+      this.filters?.clientUser, 
+      filterStatus
+    ).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (response) => {
@@ -95,6 +104,7 @@ export class LotListComponent implements OnInit, OnChanges {
   // Exemplo de uma ação em um card
   viewLotDetails(lot: LotInterface): void {
     this.logStateService.selectLot(lot);
+    this.logStateService.setPermissions(this.userPermissions);
     this.router.navigate(["/app/loteDetails"]);
   }
 }

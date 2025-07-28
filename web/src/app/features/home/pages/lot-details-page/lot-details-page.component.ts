@@ -24,6 +24,9 @@ import { ConfirmationDialogService } from '../../../../core/services/confirmatio
 import { finalize } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LotService } from '../../services/lot.service';
+import type { PermissionInterface } from '../../../permissions/models/permission.model';
+import { DialogUpdateLotComponent, type DialogUpdateLotData, type UpdateLotFormValues } from '../../components/lotDetails/dialog-update-lot/dialog-update-lot.component';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-lot-details-page',
@@ -40,7 +43,8 @@ import { LotService } from '../../services/lot.service';
     ReactiveFormsModule,
     DecimalPipe,
     MatMenuModule,
-    RouterLink
+    RouterLink,
+    MatDividerModule
   ],
   templateUrl: './lot-details-page.component.html',
   styleUrl: './lot-details-page.component.scss'
@@ -58,6 +62,7 @@ export class LotDetailsPageComponent implements OnInit {
   public answersForm!: FormGroup;
 
   public lote!: LotInterface;
+  public userPermissions!: PermissionInterface;
   public currentFilters = signal<Partial<LotImagesFiltersFormValues> | null>(null);
 
   public currentPage = signal<number>(0);
@@ -73,11 +78,13 @@ export class LotDetailsPageComponent implements OnInit {
 
   ngOnInit(): void {
     const selectedLot: LotInterface | null = this.lotStateService.selectedLot();
-    if(!selectedLot) {
+    const userPermissions: PermissionInterface | null = this.lotStateService.userPermissions();
+    if(!selectedLot || !userPermissions) {
       this.router.navigate(['/app/home']);
       return;
     }
     this.lote = selectedLot;
+    this.userPermissions = userPermissions;
     this.answersForm = this.fb.group({ answers: this.fb.array([]) });
   }
 
@@ -146,7 +153,7 @@ export class LotDetailsPageComponent implements OnInit {
       next: (details) => {
         this.selectedImageDetails.set(details);
         this.initializeAnswersForm(details.questions);
-        if (this.isLotCompleted) {
+        if (this.isLotCompleted || !this.userPermissions.upload_files) {
           this.answersForm.disable();
         } else {
           this.answersForm.enable();
@@ -187,7 +194,7 @@ export class LotDetailsPageComponent implements OnInit {
       answers: this.fb.array(questionFormGroups)
     });
 
-    if (this.isLotCompleted) {
+    if (this.isLotCompleted || !this.userPermissions.upload_files) {
       this.answersForm.disable();
     }
   }
@@ -407,6 +414,49 @@ export class LotDetailsPageComponent implements OnInit {
       },
       error: (err) => {
         this.notification.showError("Ocorreu um erro ao gerar o arquivo .txt do lote, tente novamente mais tarde!");
+      }
+    });
+  }
+
+  onOpenDialogUpdateLot(): void {
+    const dialogData: DialogUpdateLotData = {
+      lotId: this.lote.id,
+      lotName: this.lote.name
+    };
+
+    const dialogRef = this.dialog.open(DialogUpdateLotComponent, {
+      width: '500px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: UpdateLotFormValues | null) => {
+      if(!result) return;
+
+      this.lote = { ...this.lote, name: result.name }; // Atualiza o nome do lote no componente pai
+    });
+  }
+
+  deleteLot(): void {
+    const dialogData = {
+      title: "Tem certeza?",
+      message: `Você realmente deseja excluir o lote com nome ${this.lote.name}? Esta ação não poderá ser desfeita.`,
+      confirmButtonText: 'Excluir'
+    };
+
+    this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
+      if(!confirmed) return;
+      this.proceedWithLotDeletion();
+    });
+  }
+
+  proceedWithLotDeletion(): void {
+    this.lotService.deleteLot(this.lote.id).subscribe({
+      next: (_) => {
+        this.notification.showSuccess(`Lote excluído com sucesso`);
+        this.router.navigate(["/app/home"])
+      },
+      error: (err) => {
+        this.notification.showError(`Ocorreu um erro ao excluir o lote, tente novamente mais tarde`);
       }
     });
   }

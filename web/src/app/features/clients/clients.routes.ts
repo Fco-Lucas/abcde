@@ -9,14 +9,14 @@ const CLIENTS_ROUTES: Routes = [
     component: ClientsPageComponent,
     canActivate: [roleGuard],
     data: { roles: ['COMPUTEX'] },
-    title: 'ABCDE | Clientes'
+    title: 'Clientes | ABCDE'
   },
   {
     path: ':id/users', 
     component: ClientUsersPageComponent,
     canActivate: [roleGuard],
     data: { roles: ['COMPUTEX', 'CLIENT'] },
-    title: 'ABCDE | Usuários do Cliente'
+    title: 'Usuários do Cliente | ABCDE'
   }
 ];
 

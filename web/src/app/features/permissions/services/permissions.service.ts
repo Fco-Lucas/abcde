@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PermissionInterface } from '../models/permission.model';
@@ -17,5 +17,12 @@ export class PermissionsService {
 
   getPermissionById(permissionId: string): Observable<PermissionInterface> {
     return this.http.get<PermissionInterface>(`${this.apiUrl}permissions/${permissionId}`);
+  }
+
+  getUserPermission(userId: string): Observable<PermissionInterface> {
+    const params = new HttpParams()
+      .set("userId", userId);
+
+    return this.http.get<PermissionInterface>(`${this.apiUrl}permissions/getUserPermissions`, { params });
   }
 }

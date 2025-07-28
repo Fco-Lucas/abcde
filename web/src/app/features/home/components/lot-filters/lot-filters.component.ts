@@ -8,9 +8,12 @@ import { LotStatusEnum } from '../../models/lot.model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import type { AuthenticatedUserRole } from '../../../../core/services/auth.service';
 
 export interface LotFiltersFormValues {
   name: string,
+  client: string,
+  clientUser: string,
   status: LotStatusEnum | "ALL"
 }
 
@@ -33,14 +36,15 @@ export class LotFiltersComponent {
 
   filterForm = this.fb.group({
     name: ["", []],
+    client: ["", []],
+    clientUser: ["", []],
     status: ["ALL", [Validators.required]]
   });
 
-  @Output()
-  submitForm = new EventEmitter<LotFiltersFormValues>();
+  @Output() submitForm = new EventEmitter<LotFiltersFormValues>();
 
-  @Input()
-  isLoading: boolean = false;
+  @Input() isLoading: boolean = false;
+  @Input() userRole!: AuthenticatedUserRole;
 
   onSubmit() {
     this.filterForm.markAllAsTouched;
@@ -55,13 +59,5 @@ export class LotFiltersComponent {
 
   isSubmitButtonDisabled(): boolean {
     return this.filterForm.invalid || this.isLoading;
-  }
-
-  get nameControl() {
-    return this.filterForm.get("name");
-  }
-
-  get statusControl() {
-    return this.filterForm.get("status");
   }
 }
