@@ -1,10 +1,13 @@
 package com.lcsz.abcde.services;
 
+import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.clients.ClientCreateDto;
 import com.lcsz.abcde.dtos.clients.ClientResponseDto;
 import com.lcsz.abcde.dtos.clients.ClientUpdateDto;
 import com.lcsz.abcde.dtos.clients.ClientUpdatePasswordDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserResponseDto;
+import com.lcsz.abcde.enums.auditLog.AuditAction;
+import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.enums.client.ClientStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
@@ -27,11 +30,18 @@ public class ClientService {
     private final ClientRepository repository;
     private final ClientUserService clientUserService;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
-    ClientService(ClientRepository repository, ClientUserService clientUserService, PasswordEncoder passwordEncoder) {
+    ClientService(ClientRepository repository, ClientUserService clientUserService, PasswordEncoder passwordEncoder, AuditLogService auditLogService) {
         this.repository = repository;
         this.clientUserService = clientUserService;
         this.passwordEncoder = passwordEncoder;
+        this.auditLogService = auditLogService;
+    }
+
+    public String formatClientForLog(ClientResponseDto dto) {
+        return String.format("{id='%s', nome='%s', cnpj='%s'}",
+                dto.getId().toString(), dto.getName(), dto.getCnpj());
     }
 
     @Transactional(readOnly = true)
@@ -54,10 +64,18 @@ public class ClientService {
 
         Client savedClient = this.repository.save(client);
 
-        ClientResponseDto clientResponse = ClientMapper.toDto(savedClient);
-        clientResponse.setUsers(this.clientUserService.getUsersByClientId(client.getId()));
+        ClientResponseDto responseDto = ClientMapper.toDto(savedClient);
+        responseDto.setUsers(this.clientUserService.getUsersByClientId(client.getId()));
 
-        return clientResponse;
+        // Log
+        String details = String.format(
+                "Novo cliente cadastrado no sistema | Dados do cliente cadastrado: %s",
+                this.formatClientForLog(responseDto)
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.CREATE, savedClient.getId(), AuditProgram.CLIENT, details);
+        this.auditLogService.create(logDto);
+
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
@@ -106,14 +124,30 @@ public class ClientService {
             client.setCnpj(dto.getCnpj());
         }
 
-        this.repository.save(client);
+        Client updated = this.repository.save(client);
+
+        String details = String.format(
+            "Cliente atualizado com ID: %s | Novos dados -> Nome: %s | CNPJ: %s",
+            updated.getId(), updated.getName(), updated.getCnpj()
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.CLIENT, details);
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
     public void deleteClient(UUID id) {
         Client client = this.getClientById(id);
         client.setStatus(ClientStatus.INACTIVE);
-        this.repository.save(client);
+        Client updated = this.repository.save(client);
+
+        String details = String.format(
+            "Cliente com ID: %s teve o status alterado para INACTIVE (exclusão lógica).", updated.getId()
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.DELETE, AuditProgram.CLIENT, details
+        );
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
@@ -122,16 +156,27 @@ public class ClientService {
         String newPassword = dto.getNewPassword();
         String confirmNewPassword = dto.getConfirmNewPassword();
 
-        if(!newPassword.equals(confirmNewPassword))
-            throw new RuntimeException("Nova senha não é igual a confirmação da nova senha");
+        if (!newPassword.equals(confirmNewPassword)) {
+            throw new RuntimeException("Nova senha não é igual à confirmação da nova senha");
+        }
 
         Client client = this.getClientById(id);
 
-        if(!passwordEncoder.matches(currentPassword, client.getPassword()))
+        if (!passwordEncoder.matches(currentPassword, client.getPassword())) {
             throw new RuntimeException("Senha atual inválida");
-        client.setPassword(passwordEncoder.encode(newPassword));
+        }
 
+        client.setPassword(passwordEncoder.encode(newPassword));
         this.repository.save(client);
+
+        String details = String.format(
+            "Senha do cliente com ID: %s foi atualizada com sucesso.", client.getId()
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.UPDATE, AuditProgram.CLIENT, details
+        );
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
@@ -140,6 +185,15 @@ public class ClientService {
         String newPassword = passwordEncoder.encode("abcdefgh");
         client.setPassword(newPassword);
         this.repository.save(client);
+
+        String details = String.format(
+            "Senha do cliente com ID: %s foi restaurada para o valor padrão.", client.getId()
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+            AuditAction.UPDATE, AuditProgram.CLIENT, details
+        );
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = true)

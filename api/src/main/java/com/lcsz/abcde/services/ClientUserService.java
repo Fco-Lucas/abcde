@@ -1,10 +1,13 @@
 package com.lcsz.abcde.services;
 
+import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserCreateDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserResponseDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserUpdateDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserUpdatePasswordDto;
 import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
+import com.lcsz.abcde.enums.auditLog.AuditAction;
+import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.enums.clientUser.ClientUserStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
@@ -29,12 +32,25 @@ public class ClientUserService {
     private final ClientService clientService;
     private final PermissionService permissionService;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
-    ClientUserService(ClientUserRepository repository, @Lazy ClientService clientService, PermissionService permissionService, PasswordEncoder passwordEncoder) {
+    ClientUserService(
+        ClientUserRepository repository,
+        @Lazy ClientService clientService,
+        PermissionService permissionService,
+        PasswordEncoder passwordEncoder,
+        AuditLogService auditLogService
+    ) {
         this.repository = repository;
         this.clientService = clientService;
         this.permissionService = permissionService;
         this.passwordEncoder = passwordEncoder;
+        this.auditLogService = auditLogService;
+    }
+
+    public String formatClientUserForLog(ClientUserResponseDto dto) {
+        return String.format("{id='%s', nome='%s', email='%s', permission='%s'}",
+                dto.getId().toString(), dto.getName(), dto.getEmail(), dto.getPermission());
     }
 
     @Transactional(readOnly = true)
@@ -66,6 +82,14 @@ public class ClientUserService {
 
         ClientUserResponseDto responseDto = ClientUserMapper.toDto(saved);
         responseDto.setPermission(permissions);
+
+        // Log
+        String details = String.format(
+            "Novo usuário cadastrado no sistema para o cliente '%s' | Dados do usuário cadastrado: %s",
+            responseDto.getClientId(), this.formatClientUserForLog(responseDto)
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.CREATE, AuditProgram.CLIENT_USER, details);
+        this.auditLogService.create(logDto);
 
         return responseDto;
     }
@@ -125,14 +149,30 @@ public class ClientUserService {
         }
         if(dto.getPermission() != null) clientUser.setPermission(dto.getPermission());
 
-        this.repository.save(clientUser);
+        ClientUser updated = this.repository.save(clientUser);
+
+        String details = String.format(
+                "Usuário atualizado com ID: %s | Novos dados -> Nome: %s | E-mail: %s",
+                updated.getId(), updated.getName(), updated.getEmail()
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.CLIENT_USER, details);
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
     public void delete(UUID id) {
         ClientUser clientUser = this.getById(id);
         clientUser.setStatus(ClientUserStatus.INACTIVE);
-        this.repository.save(clientUser);
+        ClientUser updated = this.repository.save(clientUser);
+
+        String details = String.format(
+            "Usuário com ID: %s teve o status alterado para INACTIVE (exclusão lógica).", updated.getId()
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.DELETE, AuditProgram.CLIENT_USER, details
+        );
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
@@ -150,6 +190,15 @@ public class ClientUserService {
         clientUser.setPassword(passwordEncoder.encode(newPassword));
 
         this.repository.save(clientUser);
+
+        String details = String.format(
+                "Senha do usuário com ID: %s foi atualizada com sucesso.", clientUser.getId()
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.UPDATE, AuditProgram.CLIENT_USER, details
+        );
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
@@ -158,6 +207,15 @@ public class ClientUserService {
         String newPassword = passwordEncoder.encode("abcdefgh");
         clientUser.setPassword(newPassword);
         this.repository.save(clientUser);
+
+        String details = String.format(
+                "Senha do usuário com ID: %s foi restaurada para o valor padrão.", clientUser.getId()
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.UPDATE, AuditProgram.CLIENT_USER, details
+        );
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = true)

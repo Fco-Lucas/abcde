@@ -2,6 +2,7 @@ package com.lcsz.abcde.services;
 
 import com.lcsz.abcde.dtos.ScanImageDadosResponseDto;
 import com.lcsz.abcde.dtos.ScanImageResponseDto;
+import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageCreateDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageUpdateQuestionDto;
@@ -9,6 +10,8 @@ import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionCreateDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionUpdateDto;
 import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
+import com.lcsz.abcde.enums.auditLog.AuditAction;
+import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.enums.lot_image.LotImageStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.LotImageMapper;
@@ -43,12 +46,20 @@ public class LotImageService {
     private final LotService lotService;
     private final LotImageQuestionService lotImageQuestionService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final AuditLogService auditLogService;
 
-    LotImageService(LotImageRepository lotImageRepository, @Lazy LotService lotService, LotImageQuestionService lotImageQuestionService, AuthenticatedUserProvider authenticatedUserProvider) {
+    LotImageService(
+        LotImageRepository lotImageRepository,
+        @Lazy LotService lotService,
+        LotImageQuestionService lotImageQuestionService,
+        AuthenticatedUserProvider authenticatedUserProvider,
+        AuditLogService auditLogService
+    ) {
         this.lotImageRepository = lotImageRepository;
         this.lotService = lotService;
         this.lotImageQuestionService = lotImageQuestionService;
         this.authenticatedUserProvider = authenticatedUserProvider;
+        this.auditLogService = auditLogService;
     }
 
     private String getImageUrl(Long lotId, String key) {
@@ -131,7 +142,13 @@ public class LotImageService {
 
         LotImage lotImage = this.getById(id);
         lotImage.setStatus(LotImageStatus.INACTIVE);
-        this.lotImageRepository.save(lotImage);
+        LotImage updated = this.lotImageRepository.save(lotImage);
+
+        String details = String.format(
+                "Gabarito com ID: %s teve o status alterado para INACTIVE (exclusão lógica).", updated.getId()
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DELETE, AuditProgram.LOT_IMAGE, details);
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
@@ -216,7 +233,16 @@ public class LotImageService {
             this.lotImageQuestionService.create(questionCreateDto);
         });
 
-        return this.getByIdDto(lotImage.getId());
+        LotImageResponseDto responseDto = this.getByIdDto(lotImage.getId());
+
+        String details = String.format(
+            "Gabarito pertencente ao lote com ID: %s processado com sucesso | Dados do gabarito processado %s",
+            responseDto.getLotId(), responseDto.toString()
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.PROCESSED, AuditProgram.LOT_IMAGE, details);
+        this.auditLogService.create(logDto);
+
+        return responseDto;
     }
 
     public List<LotImage> getAllImagesLot(Long lotId) {
@@ -234,13 +260,31 @@ public class LotImageService {
         Lot lot = this.lotService.getLotById(lotImage.getLotId());
         if(Objects.equals(lot.getStatus().toString(), "COMPLETED")) throw new RuntimeException("O lote já está concluido portanto não é possível alterar suas questões");
 
+        StringBuilder questionsUpdated = new StringBuilder();
+
         dto.forEach((question) -> {
             LotImageQuestionUpdateDto updateDto = new LotImageQuestionUpdateDto(question.getAlternative());
-            this.lotImageQuestionService.update(question.getLotImageQuestionId(), updateDto);
+            LotImageQuestion saved = this.lotImageQuestionService.update(question.getLotImageQuestionId(), updateDto);
+
+            questionsUpdated.append(String.format("{questão=%s, alternativa=%s}, ",
+                    saved.getNumber(),
+                    question.getAlternative()
+            ));
         });
 
         lotImage.setHaveModification(true);
         this.lotImageRepository.save(lotImage);
+
+        // Remove a última vírgula e espaço, se necessário
+        String updatedStr = questionsUpdated.toString().replaceAll(", $", "");
+
+        String details = String.format(
+            "Questões do gabarito com ID: '%s' atualizadas manualmente | Questões atualizadas: %s",
+            lotImage.getId(), updatedStr
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.LOT_IMAGE, details);
+        this.auditLogService.create(logDto);
     }
 
     public List<LotImageQuestionResponseDto> getAllQuestionsLotImage(Long lotImageId) {

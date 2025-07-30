@@ -1,9 +1,13 @@
 package com.lcsz.abcde.services;
 
+import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
+import com.lcsz.abcde.dtos.clients.ClientResponseDto;
 import com.lcsz.abcde.dtos.lot.LotCreateDto;
 import com.lcsz.abcde.dtos.lot.LotResponseDto;
 import com.lcsz.abcde.dtos.lot.LotUpdateDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
+import com.lcsz.abcde.enums.auditLog.AuditAction;
+import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.enums.lot.LotStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
@@ -30,12 +34,19 @@ public class LotService {
     private final LotImageService lotImageService;
     private final ClientService clientService;
     private final ClientUserService clientUserService;
+    private final AuditLogService auditLogService;
 
-    LotService(LotRepository lotRepository, LotImageService lotImageService, ClientService clientService, ClientUserService clientUserService) {
+    LotService(LotRepository lotRepository, LotImageService lotImageService, ClientService clientService, ClientUserService clientUserService, AuditLogService auditLogService) {
         this.lotRepository = lotRepository;
         this.lotImageService = lotImageService;
         this.clientService = clientService;
         this.clientUserService = clientUserService;
+        this.auditLogService = auditLogService;
+    }
+
+    public String formatLotForLog(LotResponseDto dto) {
+        return String.format("{id='%s', nome='%s'}",
+                dto.getId(), dto.getName());
     }
 
     @Transactional(readOnly = false)
@@ -63,6 +74,14 @@ public class LotService {
         LotResponseDto responseDto = LotMapper.toDto(saved);
         responseDto.setUserName(userName);
         responseDto.setNumberImages(0);
+
+        // Log
+        String details = String.format(
+                "Novo lote cadastrado no sistema | Dados do lote cadastrado: %s",
+                this.formatLotForLog(responseDto)
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.CREATE, AuditProgram.LOT, details);
+        this.auditLogService.create(logDto);
 
         return responseDto;
     }
@@ -144,14 +163,36 @@ public class LotService {
         if(dto.getName() != null) lot.setName(dto.getName());
         if(dto.getStatus() != null) lot.setStatus(dto.getStatus());
 
-        this.lotRepository.save(lot);
+        Lot updated = this.lotRepository.save(lot);
+
+        // Log
+        String details;
+        if(dto.getStatus() != null && dto.getStatus() == LotStatus.COMPLETED) {
+            details = String.format(
+                    "Lote com ID: %s finalizado pelo usuário",
+                    updated.getId()
+            );
+        }else {
+            details = String.format(
+                "Lote atualizado com ID: %s | Novos dados -> Nome: %s | Status: %s",
+                updated.getId(), updated.getName(), updated.getStatus()
+            );
+        }
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.LOT, details);
+        this.auditLogService.create(logDto);
     }
 
     @Transactional(readOnly = false)
     public void delete(Long lotId) {
         Lot lot = this.getLotById(lotId);
         lot.setStatus(LotStatus.DELETED);
-        this.lotRepository.save(lot);
+        Lot updated = this.lotRepository.save(lot);
+
+        String details = String.format(
+            "Lote com ID: %s teve o status alterado para DELETED (exclusão lógica).", updated.getId()
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DELETE, AuditProgram.LOT, details);
+        this.auditLogService.create(logDto);
     }
 
     public byte[] generateTxt(Long lotId) {

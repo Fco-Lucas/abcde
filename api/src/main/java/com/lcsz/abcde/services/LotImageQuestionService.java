@@ -62,10 +62,10 @@ public class LotImageQuestionService {
     }
 
     @Transactional(readOnly = false)
-    public void update(Long id, LotImageQuestionUpdateDto dto) {
+    public LotImageQuestion update(Long id, LotImageQuestionUpdateDto dto) {
         LotImageQuestion question = this.getById(id);
         if(dto.getAlternative() != null) question.setAlternative(dto.getAlternative());
-        this.lotImageQuestionRepository.save(question);
+        return this.lotImageQuestionRepository.save(question);
     }
 
     @Transactional(readOnly = false)

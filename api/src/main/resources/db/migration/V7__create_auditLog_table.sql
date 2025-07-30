@@ -1,0 +1,8 @@
+CREATE TABLE auditlog (
+    id BIGSERIAL PRIMARY KEY,
+    action VARCHAR(100) NOT NULL,
+    user_id UUID NOT NULL,
+    program VARCHAR(255) NOT NULL,
+    details TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
