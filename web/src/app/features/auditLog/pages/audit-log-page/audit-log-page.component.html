@@ -1,0 +1,15 @@
+<div class="max-w-screen-xl mx-auto px-4 md:px-8 py-20">
+  <div class="mb-3">
+    <app-audit-log-filters
+      (submitForm)="onFilterSubmit($event)"
+    ></app-audit-log-filters>
+  </div>
+  
+  <mat-card>
+    <mat-card-content>
+      <app-audit-log-list
+        [filters]="this.currentFilters()"
+      ></app-audit-log-list>
+    </mat-card-content>
+  </mat-card>
+</div>

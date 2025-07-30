@@ -28,6 +28,7 @@ export class AppLayoutComponent {
       { label: 'Clientes', link: '/app/clients', roles: ['COMPUTEX'] },
       { label: 'Meus Usuários', link: `/app/clients/${id}/users`, roles: ['CLIENT'] },
       { label: 'Meu Perfil', link: '/app/profile', roles: ['COMPUTEX', 'CLIENT', 'CLIENT_USER'] },
+      { label: 'Auditoria', link: '/app/auditLog', roles: ['COMPUTEX'] },
     ];
     
     return allItems.filter(item => item.roles.includes(role));

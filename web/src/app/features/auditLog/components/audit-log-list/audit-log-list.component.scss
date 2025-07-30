@@ -1,0 +1,16 @@
+/* Estilos gerais para células de texto para quebra de linha */
+.table-cell-text {
+  white-space: normal !important; // Permite que o texto quebre a linha
+  word-wrap: break-word !important; // Garante que palavras longas quebrem
+  overflow-wrap: break-word !important; // Outra propriedade para quebra de palavra
+  text-align: left !important; // Alinha o texto à esquerda
+  vertical-align: center !important; // Alinha o conteúdo no topo da célula
+}
+
+/* Estilos específicos para a coluna de detalhes (se precisar de uma altura máxima) */
+.table-cell-details {
+  white-space: nowrap !important; // Permite que o texto quebre a linha
+  word-wrap: nowrap !important; // Garante que palavras longas quebrem
+  text-align: left !important; // Alinha o texto à esquerda
+  vertical-align: center !important; // Alinha o conteúdo no topo da célula
+}
