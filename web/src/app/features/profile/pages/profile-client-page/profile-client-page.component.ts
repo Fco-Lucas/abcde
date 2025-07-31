@@ -13,6 +13,10 @@ import { DialogUpdateClientInfoComponent, type DataDialogUpdateClientInfoInterfa
 import { DialogUpdateClientPasswordComponent, type DataDialogUpdateClientPasswordInterface } from '../../components/dialog-update-client-password/dialog-update-client-password.component';
 import { NgxMaskPipe } from 'ngx-mask';
 
+interface ProfileClientPageState {
+
+}
+
 @Component({
   selector: 'app-profile-page',
   imports: [

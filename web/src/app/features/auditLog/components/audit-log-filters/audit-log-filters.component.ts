@@ -56,10 +56,12 @@ export class AuditLogFiltersComponent implements AfterViewInit {
 
   @ViewChild('flatpickrInput') flatpickrInput!: ElementRef<HTMLInputElement>;
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
     const startOfToday = moment().startOf('day').toDate();
     const endOfToday = moment().endOf('day').toDate();
 
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     flatpickr(this.flatpickrInput.nativeElement, {
       enableTime: true,
       time_24hr: true,
@@ -69,7 +71,6 @@ export class AuditLogFiltersComponent implements AfterViewInit {
       altInput: true,
       altFormat: 'd/m/Y H:i',
       defaultDate: [startOfToday, endOfToday],
-      // Add onChange event to update the form control
       onChange: (selectedDates, dateStr, instance) => {
         if (selectedDates.length === 2) {
           const startDate = moment(selectedDates[0]).format("YYYY-MM-DDTHH:mm:ss");
@@ -79,11 +80,6 @@ export class AuditLogFiltersComponent implements AfterViewInit {
           this.filterForm.get('dateRange')?.setValue(null);
         }
       },
-    });
-
-    this.filterForm.get('dateRange')?.setValue({
-      startDate: moment(startOfToday).format("YYYY-MM-DDTHH:mm:ss"),
-      endDate: moment(endOfToday).format("YYYY-MM-DDTHH:mm:ss"),
     });
   }
 

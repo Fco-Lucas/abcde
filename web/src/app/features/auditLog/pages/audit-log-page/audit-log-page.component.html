@@ -1,15 +1,30 @@
 <div class="max-w-screen-xl mx-auto px-4 md:px-8 py-20">
+  <h2 class="text-2xl font-semibold mb-3">Auditoria:</h2>
   <div class="mb-3">
     <app-audit-log-filters
       (submitForm)="onFilterSubmit($event)"
     ></app-audit-log-filters>
   </div>
   
-  <mat-card>
+  <mat-card *ngIf="!error()">
     <mat-card-content>
+      <div *ngIf="isLoading()" class="flex justify-center items-center p-16">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+
       <app-audit-log-list
-        [filters]="this.currentFilters()"
+        *ngIf="!isLoading() && !error()"
+        [data]="data()"
+        [totalElements]="totalElements()"
+        [pageSize]="pagination().pageSize"
+        [pageIndex]="pagination().pageIndex"
+        (pageChange)="onPageChange($event)"
       ></app-audit-log-list>
+
     </mat-card-content>
   </mat-card>
+
+  <div *ngIf="error()" class="flex flex-col items-center p-16">
+    <app-ui-error [message]="error()"></app-ui-error>
+  </div>
 </div>

@@ -1,0 +1,13 @@
+<ng-container *ngIf="message">
+  <div role="alert" class="flex flex-col items-center justify-center gap-4 p-6 text-center">
+    <mat-icon aria-hidden="true" class="!h-12 !w-12 text-[3rem] text-red-500 dark:text-red-600">error_outline</mat-icon>
+    <div class="flex flex-col gap-1">
+      <h3 *ngIf="title" class="text-lg font-semibold text-red-800 dark:text-red-300">
+        {{ title }}
+      </h3>
+      <p class="text-sm text-red-700 dark:text-red-400">
+        {{ message }}
+      </p>
+    </div>
+  </div>
+</ng-container>
