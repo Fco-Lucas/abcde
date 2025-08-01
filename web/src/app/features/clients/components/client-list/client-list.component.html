@@ -1,13 +1,9 @@
-<!-- Container principal com controle de estado de carregamento -->
 <div class="mat-elevation-z8 rounded-lg overflow-hidden">
-  
-  <!-- Spinner de carregamento -->
-  <div *ngIf="isLoading()" class="flex justify-center items-center p-16">
-    <mat-spinner diameter="50"></mat-spinner>
-  </div>
-
-  <!-- Tabela (só é exibida quando o carregamento termina) -->
-  <div [hidden]="isLoading()">
+  @if(isLoading) {
+    <div *ngIf="this.isLoading" class="flex justify-center items-center p-16">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  } @else {
     <div class="overflow-x-auto">
       <table mat-table [dataSource]="dataSource">
 
@@ -38,10 +34,10 @@
             </button>
             <mat-menu #afterMenu="matMenu" xPosition="after">
               <button mat-menu-item [routerLink]="['/app', 'clients', client.id, 'users']" aria-label="Ver usuários do cliente">Usuários</button>
-              @if (client.status === "ACTIVE" && client.id !== clientId()) {
-                <button mat-menu-item (click)="handleOpenUpdateClientDialog(client)" aria-label="Editar cliente">Atualizar</button>
-                <button mat-menu-item (click)="deleteClient(client)" aria-label="Desativar cliente">Desativar</button>
-                <button mat-menu-item (click)="restorePassword(client)" aria-label="Restaurar senha do cliente">Restaurar senha</button>
+              @if (client.status === "ACTIVE" && client.id !== authenticatedClientId()) {
+                <button mat-menu-item (click)="updateClient.emit(client)" aria-label="Editar cliente">Atualizar</button>
+                <button mat-menu-item (click)="deleteClient.emit(client)" aria-label="Desativar cliente">Desativar</button>
+                <button mat-menu-item (click)="restorePassword.emit(client)" aria-label="Restaurar senha do cliente">Restaurar senha</button>
               }
             </mat-menu>
           </td>
@@ -61,7 +57,7 @@
 
     <!-- Paginador -->
     <mat-paginator 
-      (page)="handlePageEvent($event)"
+      (page)="pageChange.emit($event)"
       [length]="totalElements"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
@@ -69,5 +65,5 @@
       showFirstLastButtons
       aria-label="Selecione a página de clientes">
     </mat-paginator>
-  </div>
+  }
 </div>
