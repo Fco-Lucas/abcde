@@ -1,47 +1,50 @@
-@if (hasLoadError()) {
+<div class="max-w-screen-xl mx-auto px-4 md:px-8 py-20">
 
-  <mat-card>
-    <mat-card-content class="flex flex-col items-center justify-center text-center text-red-700">
-      <mat-icon class="!w-[40px] !h-[40px] text-[40px] mb-1">error_outline</mat-icon>
-      <h2 class="text-2xl font-semibold mb-2">Ocorreu um Erro</h2>
-      <p class="mb-6">Não foi possível carregar as informações dos clientes.</p>
-    </mat-card-content>
-  </mat-card>
+  @switch (viewState()) {
+    @case('loading') {
+      <div class="flex justify-center items-center p-16">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    }
+    @case ('error') {
+      <app-ui-error [message]="error()" />
+    }
+    @default {
+      <ng-container *ngIf="client() as client">
+        <h2 class="text-2xl font-semibold mb-1">Usuários:</h2>
+        <h3 class="text-1xl mb-3">Cliente: {{ client.name }}</h3>
 
-} @else if(clientId && permissions.length > 0) {
-  <div class="max-w-screen-xl mx-auto px-4 md:px-8 py-20">
-    <h2 class="text-2xl font-semibold mb-1">Usuários:</h2>
-    <h3 class="text-1xl mb-3">Cliente: {{ clientName }}</h3>
+        <div class="flex flex-col md:flex-row items-center gap-3 mb-3">
+          <app-client-users-filters 
+            class="w-full md:flex-1"
+            (submitForm)="onFilterSubmit($event)"
+            [permissions]="permissions()"
+          ></app-client-users-filters>
 
-    <div class="flex flex-col md:flex-row items-center gap-3 mb-3">
-      <app-client-users-filters 
-        class="w-full md:flex-1"
-        (submitForm)="onFilterSubmit($event)"
-        [permissions]="permissions"
-      ></app-client-users-filters>
+          <button matButton="filled" class="w-full md:w-auto" (click)="openCreateClientUserDialog(null)">
+            <mat-icon>add</mat-icon>
+            Novo Usuário
+          </button>
+        </div>
 
-      <button matButton="filled" class="w-full md:w-auto" (click)="openCreateClientUserDialog(null)">
-        <mat-icon>add</mat-icon>
-        Novo Usuário
-      </button>
-    </div>
+        <mat-card>
+          <mat-card-content>
+              <app-client-users-list
+                [clientUsers]="clientUsers()"
+                [isLoading]="isLoading()"
+                [totalElements]="totalElements()"
+                [pageSize]="pagination().pageSize"
+                [pageIndex]="pagination().pageIndex"
+                (pageChange)="onPageChange($event)"
+                (updateClientUser)="openUpdateClientUserDialog($event)"
+                (deleteClientUser)="deleteClientUser($event)"
+                (restorePassword)="restorePassword($event)"
+              >
+              </app-client-users-list>
+          </mat-card-content>
+        </mat-card>
+      </ng-container>
+    }
+  }
 
-    <mat-card>
-      <mat-card-content>
-          <app-client-users-list
-            #clientUsersList
-            [clientId]="clientId"
-            [clientName]="clientName"
-            [permissions]="permissions"
-            [filters]="currentFilters()"
-            (loadStatusChanged)="onLoadStatusChanged($event)">
-          </app-client-users-list>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-} @else {
-  <div class="flex justify-center items-center h-dvh">
-    <mat-spinner></mat-spinner>
-  </div>
-}
+</div>

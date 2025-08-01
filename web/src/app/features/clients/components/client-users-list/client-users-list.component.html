@@ -1,13 +1,9 @@
-<!-- Container principal com controle de estado de carregamento -->
 <div class="mat-elevation-z8 rounded-lg overflow-hidden">
-  
-  <!-- Spinner de carregamento -->
-  <div *ngIf="isLoading()" class="flex justify-center items-center p-16">
-    <mat-spinner diameter="50"></mat-spinner>
-  </div>
-
-  <!-- Tabela (só é exibida quando o carregamento termina) -->
-  <div [hidden]="isLoading()">
+  @if(isLoading) {
+    <div class="flex justify-center items-center p-16">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }@else {
     <div class="overflow-x-auto">
       <table mat-table [dataSource]="dataSource">
 
@@ -51,9 +47,9 @@
                 Ações
               </button>
               <mat-menu #afterMenu="matMenu" xPosition="after">
-                <button mat-menu-item aria-label="Editar cliente" (click)="openUpdateClientUserDialog(clientUser)">Atualizar</button>
-                <button mat-menu-item aria-label="Desativar cliente" (click)="deleteClientUser(clientUser)">Desativar</button>
-                <button mat-menu-item aria-label="Restaurar senha do cliente" (click)="restorePassword(clientUser)">Restaurar senha</button>
+                <button mat-menu-item aria-label="Editar cliente" (click)="updateClientUser.emit(clientUser)">Atualizar</button>
+                <button mat-menu-item aria-label="Desativar cliente" (click)="deleteClientUser.emit(clientUser)">Desativar</button>
+                <button mat-menu-item aria-label="Restaurar senha do cliente" (click)="restorePassword.emit(clientUser)">Restaurar senha</button>
               </mat-menu>
             }
           </td>
@@ -72,15 +68,14 @@
 
       <!-- Paginador -->
       <mat-paginator 
-        (page)="handlePageEvent($event)"
+        (page)="pageChange.emit($event)"
         [length]="totalElements"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
         [pageSizeOptions]="[5, 10, 20]" 
         showFirstLastButtons
-        aria-label="Selecione a página de clientes">
+        aria-label="Selecione a página dos usuários do cliente">
       </mat-paginator>
     </div>
-  </div>
- 
+  }
 </div>

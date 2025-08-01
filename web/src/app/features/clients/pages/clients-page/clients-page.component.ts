@@ -17,13 +17,20 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { DialogUpdateClientComponent, DialogUpdateClientData, UpdateClientFormValues } from '../../components/dialog-update-client/dialog-update-client.component';
-import { finalize } from 'rxjs';
+import { catchError, finalize, of, switchMap, tap } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 interface ClientsPageState {
   clients: Client[];
   totalElements: number;
   loading: boolean;
   error: string | null;
+}
+
+interface ClientQuery {
+  filters: Partial<ClientFiltersFormValues>;
+  pagination: PageEvent;
+  reload: number;
 }
 
 @Component({
@@ -46,9 +53,11 @@ export class ClientsPageComponent {
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
 
-  public filters = signal<Partial<ClientFiltersFormValues>>({});
-  public pagination = signal<PageEvent>({ pageIndex: 0, pageSize: 10, length: 0 });
-  public reloadTrigger = signal(0);
+  private query = signal<ClientQuery>({
+    filters: {},
+    pagination: { pageIndex: 0, pageSize: 10, length: 0 },
+    reload: 0,
+  });
 
   private state = signal<ClientsPageState>({
     clients: [],
@@ -57,55 +66,67 @@ export class ClientsPageComponent {
     error: null,
   });
 
-  public clients = computed(() => this.state().clients);
-  public totalElements = computed(() => this.state().totalElements);
-  public isLoading = computed(() => this.state().loading);
-  public error = computed(() => this.state().error);
+  // Signals COMPUTADOS públicos e `readonly` para a View
+  public readonly clients = computed(() => this.state().clients);
+  public readonly totalElements = computed(() => this.state().totalElements);
+  public readonly isLoading = computed(() => this.state().loading);
+  public readonly error = computed(() => this.state().error);
+  public readonly pagination = computed(() => this.query().pagination);
 
-  public viewState = computed<'loading' | 'error' | 'success'>(() => {
-    if (this.state().loading && this.clients().length === 0) return 'loading';
-    if (this.state().error) return 'error';
+  public readonly viewState = computed<'loading' | 'error' | 'success'>(() => {
+    if (this.isLoading() && this.clients().length === 0) return 'loading';
+    if (this.error()) return 'error';
     return 'success';
   });
 
   constructor() {
-    // Quando os filtros, paginação ou reloadTrigger mudarem, ele chamará a lista de clientes passando-os
-    effect(() => {
-      const filters = this.filters();
-      const page = this.pagination();
-      this.reloadTrigger();
-
-      this.loadClientsPage(page, filters);
-    });
-  }
-
-  loadClientsPage(page: PageEvent, filters: Partial<ClientFiltersFormValues>): void {
-    this.state.update(s => ({ ...s, loading: true, error: null }));
-    const statusFilter = filters.status === "ALL" ? "" : filters.status as ClientStatus;
-    this.clientService.getAllClientsPageable(page.pageIndex, page.pageSize, filters.cnpj, statusFilter)
-      .subscribe({
-        next: (response) => this.state.set({
+    toObservable(this.query).pipe(
+      tap(() => this.state.update(s => ({ ...s, loading: true, error: null }))),
+      switchMap(currentQuery => {
+        const statusFilter = currentQuery.filters.status === "ALL" ? "" : currentQuery.filters.status as ClientStatus;
+        return this.clientService.getAllClientsPageable(
+          currentQuery.pagination.pageIndex,
+          currentQuery.pagination.pageSize,
+          currentQuery.filters.cnpj,
+          statusFilter
+        ).pipe(
+          catchError(err => {
+            console.error("Erro ao buscar clientes:", err);
+            this.state.update(s => ({
+              ...s,
+              loading: false,
+              error: "Não foi possível carregar os clientes. Tente novamente.",
+            }));
+            return of(null); // Retorna um Observable seguro para o fluxo não quebrar
+          })
+        );
+      })
+    ).subscribe(response => {
+      if (response) {
+        this.state.set({
           clients: response.content,
           totalElements: response.totalElements,
           loading: false,
           error: null,
-        }),
-        error: (err) => this.state.set({
-          clients: [],
-          totalElements: 0,
-          loading: false,
-          error: "Não foi possível carregar os clientes. Tente novamente.",
-        }),
-      });
+        });
+      }
+    });
   }
 
   onFilterSubmit(filters: ClientFiltersFormValues): void {
-    this.pagination.update(p => ({ ...p, pageIndex: 0 })); // Reseta a página
-    this.filters.set(filters);
+    this.query.update(q => ({
+      ...q,
+      filters: filters,
+      pagination: { ...q.pagination, pageIndex: 0 }
+    }));
   }
 
   onPageChange(event: PageEvent): void {
-    this.pagination.set(event);
+    this.query.update(q => ({ ...q, pagination: event }));
+  }
+
+  forceReload(): void {
+    this.query.update(q => ({ ...q, reload: q.reload + 1 }));
   }
 
   openCreateClientDialog(): void {
@@ -115,7 +136,7 @@ export class ClientsPageComponent {
 
     // 2. Escuta o evento de fechamento
     dialogRef.afterClosed().subscribe(result => {
-      if (result) this.reloadTrigger.update(v => v + 1);
+      if (result) this.forceReload();
     });
   }
 
@@ -139,7 +160,7 @@ export class ClientsPageComponent {
 
     // Evento de escuta ao fechar a modal
     dialogRef.afterClosed().subscribe(result => {
-      if (result) this.reloadTrigger.update(v => v + 1);
+      if (result) this.forceReload();
     });
   }
 
@@ -160,7 +181,7 @@ export class ClientsPageComponent {
   proceedWithDeletion(clientId: string): void {
     this.clientService.deleteClient(clientId).pipe(
       finalize(() => {
-        this.reloadTrigger.update(v => v + 1);
+        this.forceReload();
       })
     ).subscribe({
       next: (_) => this.notification.showSuccess("Cliente desativado com sucesso!"),
