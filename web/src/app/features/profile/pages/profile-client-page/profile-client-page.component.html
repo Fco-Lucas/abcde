@@ -1,44 +1,48 @@
 <div class="max-w-screen-xl mx-auto px-4 md:px-8 py-20">
-  <ng-container [ngSwitch]="true">
-    <div *ngSwitchCase="isLoading()" class="flex justify-center items-center p-16">
-      <mat-spinner diameter="50"></mat-spinner>
-    </div>
+  <h2 class="text-2xl font-semibold mb-3">Meu Perfil:</h2>
 
-    <app-ui-error *ngSwitchCase="!!error()" [message]="error()"></app-ui-error>
-    
-    <ng-container *ngSwitchDefault>
-      <ng-container *ngIf="client() as client">
-        <h2 class="text-2xl font-semibold mb-3">Meu Perfil:</h2>
+  @switch (viewState()) {
+    @case ('loading') {
+      <div class="flex justify-center items-center p-16">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    }
+    @case ('error') {
+      <app-ui-error [message]="error()" (retry)="forceReload()" />
+    }
+    @default {
+      <!-- Garante que 'client' não é nulo dentro deste bloco -->
+      @if (client(); as client) {
         <mat-card>
           <mat-card-content>
             <div class="flex justify-between items-center gap-1 mb-5">
               <div class="flex flex-col">
                 <span class="text-xl">{{ client.name }}</span>
-                <span class="text-lg text-gray-600">Cargo: {{ getClientRole() }}</span>
+                <span class="text-lg text-gray-600">Cargo: {{ clientRole() }}</span>
               </div>
-              <button mat-raised-button (click)="openDialogUpdateClientInfo()">Atualizar informações</button>
+              <button matButton="filled" (click)="openDialogUpdateClientInfo()">Atualizar informações</button>
             </div>
             <form class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
               <div class="w-full">
-                <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="w-full" appearance="outline">
                   <mat-label>Nome</mat-label>
-                  <input matInput type="text" disabled [value]="client.name" />
+                  <input matInput disabled [value]="client.name" />
                 </mat-form-field>
               </div>
               <div class="w-full">
-                <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field class="w-full" appearance="outline">
                   <mat-label>CNPJ</mat-label>
-                  <input matInput type="text" [value]="client.cnpj | mask: '00.000.000/0000-00'" placeholder="00.000.000/0000-00" disabled />
+                  <input matInput disabled [value]="client.cnpj | mask: '00.000.000/0000-00'" />
                 </mat-form-field>
               </div>
               <div class="w-full">
                 <h3 class="text-2xl mb-1">Senha</h3>
-                <button mat-raised-button type="button" (click)="openDialogUpdateClientPassword()">Alterar senha de acesso</button>
+                <button matButton="filled" type="button" (click)="openDialogUpdateClientPassword()">Alterar senha de acesso</button>
               </div>
             </form>
           </mat-card-content>
         </mat-card>
-      </ng-container>
-    </ng-container>
-  </ng-container>
+      }
+    }
+  }
 </div>

@@ -1,28 +1,41 @@
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal, type OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+
+// ✅ Imports do RxJS e Interop
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { switchMap, tap, catchError, of, combineLatest } from 'rxjs';
+
+// Models, Services, Components
 import { AuthService, type AuthenticatedUserRole } from '../../../../core/services/auth.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ClientService } from '../../../clients/services/client.service';
 import { Client } from '../../../clients/models/client.model';
 import { DialogUpdateClientInfoComponent, type DataDialogUpdateClientInfoInterface } from '../../components/dialog-update-client-info/dialog-update-client-info.component';
 import { DialogUpdateClientPasswordComponent, type DataDialogUpdateClientPasswordInterface } from '../../components/dialog-update-client-password/dialog-update-client-password.component';
-import { NgxMaskPipe } from 'ngx-mask';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
+
+// Material e outros
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { NgxMaskPipe } from 'ngx-mask';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+// ✅ Interfaces claras para o estado e a query
 interface ProfileClientState {
   client: Client | null;
   loading: boolean;
-  error: string | null
+  error: string | null;
+}
+
+interface ProfileQuery {
+  reload: number;
 }
 
 @Component({
   selector: 'app-profile-page',
+  standalone: true,
   imports: [
     MatCardModule,
     MatButtonModule,
@@ -35,88 +48,87 @@ interface ProfileClientState {
   ],
   templateUrl: './profile-client-page.component.html',
 })
-export class ProfileClientPageComponent implements OnInit {
-  readonly dialog = inject(MatDialog);
+export class ProfileClientPageComponent {
   private authService = inject(AuthService);
   private clientService = inject(ClientService);
+  private dialog = inject(MatDialog);
+
+  private query = signal<ProfileQuery>({ reload: 0 });
 
   private state = signal<ProfileClientState>({
-    client: null, 
-    loading: true, // Inicia como true para a carga inicial
+    client: null,
+    loading: true,
     error: null,
   });
-  
-  // Obtem o ID e o cargo do usuário autenticado
-  authUserId = toSignal(this.authService.currentUserId$);
-  authUserRole = toSignal(this.authService.currentUserRole$);
-  
-  public client = computed(() => this.state().client);
-  public isLoading = computed(() => this.state().loading);
-  public error = computed(() => this.state().error);
 
-  ngOnInit(): void {
-    this.loadInitialInfo();
-  }
+  private readonly authUserRole = toSignal(this.authService.currentUserRole$);
+  public readonly client = computed(() => this.state().client);
+  public readonly isLoading = computed(() => this.state().loading);
+  public readonly error = computed(() => this.state().error);
 
-  loadInitialInfo(): void {
-    this.state.update(s => ({ client: null, loading: true, error: null }));
+  public readonly viewState = computed<'loading' | 'error' | 'success'>(() => {
+    if (this.isLoading()) return 'loading';
+    if (this.error()) return 'error';
+    return 'success';
+  });
 
-    const authUserId = this.authUserId();
-    if(!authUserId) {
-      console.error(`ID do usuário autenticado não encontrado`);
-      this.state.update(s => ({ ...s, error: "Ocorreu um erro, tente novamente mais tarde" }));
-      return;
-    }
+  public readonly clientRole = computed(() => {
+    const role = this.authUserRole();
+    if (role === "COMPUTEX") return "COMPUTEX";
+    if (role === "CLIENT") return "Cliente";
+    if (role === "CLIENT_USER") return "Usuário";
+    return "";
+  });
 
-    this.clientService.getClientById(authUserId).subscribe({
-      next: (data) => {
-        this.state.update(s => ({ client: data, loading: false, error: null}));
-      },
-      error: (err) => {
-        console.error(`Erro ao buscar informações do usuário: ${err.message}`);
-        this.state.update(s => ({ client: null, loading: false, error: "Ocorreu um erro ao buscar as informações do seu usuário, tente novamente mais tarde" }));
+  constructor() {
+    const userId$ = toObservable(toSignal(this.authService.currentUserId$));
+    const query$ = toObservable(this.query);
+
+    combineLatest([userId$, query$]).pipe(
+      tap(() => this.state.update(s => ({ ...s, loading: true, error: null }))),
+      switchMap(([userId, _query]) => {
+        if (!userId) {
+          throw new Error("ID do usuário autenticado não encontrado.");
+        }
+        return this.clientService.getClientById(userId);
+      }),
+      catchError(err => {
+        console.error("Erro ao carregar perfil:", err);
+        const errorMessage = err.message || "Não foi possível carregar seu perfil.";
+        this.state.update(s => ({ ...s, loading: false, error: errorMessage }));
+        return of(null); // Para o fluxo não quebrar
+      })
+    ).subscribe(client => {
+      if (client) {
+        this.state.set({
+          client: client,
+          loading: false,
+          error: null,
+        });
       }
     });
   }
 
-  openDialogUpdateClientInfo() {
-    const client = this.client();
-    if(!client) return;
-
-    const dialogData: DataDialogUpdateClientInfoInterface = {
-      client: client
-    };
-
-    const dialogRef = this.dialog.open(DialogUpdateClientInfoComponent, {
-      width: '500px',
-      data: dialogData,
-    });
-
-    dialogRef.afterClosed().subscribe(result => { 
-      if(result) this.loadInitialInfo();
-    });
+  forceReload(): void {
+    this.query.update(q => ({ ...q, reload: q.reload + 1 }));
   }
 
-  openDialogUpdateClientPassword() {
-    const client = this.client();
-    if(!client) return;
+  openDialogUpdateClientInfo(): void {
+    const currentClient = this.client();
+    if (!currentClient) return;
 
-    const dialogData: DataDialogUpdateClientPasswordInterface = {
-      clientId: client.id
-    };
-
-    this.dialog.open(DialogUpdateClientPasswordComponent, {
-      width: '500px',
-      data: dialogData,
-    });
+    const dialogData: DataDialogUpdateClientInfoInterface = { client: currentClient };
+    this.dialog.open(DialogUpdateClientInfoComponent, { width: '500px', data: dialogData })
+      .afterClosed().subscribe(result => {
+        if (result) this.forceReload();
+      });
   }
 
-  getClientRole(): string {
-    const authUserRole: AuthenticatedUserRole | undefined = this.authUserRole();
+  openDialogUpdateClientPassword(): void {
+    const currentClient = this.client();
+    if (!currentClient) return;
 
-    if(authUserRole === "COMPUTEX") return "COMPUTEX";
-    else if(authUserRole === "CLIENT") return "Cliente";
-    else if(authUserRole === "CLIENT_USER") return "Usuário";
-    else return "";
+    const dialogData: DataDialogUpdateClientPasswordInterface = { clientId: currentClient.id };
+    this.dialog.open(DialogUpdateClientPasswordComponent, { width: '500px', data: dialogData });
   }
 }
