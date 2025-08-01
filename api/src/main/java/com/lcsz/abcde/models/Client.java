@@ -24,6 +24,10 @@ public class Client implements Serializable {
     private String cnpj;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = true, name = "url_to_post")
+    private String urlToPost;
+    @Column(nullable = false, name = "image_active_days")
+    private Integer imageActiveDays;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ClientStatus status = ClientStatus.ACTIVE;
@@ -34,11 +38,13 @@ public class Client implements Serializable {
     public Client() {
     }
 
-    public Client(UUID id, String name, String cnpj, String password, ClientStatus status, LocalDateTime createdAt) {
+    public Client(UUID id, String name, String cnpj, String password, String urlToPost, Integer imageActiveDays, ClientStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.cnpj = cnpj;
         this.password = password;
+        this.urlToPost = urlToPost;
+        this.imageActiveDays = imageActiveDays;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -73,6 +79,22 @@ public class Client implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUrlToPost() {
+        return urlToPost;
+    }
+
+    public void setUrlToPost(String urlToPost) {
+        this.urlToPost = urlToPost;
+    }
+
+    public Integer getImageActiveDays() {
+        return imageActiveDays;
+    }
+
+    public void setImageActiveDays(Integer imageActiveDays) {
+        this.imageActiveDays = imageActiveDays;
     }
 
     public ClientStatus getStatus() {
@@ -110,6 +132,8 @@ public class Client implements Serializable {
                 ", name='" + name + '\'' +
                 ", cnpj='" + cnpj + '\'' +
                 ", password='" + password + '\'' +
+                ", urlToPost='" + urlToPost + '\'' +
+                ", imageActiveDays='" + imageActiveDays + '\'' +
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 '}';

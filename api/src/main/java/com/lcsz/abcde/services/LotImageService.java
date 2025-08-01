@@ -3,6 +3,7 @@ package com.lcsz.abcde.services;
 import com.lcsz.abcde.dtos.ScanImageDadosResponseDto;
 import com.lcsz.abcde.dtos.ScanImageResponseDto;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
+import com.lcsz.abcde.dtos.lot.LotResponseDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageCreateDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageUpdateQuestionDto;
@@ -36,6 +37,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -64,6 +67,10 @@ public class LotImageService {
 
     private String getImageUrl(Long lotId, String key) {
         return "http://localhost:8181/gabaritos/" + lotId.toString() + "/" + key;
+    }
+
+    private String getAbsoluteImagePath(Long lotId, String key) {
+        return "C:/workspace/abcde/api/uploads/gabaritos/" + lotId.toString() + "/" + key;
     }
 
     private String generateRandomKey() {
@@ -97,6 +104,18 @@ public class LotImageService {
         return responseDto;
     }
 
+    private void excludeFile(String imagePath) {
+        try {
+            Path path = Paths.get(imagePath);
+            if (Files.exists(path)) {
+                Files.delete(path);
+                System.out.println("Imagem excluída com sucesso: " + imagePath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao excluir imagem: " + e.getMessage());
+        }
+    }
+
     @Transactional(readOnly = true)
     public Page<LotImageResponseDto> getAllPageable(
             Pageable pageable,
@@ -105,9 +124,29 @@ public class LotImageService {
     ) {
         String filterStudent = (student == null || student.isBlank()) ? null : "%" + student + "%";
         Page<LotImageProjection> lotImages = this.lotImageRepository.findAllPageable(pageable, lotId, filterStudent);
+
+        Integer imageActiveDays = this.lotService.getImageActiveDaysFromLotId(lotId);
+
+        String authUserRole = this.authenticatedUserProvider.getAuthenticatedUserRole();
+        if(authUserRole == null) throw new RuntimeException("Cargo do usuário autenticado não encontrado");
+
         return lotImages.map(lotImage -> {
             LotImage entity = this.getById(lotImage.getId());
             List<LotImageQuestionResponseDto> questions = this.lotImageQuestionService.getAllByImageId(entity.getId());
+
+            LocalDateTime createdAt = entity.getCreatedAt();
+            String pathImage = this.getAbsoluteImagePath(lotId, entity.getKey());
+
+            if (createdAt != null && imageActiveDays != null && !authUserRole.equals("COMPUTEX")) {
+                System.out.println("Entrei no papoco");
+                long daysSinceCreation = ChronoUnit.DAYS.between(createdAt, LocalDateTime.now());
+
+                if (daysSinceCreation >= imageActiveDays) {
+                    System.out.println("Entrei no papoco2");
+                    // Exclui a imagem do diretório
+                    this.excludeFile(pathImage);
+                }
+            }
 
             LotImageResponseDto responseDto = LotImageMapper.toDto(entity);
             responseDto.setUrl(this.getImageUrl(lotImage.getLotId(), lotImage.getKey()));
@@ -149,6 +188,17 @@ public class LotImageService {
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DELETE, AuditProgram.LOT_IMAGE, details);
         this.auditLogService.create(logDto);
+    }
+
+    public String formatLotImageForLog(LotImageResponseDto dto) {
+        StringBuilder questions = new StringBuilder();
+
+        dto.getQuestions().forEach(question -> {
+            questions.append(String.format("{questão=%s, alternativa=%s}", question.getNumber(), question.getAlternative()));
+        });
+
+        return String.format("{id='%s', id_do_Lote='%s', nome_original_da_imagem='%s', matricula='%s', etapa='%s', prova='%s', gabarito='%s', presenca='%s', quantidade_de_questões='%s', questões='%s'}",
+                dto.getId(), dto.getLotId(), dto.getOriginalName(), dto.getMatricula(), dto.getEtapa(), dto.getProva(), dto.getGabarito(), dto.getPresenca(), dto.getQtdQuestoes(), questions);
     }
 
     @Transactional(readOnly = false)
@@ -203,7 +253,7 @@ public class LotImageService {
         Files.copy(file.getInputStream(), path_destiny, StandardCopyOption.REPLACE_EXISTING);
 
         // Envia o arquivo para o PYTHON
-        String pathImage = "C:/workspace/abcde/api/uploads/gabaritos/" + lotId.toString() + "/" + fileName;
+        String pathImage = this.getAbsoluteImagePath(lotId, fileName);
         ScanImageResponseDto response = this.scanImage(pathImage);
         Map<String, String> answers = response.getRespostas();
         ScanImageDadosResponseDto dados = response.getDados();
@@ -236,8 +286,8 @@ public class LotImageService {
         LotImageResponseDto responseDto = this.getByIdDto(lotImage.getId());
 
         String details = String.format(
-            "Gabarito pertencente ao lote com ID: %s processado com sucesso | Dados do gabarito processado %s",
-            responseDto.getLotId(), responseDto.toString()
+            "Gabarito pertencente ao lote com ID: %s processado com sucesso | Dados do gabarito processado: %s",
+            responseDto.getLotId(), this.formatLotImageForLog(responseDto)
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.PROCESSED, AuditProgram.LOT_IMAGE, details);
         this.auditLogService.create(logDto);

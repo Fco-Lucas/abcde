@@ -8,6 +8,7 @@ import com.lcsz.abcde.dtos.lot.LotUpdateDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.enums.auditLog.AuditAction;
 import com.lcsz.abcde.enums.auditLog.AuditProgram;
+import com.lcsz.abcde.enums.client.ClientStatus;
 import com.lcsz.abcde.enums.lot.LotStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
@@ -193,6 +194,13 @@ public class LotService {
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DELETE, AuditProgram.LOT, details);
         this.auditLogService.create(logDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getImageActiveDaysFromLotId(Long lotId) {
+        Lot lot = this.getLotById(lotId);
+        Client client = this.clientService.getByCnpj(lot.getUserCnpj(), ClientStatus.ACTIVE);
+        return client.getImageActiveDays();
     }
 
     public byte[] generateTxt(Long lotId) {

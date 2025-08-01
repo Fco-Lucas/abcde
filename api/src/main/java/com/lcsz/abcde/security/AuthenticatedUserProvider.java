@@ -36,6 +36,12 @@ public class AuthenticatedUserProvider {
             throw new RuntimeException("Usuário não autenticado.");
         }
 
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof JwtUserDetails)) {
+            return null;
+        }
+
         return (JwtUserDetails) authentication.getPrincipal();
     }
 
@@ -45,6 +51,11 @@ public class AuthenticatedUserProvider {
 
     public String getLogin() {
         return getAuthenticatedUser().getUsername();
+    }
+
+    public String getAuthenticatedUserRole() {
+        JwtUserDetails authUser = this.getAuthenticatedUser();
+        return authUser == null ? null : getAuthenticatedUser().getRole();
     }
 
     public String getAuthenticatedUserName(UUID userId) {

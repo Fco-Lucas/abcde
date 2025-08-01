@@ -15,6 +15,7 @@ import com.lcsz.abcde.mappers.ClientMapper;
 import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.repositorys.ClientRepository;
 import com.lcsz.abcde.repositorys.projection.ClientProjection;
+import com.lcsz.abcde.security.AuthenticatedUserProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,12 +32,14 @@ public class ClientService {
     private final ClientUserService clientUserService;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+    private final AuthenticatedUserProvider provider;
 
-    ClientService(ClientRepository repository, ClientUserService clientUserService, PasswordEncoder passwordEncoder, AuditLogService auditLogService) {
+    ClientService(ClientRepository repository, ClientUserService clientUserService, PasswordEncoder passwordEncoder, AuditLogService auditLogService, AuthenticatedUserProvider provider) {
         this.repository = repository;
         this.clientUserService = clientUserService;
         this.passwordEncoder = passwordEncoder;
         this.auditLogService = auditLogService;
+        this.provider = provider;
     }
 
     public String formatClientForLog(ClientResponseDto dto) {
@@ -60,7 +63,13 @@ public class ClientService {
         client.setName(dto.getName());
         client.setCnpj(dto.getCnpj());
         client.setPassword(passwordEncoder.encode(dto.getPassword()));
+        client.setUrlToPost(dto.getUrlToPost());
         client.setStatus(ClientStatus.ACTIVE);
+
+        // Seta os dias em que a imagem ficará ativa de acordo com o cargo
+        String authUserRole = this.provider.getAuthenticatedUserRole();
+        Integer imageActiveDays = authUserRole != null && authUserRole.equals("COMPUTEX") ? dto.getImageActiveDays() : 30; // 30 dias valor padrão
+        client.setImageActiveDays(imageActiveDays);
 
         Client savedClient = this.repository.save(client);
 
@@ -122,6 +131,11 @@ public class ClientService {
                 throw new EntityExistsException(String.format("Cliente com cnpj '%s' já cadastrado no sistema", dto.getCnpj()));
 
             client.setCnpj(dto.getCnpj());
+        }
+        if(dto.getUrlToPost() != null) client.setUrlToPost(dto.getUrlToPost());
+        if(dto.getImageActiveDays() != null) {
+            String authUserRole = this.provider.getAuthenticatedUserRole();
+            if(authUserRole.equals("COMPUTEX")) client.setImageActiveDays(dto.getImageActiveDays());
         }
 
         Client updated = this.repository.save(client);

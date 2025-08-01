@@ -10,16 +10,20 @@ public class ClientResponseDto {
     private UUID id;
     private String name;
     private String cnpj;
+    private String urlToPost;
+    private Integer imageActiveDays;
     private ClientStatus status;
     private List<ClientUserResponseDto> users;
 
     public ClientResponseDto() {
     }
 
-    public ClientResponseDto(UUID id, String name, String cnpj, ClientStatus status, List<ClientUserResponseDto> users) {
+    public ClientResponseDto(UUID id, String name, String cnpj, String urlToPost, Integer imageActiveDays, ClientStatus status, List<ClientUserResponseDto> users) {
         this.id = id;
         this.name = name;
         this.cnpj = cnpj;
+        this.urlToPost = urlToPost;
+        this.imageActiveDays = imageActiveDays;
         this.status = status;
         this.users = users;
     }
@@ -48,6 +52,22 @@ public class ClientResponseDto {
         this.cnpj = cnpj;
     }
 
+    public String getUrlToPost() {
+        return urlToPost;
+    }
+
+    public void setUrlToPost(String urlToPost) {
+        this.urlToPost = urlToPost;
+    }
+
+    public Integer getImageActiveDays() {
+        return imageActiveDays;
+    }
+
+    public void setImageActiveDays(Integer imageActiveDays) {
+        this.imageActiveDays = imageActiveDays;
+    }
+
     public ClientStatus getStatus() {
         return status;
     }
@@ -70,6 +90,8 @@ public class ClientResponseDto {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", cnpj='" + cnpj + '\'' +
+                ", urlToPost='" + urlToPost + '\'' +
+                ", imageActiveDays='" + imageActiveDays + '\'' +
                 ", status='" + status + '\'' +
                 ", users=" + users +
                 '}';
