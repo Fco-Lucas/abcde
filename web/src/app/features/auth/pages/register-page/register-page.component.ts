@@ -24,7 +24,9 @@ export class RegisterPageComponent {
     const data: CreateClient = {
       name: formValues.name || "",
       cnpj: formValues.cnpj || "",
-      password: formValues.password || ""
+      password: formValues.password || "",
+      urlToPost: "",
+      imageActiveDays: 30
     }
 
     this.clientService.createClient(data).pipe(

@@ -2,27 +2,25 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 
-// ✅ Imports do RxJS e Interop
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { switchMap, tap, catchError, of, combineLatest } from 'rxjs';
 
-// Models, Services, Components
-import { AuthService, type AuthenticatedUserRole } from '../../../../core/services/auth.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ClientService } from '../../../clients/services/client.service';
 import { Client } from '../../../clients/models/client.model';
-import { DialogUpdateClientInfoComponent, type DataDialogUpdateClientInfoInterface } from '../../components/dialog-update-client-info/dialog-update-client-info.component';
-import { DialogUpdateClientPasswordComponent, type DataDialogUpdateClientPasswordInterface } from '../../components/dialog-update-client-password/dialog-update-client-password.component';
+import { DialogUpdateClientInfoComponent, DataDialogUpdateClientInfoInterface } from '../../components/dialog-update-client-info/dialog-update-client-info.component';
+import { DialogUpdateClientPasswordComponent, DataDialogUpdateClientPasswordInterface } from '../../components/dialog-update-client-password/dialog-update-client-password.component';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 
-// Material e outros
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NgxMaskPipe } from 'ngx-mask';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
-// ✅ Interfaces claras para o estado e a query
 interface ProfileClientState {
   client: Client | null;
   loading: boolean;
@@ -44,7 +42,9 @@ interface ProfileQuery {
     CommonModule,
     NgxMaskPipe,
     UiErrorComponent,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './profile-client-page.component.html',
 })

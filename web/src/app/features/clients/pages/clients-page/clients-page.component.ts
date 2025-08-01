@@ -143,7 +143,9 @@ export class ClientsPageComponent {
   onUpdateClient(client: Client) {
     const initialData: UpdateClientFormValues = {
       name: client.name,
-      cnpj: client.cnpj
+      cnpj: client.cnpj,
+      urlToPost: client.urlToPost,
+      imageActiveDays: client.imageActiveDays
     };
     const data: DialogUpdateClientData = {
       clientId: client.id,

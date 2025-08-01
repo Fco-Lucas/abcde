@@ -33,6 +33,20 @@
         }
       </mat-error>
     </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>URL de destino dos dados escaneados</mat-label>
+      <input 
+        matInput
+        type="text"
+        formControlName="urlToPost"
+      />
+      <mat-icon 
+        matIconSuffix
+        class="!cursor-pointer"
+        matTooltip="URL fornecida pelo seu sistema para receber os dados automaticamente após o escaneamento do gabarito."
+      >info</mat-icon>
+    </mat-form-field>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

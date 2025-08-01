@@ -13,10 +13,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgxMaskDirective } from 'ngx-mask';
 import { cnpjValidator } from '../../../../shared/utils/custom-validators';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface DialogUpdateClientInfoFormValues {
   name: string;
   cnpj: string;
+  urlToPost: string;
 }
 
 export interface DataDialogUpdateClientInfoInterface {
@@ -33,7 +36,9 @@ export interface DataDialogUpdateClientInfoInterface {
     MatDialogModule,
     MatProgressSpinnerModule,
     NgxMaskDirective,
-    CommonModule
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './dialog-update-client-info.component.html',
 })
@@ -55,6 +60,7 @@ export class DialogUpdateClientInfoComponent {
     this.updateForm = this.fb.group({
       name: [this.client.name, [Validators.required]],
       cnpj: [this.client.cnpj, [Validators.required, Validators.minLength(18), Validators.maxLength(18)]],
+      urlToPost: [this.client.urlToPost]
     });
 
     this.updateCnpjValidators(this.cnpjControl?.value);
@@ -77,6 +83,7 @@ export class DialogUpdateClientInfoComponent {
 
   get nameControl() { return this.updateForm.get("name"); }
   get cnpjControl() { return this.updateForm.get("cnpj"); }
+  get urlToPostControl() { return this.updateForm.get("urlToPost"); }
 
   onSubmit() {
     this.updateForm.markAllAsTouched;
@@ -92,6 +99,7 @@ export class DialogUpdateClientInfoComponent {
     const data: UpdateClientInterface = {
       name: formValues.name,
       cnpj: formValues.cnpj,
+      urlToPost: formValues.urlToPost
     };
 
     this.clientService.updateClient(this.client.id, data).pipe(

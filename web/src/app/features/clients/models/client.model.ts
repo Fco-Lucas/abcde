@@ -4,6 +4,8 @@ export interface CreateClient {
   name: string;
   cnpj: string;
   password: string;
+  urlToPost: string;
+  imageActiveDays: number;
 }
 
 export enum ClientStatus {
@@ -16,6 +18,8 @@ export interface Client {
   name: string;
   cnpj: string;
   password: string;
+  urlToPost: string;
+  imageActiveDays: number;
   status: ClientStatus;
   users: ClientUserInterface[];
 }
@@ -34,6 +38,8 @@ export interface PageableClientList {
 export interface UpdateClientInterface {
   name?: string,
   cnpj?: string,
+  urlToPost?: string;
+  imageActiveDays?: number;
 }
 
 export interface UpdateClientPasswordInterface {

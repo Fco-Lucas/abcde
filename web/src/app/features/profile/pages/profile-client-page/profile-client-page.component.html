@@ -22,7 +22,7 @@
               </div>
               <button matButton="filled" (click)="openDialogUpdateClientInfo()">Atualizar informações</button>
             </div>
-            <form class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <form class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
               <div class="w-full">
                 <mat-form-field class="w-full" appearance="outline">
                   <mat-label>Nome</mat-label>
@@ -33,6 +33,23 @@
                 <mat-form-field class="w-full" appearance="outline">
                   <mat-label>CNPJ</mat-label>
                   <input matInput disabled [value]="client.cnpj | mask: '00.000.000/0000-00'" />
+                </mat-form-field>
+              </div>
+              <div class="w-full">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>URL de destino dos dados escaneados</mat-label>
+                  <input 
+                    matInput
+                    type="text"
+                    formControlName="urlToPost"
+                    [value]="client.urlToPost"
+                    disabled
+                  />
+                  <mat-icon 
+                    matIconSuffix
+                    class="!cursor-pointer"
+                    matTooltip="URL fornecida pelo seu sistema para receber os dados automaticamente após o escaneamento do gabarito."
+                  >info</mat-icon>
                 </mat-form-field>
               </div>
               <div class="w-full">

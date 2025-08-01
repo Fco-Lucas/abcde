@@ -54,6 +54,35 @@
         }
       </mat-error>
     </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>URL de destino dos dados escaneados</mat-label>
+      <input 
+        matInput
+        type="text"
+        formControlName="urlToPost"
+      />
+      <mat-icon 
+        matIconSuffix
+        class="!cursor-pointer"
+        matTooltip="Informe a URL fornecida pelo seu sistema para receber os dados automaticamente após o escaneamento do gabarito."
+      >info</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Quantidade de dias que os gabaritos ficarão salvos</mat-label>
+      <input 
+        matInput 
+        type="text"
+        formControlName="imageActiveDays" 
+        required
+      >
+      <mat-error *ngIf="imageActiveDaysControl?.invalid && imageActiveDaysControl?.touched">
+        @if (imageActiveDaysControl?.hasError('required')) {
+          A quantidade de dias é obrigatória.
+        }
+      </mat-error>
+    </mat-form-field>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgxMaskDirective } from 'ngx-mask';
 import { cnpjValidator } from '../../../../shared/utils/custom-validators';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -20,6 +21,8 @@ export interface CreateFormValues {
   name: string;
   cnpj: string;
   password: string;
+  urlToPost: string;
+  imageActiveDays: number;
 }
 
 @Component({
@@ -34,7 +37,8 @@ export interface CreateFormValues {
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   templateUrl: './dialog-create-client.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +59,8 @@ export class DialogCreateClientComponent implements OnInit {
     name: ['', [Validators.required]],
     cnpj: ['', [Validators.required, Validators.minLength(18), Validators.maxLength(18)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    urlToPost: ['', []],
+    imageActiveDays: [30, [Validators.required]]
   });
 
   ngOnInit(): void {
@@ -81,6 +87,8 @@ export class DialogCreateClientComponent implements OnInit {
   get nameControl() { return this.createForm.get("name"); }
   get cnpjControl() { return this.createForm.get('cnpj'); }
   get passwordControl() { return this.createForm.get('password'); }
+  get urlToPostControl() { return this.createForm.get('urlToPost'); }
+  get imageActiveDaysControl() { return this.createForm.get('imageActiveDays'); }
 
   hidePassword = signal(true);
   togglePasswordVisibility() {

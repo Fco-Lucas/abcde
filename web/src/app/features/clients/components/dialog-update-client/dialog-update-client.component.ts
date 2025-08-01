@@ -11,10 +11,14 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { ClientService } from '../../services/client.service';
 import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface UpdateClientFormValues {
   name: string;
   cnpj: string;
+  urlToPost: string;
+  imageActiveDays: number;
 }
 
 export interface DialogUpdateClientData {
@@ -32,7 +36,9 @@ export interface DialogUpdateClientData {
     ReactiveFormsModule,
     MatDialogModule,
     NgxMaskDirective,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatIconModule
   ],
   templateUrl: './dialog-update-client.component.html',
 })
@@ -56,6 +62,8 @@ export class DialogUpdateClientComponent implements OnInit {
     this.updateForm = this.fb.group({
       name: [this.initialData.name, [Validators.required]],
       cnpj: [this.initialData.cnpj, [Validators.required, Validators.minLength(18), Validators.maxLength(18)]],
+      urlToPost: [this.initialData.urlToPost, []],
+      imageActiveDays: [this.initialData.imageActiveDays, [Validators.required]]
     });
 
     this.updateCnpjValidators(this.cnpjControl?.value);
@@ -78,6 +86,8 @@ export class DialogUpdateClientComponent implements OnInit {
 
   get nameControl() { return this.updateForm.get("name"); }
   get cnpjControl() { return this.updateForm.get('cnpj'); }
+  get urlToPostControl() { return this.updateForm.get('urlToPost'); }
+  get imageActiveDaysControl() { return this.updateForm.get('imageActiveDays'); }
 
   onSubmit(): void {
     this.updateForm.markAllAsTouched();
