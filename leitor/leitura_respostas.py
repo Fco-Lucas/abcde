@@ -11,10 +11,10 @@ def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath, pathFileToSave)
         x, y, w, h = cv2.boundingRect(contorno)
 
         # Controle de margens
-        margem_esquerda_pct = 0.30
-        margem_direita_pct = 0.21
-        margem_superior_pct = 0.047
-        margem_inferior_pct = 0.045
+        margem_esquerda_pct = 0.18
+        margem_direita_pct = 0.11
+        margem_superior_pct = 0.042
+        margem_inferior_pct = 0.023
 
         area_util_x = x + int(w * margem_esquerda_pct)
         area_util_y = y + int(h * margem_superior_pct)
@@ -31,7 +31,7 @@ def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath, pathFileToSave)
         espaco_x = area_util_w / colunas
         espaco_y = area_util_h / linhas
 
-        fator_raio = 0.35  # Tamanho da bolha em relação à célula
+        fator_raio = 0.40  # Tamanho da bolha em relação à célula
 
         for linha in range(linhas):
             opcoes_marcadas = []
@@ -49,7 +49,7 @@ def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath, pathFileToSave)
                 preto_ratio = np.sum(binarizada == 255) / binarizada.size
 
                 # Se mais de 30% da célula estiver marcada, considera marcada
-                if preto_ratio > 0.3:
+                if preto_ratio > 0.2:
                     opcoes_marcadas.append(coluna)
 
             # Determina a resposta
