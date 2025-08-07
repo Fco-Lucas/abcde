@@ -1,8 +1,7 @@
 <mat-card class="w-full max-w-md p-8 rounded-xl shadow-lg">
-  <mat-card-header class="!flex-col !items-center mb-6">
-    <mat-card-title class="text-3xl font-bold mb-1">
-      Cadastrar empresa
-    </mat-card-title>
+  <mat-card-header class="flex flex-col items-center mb-5 text-center">
+    <h1 class="text-xl font-semibold mb-1">Gabaritos | ABCDE</h1>
+    <h2 class="text-lg">Cadastrar empresa</h2>
   </mat-card-header>
 
   <mat-card-content class="p-6 md:p-8">
@@ -15,11 +14,13 @@
           formControlName="name"
           required
         />
-        <mat-error *ngIf="nameControl?.invalid && nameControl?.touched">
-          @if (nameControl?.hasError('required')) {
-            Nome obrigatório.
-          }
-        </mat-error>
+        @if(nameControl?.invalid && nameControl?.touched) {
+          <mat-error>
+            @if (nameControl?.hasError('required')) {
+              Nome obrigatório.
+            }
+          </mat-error>
+        }
       </mat-form-field>
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>CNPJ</mat-label>
@@ -31,15 +32,17 @@
           mask="00.000.000/0000-00"
           placeholder="00.000.000/0000-00"
         />
-        <mat-error *ngIf="cnpjControl?.invalid && cnpjControl?.touched">
-          @if (cnpjControl?.hasError('required')) {
-            CNPJ obrigatório.
-          } @else if (cnpjControl?.hasError('minlength')) {
-            CNPJ deve ter no mínimo {{ cnpjControl?.errors?.['minlength']?.requiredLength }} caracteres.
-          } @else if (cnpjControl?.hasError('cnpjInvalid')) {
-            CNPJ inválido.
-          }
-        </mat-error>
+        @if(cnpjControl?.invalid && cnpjControl?.touched) {
+          <mat-error>
+            @if (cnpjControl?.hasError('required')) {
+              CNPJ obrigatório.
+            } @else if (cnpjControl?.hasError('minlength')) {
+              CNPJ deve ter no mínimo {{ cnpjControl?.errors?.['minlength']?.requiredLength }} caracteres.
+            } @else if (cnpjControl?.hasError('cnpjInvalid')) {
+              CNPJ inválido.
+            }
+          </mat-error>
+        }
       </mat-form-field>
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Senha</mat-label>
@@ -53,13 +56,15 @@
         <button mat-icon-button type="button" matSuffix (click)="togglePasswordVisibility()">
           <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
-        <mat-error *ngIf="passwordControl?.invalid && passwordControl?.touched">
-          @if (passwordControl?.hasError('required')) {
-            Senha é obrigatória.            
-          } @else if (passwordControl?.hasError('minlength')) {
-            Senha deve ter no mínimo {{ passwordControl?.errors?.['minlength']?.requiredLength }} caracteres.
-          }
-        </mat-error>
+        @if (passwordControl?.invalid && passwordControl?.touched) {
+          <mat-error>
+            @if (passwordControl?.hasError('required')) {
+              Senha é obrigatória.            
+            } @else if (passwordControl?.hasError('minlength')) {
+              Senha deve ter no mínimo {{ passwordControl?.errors?.['minlength']?.requiredLength }} caracteres.
+            }
+          </mat-error>
+        }
       </mat-form-field>
       <div class="flex items-center justify-center">
         <button mat-raised-button color="primary" class="!py-3 !text-base w-full" type="submit" [disabled]="isSubmitButtonDisabled()">
