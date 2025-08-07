@@ -1,20 +1,41 @@
-import { Component, inject, signal, ViewChild, OnInit } from '@angular/core';
+import { Component, inject, signal, ViewChild, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { LotFiltersComponent, LotFiltersFormValues } from '../../components/lot-filters/lot-filters.component';
 import { LotListComponent } from '../../components/lot-list/lot-list.component';
 import { DialogCreateLotComponent, DialogCreateLotData } from '../../components/dialog-create-lot/dialog-create-lot.component';
 import { DialogImageUploadProgressComponent, DialogImageUploadProgressData } from '../../components/dialog-image-upload-progress/dialog-image-upload-progress.component';
-import { AuthService, type AuthenticatedUserRole } from '../../../../core/services/auth.service';
+import { AuthService, AuthenticatedUserRole } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LotInterface } from '../../models/lot.model';
 import { PermissionsService } from '../../../permissions/services/permissions.service';
-import type { PermissionInterface } from '../../../permissions/models/permission.model';
+import { PermissionInterface } from '../../../permissions/models/permission.model';
+import { PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
+import { LotService } from '../../services/lot.service';
+import { catchError, combineLatest, of, shareReplay, switchMap, tap } from 'rxjs';
+import { LotStateService } from '../../services/lot-state.service';
+import { Router } from '@angular/router';
+
+interface HomeState {
+  permissions: PermissionInterface | null;
+  lots: LotInterface[];
+  totalElements: number;
+  loading: boolean;
+  error: string | null;
+}
+
+interface HomeLotsQuery {
+  filters: Partial<LotFiltersFormValues>;
+  pagination: PageEvent;
+  reload: number;
+}
 
 @Component({
   selector: 'app-home-page',
@@ -25,109 +46,145 @@ import type { PermissionInterface } from '../../../permissions/models/permission
     MatCardModule,
     MatIconModule,
     LotFiltersComponent,
-    LotListComponent
+    LotListComponent,
+    MatProgressSpinnerModule,
+    UiErrorComponent
   ],
   templateUrl: './home-page.component.html',
 })
-export class HomePageComponent implements OnInit {
-  // Injeção de dependências
-  readonly dialog = inject(MatDialog);
+export class HomePageComponent {
+  private readonly dialog = inject(MatDialog);
+  private lotService = inject(LotService);
+  private lotStateService = inject(LotStateService);
   private authService = inject(AuthService);
-  private notification = inject(NotificationService); // Injetar para notificações
   private permissionsService = inject(PermissionsService);
+  private notification = inject(NotificationService);
+  private router = inject(Router);
 
-  // Sinais e propriedades
-  userIdSignal = toSignal(this.authService.currentUserId$);
-  userId!: string;
+  private query = signal<HomeLotsQuery>({
+    filters: {},
+    pagination: { pageIndex: 0, pageSize: 10, length: 0 },
+    reload: 0,
+  });
 
-  userRoleSignal = toSignal(this.authService.currentUserRole$);
-  userRole!: AuthenticatedUserRole;
+  private state = signal<HomeState>({
+    permissions: null,
+    lots: [],
+    totalElements: 0,
+    loading: true,
+    error: null,
+  });
 
-  userPermissions!: PermissionInterface;
-  public hasLoadError = signal(false);
-  public currentFilters = signal<Partial<LotFiltersFormValues> | null>(null);
+  public readonly permissions = computed(() => this.state().permissions);
+  public readonly lots = computed(() => this.state().lots);
+  public readonly totalElements = computed(() => this.state().totalElements);
+  public readonly isLoading = computed(() => this.state().loading);
+  public readonly error = computed(() => this.state().error);
+  public readonly pagination = computed(() => this.query().pagination);
 
-  @ViewChild('lotList') private lotListComponent!: LotListComponent;
+  public readonly viewState = computed<'loading' | 'error' | 'success'>(() => {
+    if (this.isLoading() && this.lots().length === 0) return 'loading';
+    if (this.error()) return 'error';
+    return 'success';
+  });
 
-  ngOnInit(): void {
-    const userId = this.userIdSignal();
-    if(!userId) {
-      console.error(`Erro ao encontrar ID do usuário`);
-      return;
-    }
-    this.userId = userId;
+  public readonly userId = toSignal(this.authService.currentUserId$);
+  public readonly userRole = toSignal(this.authService.currentUserRole$);
 
-    const userRole = this.userRoleSignal();
-    if(!userRole) {
-      console.error(`Erro ao encontrar cargo do usuário`);
-      return;
-    }
-    this.userRole = userRole;
+  constructor() {
+    // Stream para dados iniciais (que não mudam com filtros)
+    const initialData$ = this.authService.currentUserId$.pipe(
+      switchMap(userId => {
+        if (!userId) throw new Error("ID do usuário autenticado não encontrado.");
+        return this.permissionsService.getUserPermission(userId);
+      }),
+      // shareReplay garante que este fluxo só executa UMA VEZ.
+      shareReplay({ bufferSize: 1, refCount: true }) 
+    );
 
-    this.permissionsService.getUserPermission(this.userId).subscribe({
-      next: (permissions) => {
-        this.userPermissions = permissions;
-      },
-      error: (err) => {
-        console.error(`Erro ao buscar as permissões do usuário autenticado: ${err.message}`);
+    // Stream para as queries dinâmicas
+    const query$ = toObservable(this.query);
+
+    combineLatest([initialData$, query$]).pipe(
+      tap(() => this.state.update(s => ({ ...s, loading: true, error: null }))),
+      switchMap(([permissions, currentQuery]) => {
+        // Atualiza as permissões no estado
+        this.state.update(s => ({ ...s, permissions }));
+        
+        const { pagination, filters } = currentQuery;
+        const filterStatus = filters.status === "ALL" ? "" : filters.status;
+        return this.lotService.getAllLotsUserPageable(
+          pagination.pageIndex, pagination.pageSize, filters.name, 
+          filters.client, filters.clientUser, filterStatus
+        ).pipe(
+          catchError(err => {
+            this.state.update(s => ({ ...s, loading: false, error: "Falha ao carregar a lista de lotes." }));
+            return of(null);
+          })
+        );
+      }),
+      catchError(err => {
+        this.state.update(s => ({ ...s, loading: false, error: err.message }));
+        return of(null);
+      })
+    ).subscribe(response => {
+      if (response) {
+        this.state.update(s => ({
+          ...s,
+          lots: response.content,
+          totalElements: response.totalElements,
+          loading: false,
+        }));
       }
     });
-  }
-
-  /**
-   * 1. Orquestra todo o fluxo de criação do lote.
-   */
-  openCreateLotDialog(): void {
-    const dialogData: DialogCreateLotData = { userId: this.userId };
-
-    const createDialogRef = this.dialog.open(DialogCreateLotComponent, {
-      width: '500px',
-      data: dialogData
-    });
-
-    // Escuta o resultado do primeiro diálogo
-    createDialogRef.afterClosed().subscribe(result => {
-      // Se o usuário cancelou ou não retornou dados, não faz nada
-      if (!result) return;
-
-      const { lot, images } = result;
-
-      // Se houver imagens para enviar, abre o segundo diálogo
-      if (images && images.length > 0) {
-        this.openProgressDialog(lot, images);
-      } else {
-        // Se não houver imagens, o processo terminou. Notifica e atualiza a lista.
-        this.notification.showSuccess("Lote criado com sucesso!");
-        this.lotListComponent.loadLotsPage();
-      }
-    });
-  }
-
-  /**
-   * 2. Abre o diálogo de progresso de upload e atualiza a lista ao final.
-   */
-  private openProgressDialog(lot: LotInterface, images: FileList): void {
-    const dialogData: DialogImageUploadProgressData = { lotId: lot.id, images };
-
-    const progressDialogRef = this.dialog.open(DialogImageUploadProgressComponent, {
-      width: '500px',
-      data: dialogData,
-      disableClose: true // Impede o fechamento acidental
-    });
-
-    // O processo SÓ termina de verdade quando o diálogo de progresso fecha.
-    // É AQUI que a lista deve ser atualizada.
-    progressDialogRef.afterClosed().subscribe(() => {
-      this.lotListComponent.loadLotsPage();
-    });
-  }
-
-  // Métodos de controle do template (sem alterações)
-  onLoadStatusChanged(status: 'SUCCESS' | 'ERROR'): void {
-    this.hasLoadError.set(status === "ERROR");
   }
 
   onFilterSubmit(filters: LotFiltersFormValues): void {
-    this.currentFilters.set(filters);
+    this.query.update(q => ({ ...q, filters, pagination: { ...q.pagination, pageIndex: 0 } }));
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.query.update(q => ({ ...q, pagination: event }));
+  }
+
+  forceReload(): void {
+    this.query.update(q => ({ ...q, reload: q.reload + 1 }));
+  }
+
+  openCreateLotDialog(): void {
+    const currentUserId = this.userId();
+    if (!currentUserId) {
+      this.notification.showError("Não foi possível identificar o usuário para criar o lote.");
+      return;
+    }
+    const dialogData: DialogCreateLotData = { userId: currentUserId };
+    const createDialogRef = this.dialog.open(DialogCreateLotComponent, { width: '500px', data: dialogData });
+    createDialogRef.afterClosed().subscribe(result => {
+      if (!result) return;
+      const { lot, images } = result;
+      if (images && images.length > 0) {
+        this.openProgressDialog(lot, images);
+      } else {
+        this.notification.showSuccess("Lote criado com sucesso!");
+        this.forceReload();
+      }
+    });
+  }
+
+  private openProgressDialog(lot: LotInterface, images: FileList): void {
+    const dialogData: DialogImageUploadProgressData = { lotId: lot.id, images };
+    this.dialog.open(DialogImageUploadProgressComponent, { width: '500px', data: dialogData, disableClose: true })
+      .afterClosed().subscribe(() => this.forceReload());
+  }
+
+  onOpenLotDetails(lot: LotInterface) {
+    const permissions = this.permissions();
+    if(!permissions) {
+      this.notification.showError("Erro ao obter as permissões do usuário");
+      return;
+    }
+    this.lotStateService.selectLot(lot);
+    this.lotStateService.setPermissions(permissions);
+    this.router.navigate(["/app/loteDetails"]);
   }
 }

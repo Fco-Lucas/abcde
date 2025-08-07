@@ -1,8 +1,10 @@
-@if(this.lote && this.userPermissions.read_files) {
+@if (lot() && userPermissions(); as userPermissions) {
   <div class="flex flex-col md:flex-row h-screen pt-16 w-screen overflow-x-hidden">
-    <!-- left -->
-    <div class="w-screen md:w-1/4 h-auto md:h-full px-6 md:px-4 pt-2 md:pt-6 pb-2 flex flex-col md:overflow-y-auto">
-      <div class="flex justify-between gap-3 items-center mb-3">
+    
+    <!-- Left -->
+    <div class="w-screen md:w-1/4 h-auto md:h-full px-4 pt-2 md:pt-6 pb-2 flex flex-col md:overflow-y-auto">
+      
+      <div class="flex items-center justify-between gap-1 mb-3">
         <div class="flex items-center gap-2">
           <button matMiniFab class="fabButtons" routerLink="/app/home">
             <mat-icon>arrow_back</mat-icon>
@@ -24,19 +26,19 @@
             Processos auditados
           </button>
 
-          @if(this.lote.status === "COMPLETED") {
+          @if(this.lot().status === "COMPLETED") {
             <button mat-menu-item aria-label="Baixar .txt" class="w-full" aria-label="Baixar .txt" (click)="onDownloadTxt()">
               <mat-icon>download</mat-icon>
               Baixar .txt
             </button>
           }
-          @if(this.lote.status === "INCOMPLETED" && this.userPermissions.upload_files) {
+          @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {
             <button mat-menu-item aria-label="Adicionar novos gabaritos" (click)="openDialogProcessImages()">
               <mat-icon>image_arrow_up</mat-icon>
               Adicionar novos gabaritos
             </button>
           }
-          @if(this.userPermissions.upload_files) {
+          @if(userPermissions.upload_files) {
             <button mat-menu-item aria-label="Atualizar nome do lote" (click)="onOpenDialogUpdateLot()">
               <mat-icon>edit</mat-icon>
               Atualizar nome do lote
@@ -46,7 +48,11 @@
               Excluir lote
             </button>
           }
-          @if(this.lote.status === "INCOMPLETED" && this.userPermissions.upload_files) {
+          <button mat-menu-item aria-label="Baixar todas as imagens do lote" (click)="onDownloadLot()">
+            <mat-icon>download</mat-icon>
+            Baixar todas as imagens do lote
+          </button>
+          @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {
             <button mat-menu-item aria-label="Finalizar lote" (click)="finalizeLot()">
               <mat-icon>check</mat-icon>
               Finalizar lote
@@ -55,178 +61,204 @@
         </mat-menu>
       </div>
 
-      <div class="flex-grow">
-        <app-images-list
-          #imagesListComponent
-          [lote]="this.lote"
-          [filters]="this.currentFilters()"
-          [currentPage]="this.currentPage()"
-          [pageSize]="this.pageSize"
-          (totalPagesChange)="onTotalPagesChange($event)"
-          [selectedImageId]="this.selectedImageId()"
-          (imageSelected)="onImageSelected($event)"
-          (imagesLoaded)="onImagesLoaded($event)"
-        ></app-images-list>
-      </div>
+      <h2 class="text-xl mb-3" [title]="lot()!.name">{{ lot()!.name }}</h2>
 
-      <div class="mt-4">
-        <app-images-list-pagination
-          [currentPage]="this.currentPage()"
-          [totalPages]="this.totalPages()"
-          (pageChange)="onPageChange($event)"
-        ></app-images-list-pagination>
+      <div class="flex-grow">
+        @switch (viewState()) {
+          @case ('loading') {
+            <div class="flex justify-center items-center pt-16">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          }
+          @case ('error') {
+            <app-ui-error [message]="error()" />
+          }
+          @default {
+            <app-images-list
+              [images]="lotImages()"
+              [isLoading]="isLoadingImages()"
+              [selectedImageId]="selectedImageId()"
+              (imageSelected)="onImageSelected($event)"
+              (viewAudit)="onOpenDialogAuditLogQuestions($event)"
+            ></app-images-list>
+          }
+        }
       </div>
+      
+      <mat-paginator
+        class="mt-auto"
+        [length]="totalImages()"
+        [pageSize]="pagination().pageSize"
+        [pageIndex]="pagination().pageIndex"
+        (page)="onPageChange($event)"
+        [pageSizeOptions]="[10, 20, 50]">
+      </mat-paginator>
 
     </div>
 
-    <!-- Right -->
-    <div class="w-screen md:w-3/4 h-auto md:h-full px-6 md:px-4 pt-0 md:p-6 pb-2 md:overflow-y-auto">
-
-      @if (selectedImageDetails()) {
+    <div class="w-screen md:w-3/4 h-auto md:h-full px-4 pt-0 md:p-6 pb-2 md:overflow-y-auto">
+      @if (selectedImageDetails(); as details) {
         <div class="flex flex-col md:flex-row md:justify-between w-full gap-5">
+          
           <div class="flex-1">
-            @if(this.selectedImageDetails()?.haveModification) {
-              <div class="flex items-center gap-3 p-3 bg-yellow-400 rounded-lg text-gray-800 w-full md:w-auto mb-3">
-                <mat-icon>error</mat-icon>
-                <span>Este gabarito possui alterações manuais</span>
-              </div>
-            }
-            <div class="flex items-center justify-center overflow-hidden">
-              <img [src]="selectedImageDetails()!.url" [alt]="selectedImageDetails()!.matricula" class="w-full object-contain">
-            </div>
-          </div>
 
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-5">
-              <div class="flex flex-col">
-                <p class="text-2xl text-bold">Alterações:</p>
-                <p class="text-sm text-semibold">(Processos auditados)</p>
-              </div>
-              @if(this.lote.status === "INCOMPLETED" && userPermissions.upload_files) {
-                <button matButton="filled" class="!bg-red-700" aria-label="Excluir gabarito" (click)="deleteSelectedImage()">
-                  <mat-icon>delete</mat-icon>
-                  Excluir gabarito
-                </button>
+            <div class="flex justify-center items-start overflow-hidden">
+              @if (details.url) {
+                <img [src]="details.url" [alt]="details.matricula" class="max-w-full max-h-full object-contain rounded-md shadow-md">
+              } @else {
+                <div class="mt-20 hidden md:block">
+                  <app-ui-not-found 
+                    title="Imagem não encontrada" 
+                    subtitle="A imagem pode ter expirado ou não foi carregada corretamente."
+                  ></app-ui-not-found>
+                </div>
               }
             </div>
-            <mat-card>
-              <mat-card-content>
-                <mat-tab-group dynamicHeight>
-                  <mat-tab>
-                    <ng-template mat-tab-label>
-                      <span class="font-bold text-lg">1 - 30</span>
-                    </ng-template>
-                    <!-- Grid para as questões desta aba -->
-                    <!-- AGORA 6 COLUNAS: 1 para número, 5 para A,B,C,D,E, 1 para Z -->
-                    <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
-                      <!-- Cabeçalho das Opções -->
-                      <div class="col-span-1"></div>
-                      <div class="flex justify-center items-center font-bold text-lg me-1">A</div>
-                      <div class="flex justify-center items-center font-bold text-lg me-1">B</div>
-                      <div class="flex justify-center items-center font-bold text-lg me-1">C</div>
-                      <div class="flex justify-center items-center font-bold text-lg me-1">D</div>
-                      <div class="flex justify-center items-center font-bold text-lg me-1">E</div>
-                      <!-- REMOVIDO: W -->
-                      <div class="flex justify-center items-center font-bold text-lg me-1">Z</div>
-
-                      <!-- Loop para Questões 1-30 -->
-                      @for (question of selectedImageDetails()!.questions; track question.id; let i = $index) {
-                        @if (question.number >= 1 && question.number <= 30) {
-                          <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number | number: '2.0' }}</p>
-                          <!-- NOVO: Usando formGroup para cada questão e mat-checkbox -->
-                          <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
-                            <mat-checkbox formControlName="A" value="A"></mat-checkbox>
-                            <mat-checkbox formControlName="B" value="B"></mat-checkbox>
-                            <mat-checkbox formControlName="C" value="C"></mat-checkbox>
-                            <mat-checkbox formControlName="D" value="D"></mat-checkbox>
-                            <mat-checkbox formControlName="E" value="E"></mat-checkbox>
-                            <!-- REMOVIDO: W -->
-                            <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
-                          </div>
-                        }
-                      }
-                    </div>
-                  </mat-tab>
-
-                  <mat-tab>
-                    <ng-template mat-tab-label>
-                      <span class="font-bold text-lg">31 - 60</span>
-                    </ng-template>
-                    <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
-                      <!-- Cabeçalho das Opções (repetir para cada tab) -->
-                      <div class="col-span-1"></div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">A</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">B</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">C</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">D</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">E</div>
-                      <!-- REMOVIDO: W -->
-                      <div class="flex justify-center items-center font-bold text-sm me-1">Z</div>
-
-                      <!-- Loop para Questões 31-60 -->
-                      @for (question of selectedImageDetails()!.questions; track question.id; let i = $index) {
-                        @if (question.number >= 31 && question.number <= 60) {
-                          <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number }}</p>
-                          <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
-                            <mat-checkbox formControlName="A" value="A"></mat-checkbox>
-                            <mat-checkbox formControlName="B" value="B"></mat-checkbox>
-                            <mat-checkbox formControlName="C" value="C"></mat-checkbox>
-                            <mat-checkbox formControlName="D" value="D"></mat-checkbox>
-                            <mat-checkbox formControlName="E" value="E"></mat-checkbox>
-                            <!-- REMOVIDO: W -->
-                            <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
-                          </div>
-                        }
-                      }
-                    </div>
-                  </mat-tab>
-
-                  <mat-tab>
-                    <ng-template mat-tab-label>
-                      <span class="font-bold text-lg">61 - 90</span>
-                    </ng-template>
-                    <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
-                      <!-- Cabeçalho das Opções (repetir para cada tab) -->
-                      <div class="col-span-1"></div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">A</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">B</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">C</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">D</div>
-                      <div class="flex justify-center items-center font-bold text-sm me-1">E</div>
-                      <!-- REMOVIDO: W -->
-                      <div class="flex justify-center items-center font-bold text-sm me-1">Z</div>
-
-                      <!-- Loop para Questões 61-90 -->
-                      @for (question of selectedImageDetails()!.questions; track question.id; let i = $index) {
-                        @if (question.number >= 61 && question.number <= 90) {
-                          <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number }}</p>
-                          <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
-                            <mat-checkbox formControlName="A" value="A"></mat-checkbox>
-                            <mat-checkbox formControlName="B" value="B"></mat-checkbox>
-                            <mat-checkbox formControlName="C" value="C"></mat-checkbox>
-                            <mat-checkbox formControlName="D" value="D"></mat-checkbox>
-                            <mat-checkbox formControlName="E" value="E"></mat-checkbox>
-                            <!-- REMOVIDO: W -->
-                            <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
-                          </div>
-                        }
-                      }
-                    </div>
-                  </mat-tab>
-                </mat-tab-group>
-              </mat-card-content>
-            </mat-card>
+            
           </div>
+          
+          <div class="flex flex-col gap-3">
+             <div class="flex items-center justify-between gap-5">
+                <div class="flex flex-col">
+                  <p class="text-xl">Alterações:</p>
+                  <p class="text-sm text-semibold">(Processos auditados)</p>
+                </div>
+                <button class="w-full md:w-auto" matButton="filled" [matMenuTriggerFor]="afterMenuImage">
+                  Ações
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+                <mat-menu #afterMenuImage="matMenu" xPosition="after">
+                  <button mat-menu-item aria-label="Baixar imagem do gabarito" (click)="onDownloadImage()">
+                    <mat-icon>download</mat-icon>
+                    Baixar imagem do gabarito
+                  </button>
+                  @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {
+                    <button mat-menu-item aria-label="Excluir gabarito" (click)="deleteSelectedImage()">
+                      <mat-icon>delete</mat-icon>
+                      Excluir gabarito
+                    </button>
+                  }
+                </mat-menu>
+             </div>
+
+             <mat-card>
+               <mat-card-content>
+                 <form [formGroup]="answersForm()">
+                    <mat-tab-group dynamicHeight>
+                      <mat-tab>
+                        <ng-template mat-tab-label>
+                          <span class="font-bold text-lg">1 - 30</span>
+                        </ng-template>
+                        <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
+                          <!-- Cabeçalho das Opções -->
+                          <div class="col-span-1"></div>
+                          <div class="flex justify-center items-center font-bold text-lg me-1">A</div>
+                          <div class="flex justify-center items-center font-bold text-lg me-1">B</div>
+                          <div class="flex justify-center items-center font-bold text-lg me-1">C</div>
+                          <div class="flex justify-center items-center font-bold text-lg me-1">D</div>
+                          <div class="flex justify-center items-center font-bold text-lg me-1">E</div>
+                          <div class="flex justify-center items-center font-bold text-lg me-1">Z</div>
+
+                          <!-- Loop para Questões 1-30 -->
+                          @for (question of usedQuestions; track question.id; let i = $index) {
+                            @if (question.number >= 1 && question.number <= 30) {
+                              <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number | number: '2.0' }}</p>
+                              <!-- NOVO: Usando formGroup para cada questão e mat-checkbox -->
+                              <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
+                                <mat-checkbox formControlName="A" value="A"></mat-checkbox>
+                                <mat-checkbox formControlName="B" value="B"></mat-checkbox>
+                                <mat-checkbox formControlName="C" value="C"></mat-checkbox>
+                                <mat-checkbox formControlName="D" value="D"></mat-checkbox>
+                                <mat-checkbox formControlName="E" value="E"></mat-checkbox>
+                                <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </mat-tab>
+
+                      <mat-tab>
+                        <ng-template mat-tab-label>
+                          <span class="font-bold text-lg">31 - 60</span>
+                        </ng-template>
+                        <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
+                          <!-- Cabeçalho das Opções (repetir para cada tab) -->
+                          <div class="col-span-1"></div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">A</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">B</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">C</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">D</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">E</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">Z</div>
+
+                          <!-- Loop para Questões 31-60 -->
+                          @for (question of usedQuestions; track question.id; let i = $index) {
+                            @if (question.number >= 31 && question.number <= 60) {
+                              <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number }}</p>
+                              <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
+                                <mat-checkbox formControlName="A" value="A"></mat-checkbox>
+                                <mat-checkbox formControlName="B" value="B"></mat-checkbox>
+                                <mat-checkbox formControlName="C" value="C"></mat-checkbox>
+                                <mat-checkbox formControlName="D" value="D"></mat-checkbox>
+                                <mat-checkbox formControlName="E" value="E"></mat-checkbox>
+                                <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </mat-tab>
+
+                      <mat-tab>
+                        <ng-template mat-tab-label>
+                          <span class="font-bold text-lg">61 - 90</span>
+                        </ng-template>
+                        <div class="grid py-2" style="grid-template-columns: auto repeat(6, 1fr);">
+                          <!-- Cabeçalho das Opções (repetir para cada tab) -->
+                          <div class="col-span-1"></div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">A</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">B</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">C</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">D</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">E</div>
+                          <div class="flex justify-center items-center font-bold text-sm me-1">Z</div>
+
+                          <!-- Loop para Questões 61-90 -->
+                          @for (question of usedQuestions; track question.id; let i = $index) {
+                            @if (question.number >= 61 && question.number <= 90) {
+                              <p class="text-lg font-semibold flex items-center justify-end pr-2 py-1">{{ question.number }}</p>
+                              <div [formGroup]="getQuestionFormGroup(i)" class="col-span-6 flex justify-around items-center">
+                                <mat-checkbox formControlName="A" value="A"></mat-checkbox>
+                                <mat-checkbox formControlName="B" value="B"></mat-checkbox>
+                                <mat-checkbox formControlName="C" value="C"></mat-checkbox>
+                                <mat-checkbox formControlName="D" value="D"></mat-checkbox>
+                                <mat-checkbox formControlName="E" value="E"></mat-checkbox>
+                                <mat-checkbox formControlName="Z" value="Z"></mat-checkbox>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </mat-tab>
+                    </mat-tab-group>
+                 </form>
+               </mat-card-content>
+             </mat-card>
+          </div>
+
+        </div>
+      }@else if (isLoadingImageDetails()) {
+        <div class="flex justify-center items-center h-full">
+          <mat-spinner></mat-spinner>
         </div>
       } @else {
-        <div class="text-center text-gray-500 py-8">
-          Selecione uma imagem na lista à esquerda para visualizar os detalhes.
+        <div class="flex justify-center items-center h-full text-center text-gray-500">
+          <p>Selecione uma imagem na lista à esquerda para ver os detalhes.</p>
         </div>
       }
     </div>
+
   </div>
 
-  @if (shouldShowSaveFab && userPermissions.upload_files) {
+  @if (shouldShowSaveFab()) {
     <button
       matFab
       class="!fixed !bottom-6 !right-6 z-50 shadow-lg fabButtons"

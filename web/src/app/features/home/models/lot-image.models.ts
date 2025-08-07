@@ -23,11 +23,24 @@ export interface lotImageInterface {
   qtdQuestoes: number;
   haveModification: boolean;
   status: LotImageStatusEnum;
+  createdAt: string;
   questions: LotImageQuestionInterface[];
 }
 
+export interface LotImagePageableInterface {
+  id: number;
+  lotId: number;
+  matricula: number;
+  nomeAluno: string;
+  presenca: number;
+  haveModification: boolean;
+  status: LotImageStatusEnum;
+  expirationImageDate: string;
+  createdAt: string;
+}
+
 export interface PageableLotImagesList {
-  content: lotImageInterface[],
+  content: LotImagePageableInterface[],
   first: boolean,
   end: boolean,
   page: number,
@@ -40,4 +53,11 @@ export interface PageableLotImagesList {
 export interface UpdateLotImageQuetionInterface {
   lotImageQuestionId: number;
   alternative: string;
+  previousAlternative: string;
+}
+
+export interface LotImageHashInterface {
+  hash: string;
+  matricula: number;
+  nomeAluno: string;
 }

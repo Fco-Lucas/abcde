@@ -37,18 +37,31 @@
 
     <!-- Lista para mostrar os arquivos selecionados (melhora a UX) -->
     <div *ngIf="imagesControl?.value as files">
-      <mat-list dense>
+      <mat-list dense *ngIf="hashedFiles.length > 0">
         <div mat-subheader class="flex justify-between items-center w-full">
           <span>Arquivos Selecionados:</span>
-          <button mat-icon-button type="button" color="warn" (click)="clearFileSelection()" matTooltip="Limpar seleção">
-            <mat-icon class="text-red-700">delete_forever</mat-icon>
-          </button>
+
+          <div class="flex items-center gap-1">
+            <ng-container *ngIf="hasDuplicatedImages">
+              <button mat-icon-button type="button" color="warn" matTooltip="Há imagem(ns) duplicada(s)!">
+                <mat-icon class="text-red-700">info</mat-icon>
+              </button>
+            </ng-container>
+            <button mat-icon-button type="button" color="warn" (click)="clearFileSelection()" matTooltip="Limpar seleção">
+              <mat-icon class="text-red-700">delete_forever</mat-icon>
+            </button>
+          </div>
         </div>
-        
-        <mat-list-item *ngFor="let file of files">
-          <mat-icon matListItemIcon>image</mat-icon>
-          <div matListItemTitle>{{ file.name }}</div>
-          <div matListItemLine>{{ (file.size / 1024) | number:'1.0-2' }} KB</div>
+
+        <mat-list-item *ngFor="let f of hashedFiles" [ngClass]="{ 'opacity-50': f.duplicated }">
+          <mat-icon matListItemIcon color="{{ f.duplicated ? 'warn' : 'primary' }}">
+            {{ f.duplicated ? 'error' : 'image' }}
+          </mat-icon>
+          <div matListItemTitle>{{ f.file.name }}</div>
+          <div matListItemLine>
+            {{ (f.file.size / 1024) | number:'1.0-2' }} KB
+            <span *ngIf="f.duplicated" class="text-red-600 ml-2">(Duplicada)</span>
+          </div>
         </mat-list-item>
       </mat-list>
     </div>

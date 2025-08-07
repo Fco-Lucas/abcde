@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { lotImageInterface, PageableLotImagesList, type UpdateLotImageQuetionInterface } from '../models/lot-image.models';
+import { lotImageInterface, PageableLotImagesList, type LotImageHashInterface, type UpdateLotImageQuetionInterface } from '../models/lot-image.models';
 
 @Injectable({
   providedIn: 'root'
@@ -34,5 +34,15 @@ export class LotImageService {
 
   updateLotImageQuestions(lotId: number, lotImageId: number, data: UpdateLotImageQuetionInterface[]): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}lots/${lotId}/images/${lotImageId}`, data);
+  }
+
+  getHashs(lotId: number): Observable<LotImageHashInterface[]> {
+    return this.http.get<LotImageHashInterface[]>(`${this.apiUrl}lots/${lotId}/images/getHashs`);
+  }
+
+  downloadAll(lotId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}lots/${lotId}/images/download-all`, {
+      responseType: 'blob'
+    });
   }
 }

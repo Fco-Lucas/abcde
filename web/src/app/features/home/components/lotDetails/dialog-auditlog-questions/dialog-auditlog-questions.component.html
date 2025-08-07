@@ -1,0 +1,34 @@
+<h2 mat-dialog-title>Auditoria</h2>
+
+<mat-dialog-content>
+  <!-- <div class="mb-3 !mt-3">
+    <app-dialog-auditlog-questions-filters
+      (submitForm)="onFilterSubmit($event)"
+    ></app-dialog-auditlog-questions-filters>
+  </div> -->
+
+  <mat-card>
+    <mat-card-content>
+      @switch (viewState()) {
+        @case ('loading') {
+          <div class="flex justify-center items-center p-16">
+            <mat-spinner diameter="50"></mat-spinner>
+          </div>
+        }
+        @case ('error') {
+          <app-ui-error [message]="error()" />
+        }
+        @default {
+          <app-dialog-auditlog-questions-list
+            [entries]="entries()"
+            [isLoading]="isLoading()"
+            [totalElements]="totalElements()"
+            [pageSize]="pagination().pageSize"
+            [pageIndex]="pagination().pageIndex"
+            (pageChange)="onPageChange($event)"
+          ></app-dialog-auditlog-questions-list>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</mat-dialog-content>

@@ -14,6 +14,8 @@ import { LotCreateInterface, LotInterface } from '../../models/lot.model';
 import { finalize } from 'rxjs';
 import { MatListModule } from "@angular/material/list";
 import { LotImageService } from '../../services/lot-image.service';
+import { calculateHash } from '../../../../shared/utils/functions';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface DialogCreateLotData {
   userId: string;
@@ -23,6 +25,12 @@ export interface CreateLotFormValues {
   name: string;
   images: FileList | null;
 }
+
+type HashedFile = {
+  file: File;
+  hash: string;
+  duplicated: boolean;
+};
 
 @Component({
   selector: 'app-dialog-create-lot',
@@ -36,7 +44,8 @@ export interface CreateLotFormValues {
     MatIconModule,
     MatSelectModule,
     MatProgressSpinnerModule,
-    MatListModule
+    MatListModule,
+    MatTooltipModule
   ],
   templateUrl: './dialog-create-lot.component.html',
 })
@@ -46,11 +55,12 @@ export class DialogCreateLotComponent implements OnInit {
   private lotService = inject(LotService);
   private notification = inject(NotificationService);
   private lotImageService = inject(LotImageService);
-
+  
   @ViewChild('inputFile') inputFile!: ElementRef<HTMLInputElement>;
 
   public userId!: string;
   public isLoading = signal(false);
+  public hashedFiles: HashedFile[] = [];
 
   // Sinal para controlar o texto dinâmico do botão de upload
   public buttonText = signal('Selecionar imagens');
@@ -68,24 +78,33 @@ export class DialogCreateLotComponent implements OnInit {
 
   get nameControl() { return this.createForm.get("name"); }
   get imagesControl() { return this.createForm.get("images"); }
+  get hasDuplicatedImages(): boolean { return this.hashedFiles.some(f => f.duplicated); }
 
-  /**
-   * Chamado quando o usuário seleciona arquivos no input.
-   * @param event O evento de mudança do input.
-   */
-  onFileSelected(event: Event): void {
+  async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const files = input.files;
-      // Atualiza o valor do form control com a FileList
-      this.createForm.patchValue({ images: files });
-      // Atualiza o texto do botão
-      this.buttonText.set(`${files.length} imagem(ns) selecionada(s)`);
-    } else {
-      // Caso o usuário cancele a seleção, reseta
+    if (!input.files || input.files.length === 0) {
+      this.hashedFiles = [];
       this.createForm.patchValue({ images: null });
       this.buttonText.set('Selecionar imagens');
+      return;
     }
+
+    const fileArray = Array.from(input.files);
+    const temp: HashedFile[] = [];
+
+    for (const file of fileArray) {
+      const hash = await calculateHash(file);
+      const isDuplicate = temp.some(f => f.hash === hash) || this.hashedFiles.some(f => f.hash === hash);
+      temp.push({ file, hash, duplicated: isDuplicate });
+    }
+
+    this.hashedFiles = [...this.hashedFiles, ...temp];
+    this.buttonText.set(`${this.hashedFiles.length} imagem(ns) selecionada(s)`);
+
+    // Apenas para manter compatibilidade com o FormGroup
+    const uniqueFileList = new DataTransfer();
+    this.hashedFiles.forEach(({ file }) => uniqueFileList.items.add(file));
+    this.createForm.patchValue({ images: uniqueFileList.files });
   }
 
    /**
@@ -95,6 +114,7 @@ export class DialogCreateLotComponent implements OnInit {
     this.inputFile.nativeElement.value = ''; // Limpa o valor do input
     this.createForm.patchValue({ images: null });
     this.buttonText.set('Selecionar imagens');
+    this.hashedFiles = [];
   }
 
   onSubmit() {
@@ -102,6 +122,8 @@ export class DialogCreateLotComponent implements OnInit {
       this.createForm.markAllAsTouched();
       return;
     }
+
+    const uniqueFiles = this.hashedFiles.filter(f => !f.duplicated).map(f => f.file);
 
     this.isLoading.set(true);
     this.createForm.disable();
@@ -119,8 +141,10 @@ export class DialogCreateLotComponent implements OnInit {
       })
     ).subscribe({
       next: (lot: LotInterface) => {
-        // 2. Retorna o lote criado e a lista de imagens para o orquestrador.
-        this.dialogRef.close({ lot, images: formValues.images });
+        // Retorna apenas arquivos únicos
+        const files = new DataTransfer();
+        uniqueFiles.forEach(file => files.items.add(file));
+        this.dialogRef.close({ lot, images: files.files });
       },
       error: (err) => {
         this.notification.showError(err.message || "Ocorreu um erro ao criar o lote.");

@@ -1,48 +1,43 @@
-<!-- Estado de Carregamento -->
-<div *ngIf="isLoading()" class="flex justify-center items-center h-64">
-  <mat-spinner diameter="50"></mat-spinner>
-</div>
-
-<!-- Estado de Erro ou Vazio -->
-<div *ngIf="!isLoading() && lots().length === 0" class="text-center p-8">
-  <mat-icon class="text-gray-400 text-[45px] !w-[45px] !h-[45px]">search_off</mat-icon>
-  <p class="mt-3 text-lg text-gray-600">Nenhum lote encontrado.</p>
-  <p class="text-sm text-gray-500">Tente ajustar seus filtros ou volte mais tarde.</p>
-</div>
-
-<!-- Exibição dos Cards -->
-<div *ngIf="!isLoading() && lots().length > 0">
-  <div class="grid grid-cols-1 gap-3">
-    <mat-card *ngFor="let lot of lots()" class="cursor-pointer" (click)="viewLotDetails(lot)">
-      <mat-card-content class="flex-grow">
-        <div class="grid grid-cols-2 gap-2 items-center">
-          <div class="flex flex-col">
-            <p class="text-2xl">{{ lot.name }}</p>
-            <p class="text-1xl">Criado por: {{ lot.userName }}</p>
-          </div>
-          <div class="flex justify-end">
-            <app-lot-status-badge
-              [status]="lot.status"
-            ></app-lot-status-badge>
-          </div>
-          <div class="col-span-2">
-            <p>{{ lot.numberImages }} {{ lot.numberImages > 1 ? "Imagens" : "Imagem" }} </p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+@if(this.isLoading) {
+  <div class="flex justify-center items-center mt-10">
+    <mat-spinner diameter="50"></mat-spinner>
   </div>
-
-  <!-- Paginador -->
-  <mat-paginator
-    #paginator
-    class="mt-6 bg-transparent"
-    [length]="totalElements"
-    [pageSize]="pageSize"
-    [pageIndex]="pageIndex"
-    [pageSizeOptions]="[5, 10, 20]"
-    (page)="handlePageEvent($event)"
-    showFirstLastButtons
-    aria-label="Selecione a página de lotes">
-  </mat-paginator>
-</div>
+}@else {
+  @if(this.lots.length > 0) {
+    <div class="grid grid-cols-1 gap-3">
+      <mat-card *ngFor="let lot of this.lots" class="cursor-pointer" (click)="this.onClickedLot.emit(lot)">
+        <mat-card-content class="flex-grow">
+          <div class="grid grid-cols-2 gap-2 items-center">
+            <div class="flex flex-col">
+              <p class="text-2xl">{{ lot.name }}</p>
+              <p class="text-1xl">Criado por: {{ lot.userName }}</p>
+            </div>
+            <div class="flex justify-end">
+              <app-lot-status-badge
+                [status]="lot.status"
+              ></app-lot-status-badge>
+            </div>
+            <div class="col-span-2 flex justify-between items-center gap-1">
+              <p>{{ lot.numberImages }} {{ lot.numberImages > 1 ? "Imagens" : "Imagem" }} </p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <mat-paginator
+      (page)="this.pageChange.emit($event)"
+      [length]="totalElements"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons
+      aria-label="Selecione a página dos lotes">
+    </mat-paginator>
+  }@else {
+    <app-ui-not-found
+      title="Nenhum lote encontrado"
+      subtitle="Verifique seus filtros e tente novamente"
+    ></app-ui-not-found>
+  }
+}
