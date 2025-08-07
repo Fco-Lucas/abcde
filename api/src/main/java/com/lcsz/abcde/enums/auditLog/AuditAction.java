@@ -5,5 +5,6 @@ public enum AuditAction {
     UPDATE,
     DELETE,
     LOGIN,
-    PROCESSED
+    PROCESSED,
+    DOWNLOADTXT
 }

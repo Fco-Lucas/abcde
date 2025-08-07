@@ -8,6 +8,7 @@ public class LotResponseDto {
     private Long id;
     private UUID userId;
     private String userName;
+    private String userCnpj;
     private String name;
     private Integer numberImages;
     private LotStatus status;
@@ -15,10 +16,11 @@ public class LotResponseDto {
     public LotResponseDto() {
     }
 
-    public LotResponseDto(Long id, UUID userId, String userName, String name, Integer numberImages, LotStatus status) {
+    public LotResponseDto(Long id, UUID userId, String userName, String userCnpj, String name, Integer numberImages, LotStatus status) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
+        this.userCnpj = userCnpj;
         this.name = name;
         this.numberImages = numberImages;
         this.status = status;
@@ -46,6 +48,14 @@ public class LotResponseDto {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getUserCnpj() {
+        return userCnpj;
+    }
+
+    public void setUserCnpj(String userCnpj) {
+        this.userCnpj = userCnpj;
     }
 
     public String getName() {
@@ -78,6 +88,7 @@ public class LotResponseDto {
                 "id=" + id +
                 ", userId=" + userId +
                 ", userName=" + userName +
+                ", userCnpj=" + userCnpj +
                 ", name=" + name +
                 ", numberImages=" + numberImages +
                 ", status='" + status + '\'' +

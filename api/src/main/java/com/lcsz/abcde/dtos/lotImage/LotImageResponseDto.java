@@ -3,6 +3,7 @@ package com.lcsz.abcde.dtos.lotImage;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.enums.lot_image.LotImageStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class LotImageResponseDto {
@@ -19,12 +20,13 @@ public class LotImageResponseDto {
     private Integer qtdQuestoes;
     private Boolean haveModification;
     private LotImageStatus status;
+    private LocalDateTime createdAt;
     private List<LotImageQuestionResponseDto> questions;
 
     public LotImageResponseDto() {
     }
 
-    public LotImageResponseDto(Long id, Long lotId, String url, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, List<LotImageQuestionResponseDto> questions) {
+    public LotImageResponseDto(Long id, Long lotId, String url, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt, List<LotImageQuestionResponseDto> questions) {
         this.id = id;
         this.lotId = lotId;
         this.url = url;
@@ -38,6 +40,7 @@ public class LotImageResponseDto {
         this.qtdQuestoes = qtdQuestoes;
         this.haveModification = haveModification;
         this.status = status;
+        this.createdAt = createdAt;
         this.questions = questions;
     }
 
@@ -129,6 +132,14 @@ public class LotImageResponseDto {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public Integer getQtdQuestoes() {
         return qtdQuestoes;
     }
@@ -168,6 +179,7 @@ public class LotImageResponseDto {
                 ", qtdQuestoes=" + qtdQuestoes +
                 ", haveModification=" + haveModification +
                 ", status=" + status +
+                ", createdAt=" + createdAt +
                 ", questions=" + questions +
                 '}';
     }

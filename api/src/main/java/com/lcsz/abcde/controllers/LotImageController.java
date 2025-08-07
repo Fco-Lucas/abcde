@@ -1,12 +1,15 @@
 package com.lcsz.abcde.controllers;
 
 import com.lcsz.abcde.dtos.PageableDto;
+import com.lcsz.abcde.dtos.lotImage.LotImageHashResponseDto;
+import com.lcsz.abcde.dtos.lotImage.LotImagePageableResponseDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageUpdateQuestionDto;
 import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.mappers.PageableMapper;
 import com.lcsz.abcde.security.AuthenticatedUserProvider;
 import com.lcsz.abcde.services.LotImageService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -58,7 +62,7 @@ public class LotImageController {
         PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
         if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar imagens");
 
-        Page<LotImageResponseDto> lotImages = this.lotImageService.getAllPageable(pageable, lotId, student);
+        Page<LotImagePageableResponseDto> lotImages = this.lotImageService.getAllPageable(pageable, lotId, student);
         return ResponseEntity.status(HttpStatus.OK).body(PageableMapper.toDto(lotImages));
     }
 
@@ -99,5 +103,25 @@ public class LotImageController {
 
         this.lotImageService.delete(lotImageId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/getHashs")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<LotImageHashResponseDto>> getHashs(
+            @PathVariable("lotId") Long lotId
+    ) {
+        List<LotImageHashResponseDto> responseDto = this.lotImageService.getAllImagesLotHash(lotId);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+
+    @GetMapping("/download-all")
+    @PreAuthorize("isAuthenticated()")
+    public void downloadAll(
+            @PathVariable("lotId") Long lotId,
+            HttpServletResponse response
+    ) throws IOException {
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=gabaritos_" + lotId + ".zip");
+        lotImageService.downloadAllImages(lotId, response.getOutputStream());
     }
 }

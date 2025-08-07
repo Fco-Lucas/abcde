@@ -29,6 +29,7 @@ public class AuthenticatedUserProvider {
         this.clientUserService = clientUserService;
     }
 
+    // Retorna o usuário autenticado
     public JwtUserDetails getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -45,19 +46,18 @@ public class AuthenticatedUserProvider {
         return (JwtUserDetails) authentication.getPrincipal();
     }
 
+    // Retorna o ID do usuário autenticado
     public UUID getAuthenticatedUserId() {
         return getAuthenticatedUser().getId();
     }
 
-    public String getLogin() {
-        return getAuthenticatedUser().getUsername();
-    }
-
+    // Retorna o cargo do usuário autenticado
     public String getAuthenticatedUserRole() {
         JwtUserDetails authUser = this.getAuthenticatedUser();
         return authUser == null ? null : getAuthenticatedUser().getRole();
     }
 
+    // Retorna o nome do usuário autenticado
     public String getAuthenticatedUserName(UUID userId) {
         Client client = this.clientService.getByIdOrNull(userId);
 
@@ -94,5 +94,22 @@ public class AuthenticatedUserProvider {
             // Se for cliente busca a permissão cujo pode fazer tudo e retorna
             return this.permissionService.getMainPermission();
         }
+    }
+
+    // Retorna o cliente do usuário autenticado
+    public Client getClientAuthenticatedUser() {
+        // Obtem o ID do usuário autenticado
+        UUID userId = this.getAuthenticatedUserId();
+
+        Client client = this.clientService.getByIdOrNull(userId);
+
+        if(client == null) {
+            // Se não for um cliente, busca o cliente com base no usuário autenticado e retorna-o
+            ClientUser clientUser = this.clientUserService.getByIdOrNull(userId);
+            return this.clientService.getClientById(clientUser.getClientId());
+        }
+
+        // Retorna o cliente caso o usuário autenticado já seja um cliente
+        return client;
     }
 }

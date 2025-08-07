@@ -12,17 +12,23 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface LotImageRepository extends JpaRepository<LotImage, Long> {
-    @Query("""
-        SELECT l FROM LotImage l 
-        WHERE l.lotId = :lotId
-          AND (
-            :student IS NULL OR 
-            CAST(l.matricula AS string) ILIKE :student OR 
-            l.nomeAluno ILIKE :student
-          )
-          AND l.status = 'ACTIVE'
-        ORDER BY l.id DESC
-    """)
+    @Query(value = """
+        SELECT 
+            id, 
+            lot_id, 
+            key, 
+            matricula, 
+            nome_aluno, 
+            presenca, 
+            have_modification, 
+            status, 
+            created_at 
+        FROM lots_images
+        WHERE lot_id = :lotId
+          AND (:student IS NULL OR CAST(matricula AS TEXT) ILIKE :student OR nome_aluno ILIKE :student)
+          AND status = 'ACTIVE'
+        ORDER BY id DESC 
+    """, nativeQuery = true)
     Page<LotImageProjection> findAllPageable(
             Pageable pageable,
             @Param("lotId") Long lotId,
@@ -30,4 +36,6 @@ public interface LotImageRepository extends JpaRepository<LotImage, Long> {
     );
 
     List<LotImage> findAllByLotIdAndStatus(Long lotId, LotImageStatus status);
+
+    List<LotImage> findAllByKeyAndLotIdAndStatus(String key, Long lotId, LotImageStatus status);
 }

@@ -3,10 +3,8 @@ package com.lcsz.abcde.services;
 import com.lcsz.abcde.dtos.ScanImageDadosResponseDto;
 import com.lcsz.abcde.dtos.ScanImageResponseDto;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
-import com.lcsz.abcde.dtos.lot.LotResponseDto;
-import com.lcsz.abcde.dtos.lotImage.LotImageCreateDto;
-import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
-import com.lcsz.abcde.dtos.lotImage.LotImageUpdateQuestionDto;
+import com.lcsz.abcde.dtos.auditLogQuestion.AuditLogQuestionCreateDto;
+import com.lcsz.abcde.dtos.lotImage.*;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionCreateDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionUpdateDto;
@@ -16,6 +14,7 @@ import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.enums.lot_image.LotImageStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.LotImageMapper;
+import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.models.Lot;
 import com.lcsz.abcde.models.LotImage;
 import com.lcsz.abcde.models.LotImageQuestion;
@@ -31,15 +30,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class LotImageService {
@@ -50,19 +53,22 @@ public class LotImageService {
     private final LotImageQuestionService lotImageQuestionService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final AuditLogService auditLogService;
+    private final AuditLogQuestionService auditLogQuestionService;
 
     LotImageService(
         LotImageRepository lotImageRepository,
         @Lazy LotService lotService,
         LotImageQuestionService lotImageQuestionService,
         AuthenticatedUserProvider authenticatedUserProvider,
-        AuditLogService auditLogService
+        AuditLogService auditLogService,
+        AuditLogQuestionService auditLogQuestionService
     ) {
         this.lotImageRepository = lotImageRepository;
         this.lotService = lotService;
         this.lotImageQuestionService = lotImageQuestionService;
         this.authenticatedUserProvider = authenticatedUserProvider;
         this.auditLogService = auditLogService;
+        this.auditLogQuestionService = auditLogQuestionService;
     }
 
     private String getImageUrl(Long lotId, String key) {
@@ -71,10 +77,6 @@ public class LotImageService {
 
     private String getAbsoluteImagePath(Long lotId, String key) {
         return "C:/workspace/abcde/api/uploads/gabaritos/" + lotId.toString() + "/" + key;
-    }
-
-    private String generateRandomKey() {
-        return UUID.randomUUID().toString().replace("-", "");
     }
 
     @Transactional(readOnly = false)
@@ -107,17 +109,14 @@ public class LotImageService {
     private void excludeFile(String imagePath) {
         try {
             Path path = Paths.get(imagePath);
-            if (Files.exists(path)) {
-                Files.delete(path);
-                System.out.println("Imagem excluída com sucesso: " + imagePath);
-            }
+            if (Files.exists(path)) Files.delete(path);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao excluir imagem: " + e.getMessage());
         }
     }
 
     @Transactional(readOnly = true)
-    public Page<LotImageResponseDto> getAllPageable(
+    public Page<LotImagePageableResponseDto> getAllPageable(
             Pageable pageable,
             Long lotId,
             String student
@@ -131,26 +130,24 @@ public class LotImageService {
         if(authUserRole == null) throw new RuntimeException("Cargo do usuário autenticado não encontrado");
 
         return lotImages.map(lotImage -> {
-            LotImage entity = this.getById(lotImage.getId());
-            List<LotImageQuestionResponseDto> questions = this.lotImageQuestionService.getAllByImageId(entity.getId());
+            LocalDateTime createdAt = lotImage.getCreatedAt();
+            String pathImage = this.getAbsoluteImagePath(lotId, lotImage.getKey());
+            Path path = Paths.get(pathImage);
 
-            LocalDateTime createdAt = entity.getCreatedAt();
-            String pathImage = this.getAbsoluteImagePath(lotId, entity.getKey());
+            LocalDateTime expirationDate = null;
 
-            if (createdAt != null && imageActiveDays != null && !authUserRole.equals("COMPUTEX")) {
-                System.out.println("Entrei no papoco");
-                long daysSinceCreation = ChronoUnit.DAYS.between(createdAt, LocalDateTime.now());
+            if (createdAt != null && imageActiveDays != null) {
+                expirationDate = createdAt.plusDays(imageActiveDays);
 
-                if (daysSinceCreation >= imageActiveDays) {
-                    System.out.println("Entrei no papoco2");
-                    // Exclui a imagem do diretório
-                    this.excludeFile(pathImage);
+                if (!authUserRole.equals("COMPUTEX")) {
+                    long daysSinceCreation = ChronoUnit.DAYS.between(createdAt, LocalDateTime.now());
+                    if (daysSinceCreation >= imageActiveDays) this.excludeFile(pathImage);
                 }
             }
 
-            LotImageResponseDto responseDto = LotImageMapper.toDto(entity);
-            responseDto.setUrl(this.getImageUrl(lotImage.getLotId(), lotImage.getKey()));
-            responseDto.setQuestions(questions);
+            LotImagePageableResponseDto responseDto = LotImageMapper.toPageableDto(lotImage);
+            responseDto.setExpirationImageDate(expirationDate);
+
             return responseDto;
         });
     }
@@ -226,8 +223,32 @@ public class LotImageService {
         }
     }
 
+    // Função na qual verifica se já existe a imagem no lote evitando duplicatas
+    private Boolean existsByFileKey(String fileKey, Long lotId, LotImageStatus status) {
+        return !this.lotImageRepository.findAllByKeyAndLotIdAndStatus(fileKey, lotId, status).isEmpty();
+    }
+
+    // Função na qual calcula a HASH do arquivo recebido com base no seu conteúdo
+    private String generateHashKey(MultipartFile file) throws IOException, NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream is = file.getInputStream()) {
+            byte[] buffer = new byte[8192]; // 8 KB
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesRead);
+            }
+        }
+
+        byte[] hashBytes = digest.digest();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
     @Transactional(readOnly = false)
-    public LotImageResponseDto processImage(MultipartFile file, Long lotId) throws IOException {
+    public LotImageResponseDto processImage(MultipartFile file, Long lotId) throws IOException, NoSuchAlgorithmException, RuntimeException {
         // Busca e verifica as permissões do usuário autenticado
         PermissionResponseDto permission = this.authenticatedUserProvider.getAuthenticatedUserPermissions();
         if(!permission.getUpload_files()) throw new RuntimeException("Você não tem permissão para processar gabaritos");
@@ -236,17 +257,24 @@ public class LotImageService {
         Lot lot = this.lotService.getLotById(lotId);
         if(Objects.equals(lot.getStatus().toString(), "COMPLETED")) throw new RuntimeException("O lote já está concluido portanto não é possível enviar novas imagens");
 
-        // Cria pasta do lote
-        Path pastaLote = raiz.resolve(lotId.toString());
-        Files.createDirectories(pastaLote);
-
         // Monta o nome do arquivo
         String originalFileName = file.getOriginalFilename();
         String extension = "";
         int i = originalFileName.lastIndexOf('.');
         if (i >= 0) extension = originalFileName.substring(i); // inclui o ponto, ex: ".png"
-        String fileKey = this.generateRandomKey();
+        String fileKey = this.generateHashKey(file);
+        System.out.printf("HASH: %s%n", fileKey);
         String fileName = fileKey + extension;
+
+        // Verifica se já existe alguma imagem no lote com a mesma key
+        // Imagem já existente, não processar novamente
+        if(this.existsByFileKey(fileName, lotId, LotImageStatus.ACTIVE)) {
+            throw new RuntimeException(String.format("Imagem duplicada encontrada com a HASH '%s'", fileKey));
+        }
+
+        // Cria pasta do lote
+        Path pastaLote = raiz.resolve(lotId.toString());
+        Files.createDirectories(pastaLote);
 
         // Salva o arquivo na pasta
         Path path_destiny = pastaLote.resolve(fileName);
@@ -299,7 +327,27 @@ public class LotImageService {
         return this.lotImageRepository.findAllByLotIdAndStatus(lotId, LotImageStatus.ACTIVE);
     }
 
+    @Transactional(readOnly = true)
+    public List<LotImageHashResponseDto> getAllImagesLotHash(Long lotId) {
+        List<LotImage> images = this.getAllImagesLot(lotId);
+        List<LotImageHashResponseDto> response = new ArrayList<>();
+        for(LotImage image : images) {
+            // Garante pegar apenas a hash da imagem
+            String key = image.getKey();
+            String hash = key.contains(".") ? key.substring(0, key.lastIndexOf('.')) : key;
+
+            LotImageHashResponseDto hashResponseDto = new LotImageHashResponseDto(hash, image.getMatricula(), image.getNomeAluno());
+            response.add(hashResponseDto);
+        }
+        return response;
+    }
+
     public void updateImageQuestions(Long lotImageId, List<LotImageUpdateQuestionDto> dto) {
+        // Verifica se existe algum registro informado cujo a alternativa seja vazia ou null
+        boolean haveEmptyAlternative = dto.stream()
+                .anyMatch(question -> question.getAlternative() == null || question.getAlternative().isBlank());
+        if(haveEmptyAlternative) throw new RuntimeException("Não é permitido alterar questões com alternativa em branco");
+
         LotImage lotImage = this.getById(lotImageId);
 
         // Busca e verifica as permissões do usuário autenticado
@@ -310,14 +358,18 @@ public class LotImageService {
         Lot lot = this.lotService.getLotById(lotImage.getLotId());
         if(Objects.equals(lot.getStatus().toString(), "COMPLETED")) throw new RuntimeException("O lote já está concluido portanto não é possível alterar suas questões");
 
+        // Verifica se o aluno faltou
+        if(lotImage.getPresenca() != 1) throw new RuntimeException("Não é permitido alterar questões do gabarito na qual o aluno faltou");
+
         StringBuilder questionsUpdated = new StringBuilder();
 
         dto.forEach((question) -> {
-            LotImageQuestionUpdateDto updateDto = new LotImageQuestionUpdateDto(question.getAlternative());
+            LotImageQuestionUpdateDto updateDto = new LotImageQuestionUpdateDto(question.getAlternative(), question.getPreviousAlternative());
             LotImageQuestion saved = this.lotImageQuestionService.update(question.getLotImageQuestionId(), updateDto);
 
-            questionsUpdated.append(String.format("{questão=%s, alternativa=%s}, ",
+            questionsUpdated.append(String.format("{questão=%s, anterior=%s, atual=%s}, ",
                     saved.getNumber(),
+                    question.getPreviousAlternative(),
                     question.getAlternative()
             ));
         });
@@ -328,16 +380,56 @@ public class LotImageService {
         // Remove a última vírgula e espaço, se necessário
         String updatedStr = questionsUpdated.toString().replaceAll(", $", "");
 
+        // Insere o log na tabela de auditoria geral
         String details = String.format(
             "Questões do gabarito com ID: '%s' atualizadas manualmente | Questões atualizadas: %s",
             lotImage.getId(), updatedStr
         );
-
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.LOT_IMAGE, details);
         this.auditLogService.create(logDto);
+
+        // Busca o cliente do usuário autenticado (se for o próprio cliente retorna ele mesmo, caso contrário retorna o equivalente ao usuário do cliente)
+        Client authClient = this.authenticatedUserProvider.getClientAuthenticatedUser();
+
+        // Insere o log na tabela somente de atualização das questões
+        String detailsQuestion = String.format(
+                "Questões do gabarito atualizadas manualmente | Questões atualizadas: %s",
+                updatedStr
+        );
+        AuditLogQuestionCreateDto logQuestionDto = new AuditLogQuestionCreateDto(authClient.getId(), lotImageId, detailsQuestion);
+        this.auditLogQuestionService.create(logQuestionDto);
     }
 
     public List<LotImageQuestionResponseDto> getAllQuestionsLotImage(Long lotImageId) {
         return this.lotImageQuestionService.getAllByImageId(lotImageId);
+    }
+
+    // Gera o .zip para baixar as imagens do lote
+    public void downloadAllImages(Long lotId, OutputStream outputStream) {
+        List<LotImage> images = this.getAllImagesLot(lotId);
+
+        try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
+            for (LotImage image : images) {
+                String absolutePath = getAbsoluteImagePath(lotId, image.getKey());
+                File file = new File(absolutePath);
+
+                if (file.exists() && file.isFile()) {
+                    try (FileInputStream fis = new FileInputStream(file)) {
+                        ZipEntry zipEntry = new ZipEntry(image.getKey()); // ou file.getName()
+                        zipOut.putNextEntry(zipEntry);
+
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = fis.read(buffer)) >= 0) {
+                            zipOut.write(buffer, 0, length);
+                        }
+                        zipOut.closeEntry();
+                    }
+                }
+            }
+            zipOut.finish();
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao gerar ZIP", e);
+        }
     }
 }

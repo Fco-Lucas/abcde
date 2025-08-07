@@ -1,10 +1,13 @@
 package com.lcsz.abcde.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lcsz.abcde.dtos.ExportDto;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.clients.ClientResponseDto;
 import com.lcsz.abcde.dtos.lot.LotCreateDto;
 import com.lcsz.abcde.dtos.lot.LotResponseDto;
 import com.lcsz.abcde.dtos.lot.LotUpdateDto;
+import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.enums.auditLog.AuditAction;
 import com.lcsz.abcde.enums.auditLog.AuditProgram;
@@ -12,6 +15,7 @@ import com.lcsz.abcde.enums.client.ClientStatus;
 import com.lcsz.abcde.enums.lot.LotStatus;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
+import com.lcsz.abcde.mappers.ExportMapper;
 import com.lcsz.abcde.mappers.LotMapper;
 import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.models.ClientUser;
@@ -24,7 +28,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -203,9 +212,48 @@ public class LotService {
         return client.getImageActiveDays();
     }
 
+    public void exportData(LotResponseDto lot, List<LotImageResponseDto> imageResponseDtos, String urlToPost) {
+        try {
+            ExportDto exportDto = ExportMapper.toDto(lot, imageResponseDtos);
+
+            // Converte para JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(exportDto);
+
+            // Cria o request
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlToPost))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            // Envia de forma assíncrona (não bloqueia)
+            HttpClient.newHttpClient()
+                    .sendAsync(request, HttpResponse.BodyHandlers.discarding()) // ignora resposta
+                    .exceptionally(ex -> {
+                        String details = String.format(
+                                "Erro ao enviar POST para a url '%s' ao baixar o text do lote contendo as seguintes informações: %s. ERRO: %s",
+                                urlToPost, this.formatLotForLog(lot), ex.getMessage()
+                        );
+                        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DOWNLOADTXT, AuditProgram.LOT, details);
+                        this.auditLogService.create(logDto);
+                        return null;
+                    });
+
+        } catch (Exception e) {
+            String details = String.format(
+                    "Erro ao enviar POST para a url '%s' ao baixar o text do lote contendo as seguintes informações: %s. ERRO: %s",
+                    urlToPost, this.formatLotForLog(lot), e.getMessage()
+            );
+            AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DOWNLOADTXT, AuditProgram.LOT, details);
+            this.auditLogService.create(logDto);
+        }
+    }
+
     public byte[] generateTxt(Long lotId) {
-        Lot lot = this.getLotById(lotId);
+        LotResponseDto lot = this.getLotByIdDto(lotId);
         List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
+        List<LotImageResponseDto> imageResponseDtos = new ArrayList<>();
 
         StringBuilder content = new StringBuilder("imagem,matricula");
 
@@ -215,6 +263,8 @@ public class LotService {
         }
 
         for (LotImage lotImage : lotImages) {
+            imageResponseDtos.add(this.lotImageService.getByIdDto(lotImage.getId()));
+
             String matricula = String.format("%08d", lotImage.getMatricula()); // 8 dígitos com 0 à esquerda
             String etapa = lotImage.getEtapa();
             String prova = String.format("%02d", lotImage.getProva());         // 2 dígitos com 0 à esquerda
@@ -246,8 +296,14 @@ public class LotService {
             }else {
                 content.append(",".repeat(90));
             }
-
         }
+
+        // Obtém o cliente
+        Client client = this.clientService.getByCnpj(lot.getUserCnpj(), ClientStatus.ACTIVE);
+        String urlToPost = client.getUrlToPost();
+
+        // Caso o cliente possua urlToPost informada, faz o post com o JSON dos dados para a URL sem aguardar um resultado
+        if(urlToPost != null && !urlToPost.isBlank()) this.exportData(lot, imageResponseDtos, urlToPost);
 
         return content.toString().getBytes(StandardCharsets.UTF_8);
     }
