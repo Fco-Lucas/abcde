@@ -48,7 +48,6 @@ export class ProfileUserPageComponent {
   private clientUserService = inject(ClientUsersService);
   private dialog = inject(MatDialog);
 
-  // ✅ 1. UM ÚNICO SIGNAL para controlar os gatilhos
   private query = signal<ProfileUserQuery>({ reload: 0 });
 
   private state = signal<ProfileUserState>({
@@ -57,7 +56,7 @@ export class ProfileUserPageComponent {
     error: null,
   });
 
-  // ✅ 2. Signals COMPUTADOS públicos e `readonly` para a View
+  public readonly authUserRole = toSignal(this.authService.currentUserRole$);
   public readonly clientUser = computed(() => this.state().clientUser);
   public readonly isLoading = computed(() => this.state().loading);
   public readonly error = computed(() => this.state().error);

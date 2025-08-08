@@ -16,6 +16,7 @@ import moment from 'moment'; // Importar Moment.js diretamente
 export interface AuditLogFiltersFormValues {
   action: AuditLogAction | "ALL",
   user: string,
+  client: string,
   program: AuditLogProgram | "ALL",
   details: string,
   startDate: string, // Data de início formatada como string (ex: ISO 8601)
@@ -48,6 +49,7 @@ export class AuditLogFiltersComponent implements AfterViewInit {
   filterForm = this.fb.group({
     action: ["ALL", [Validators.required]],
     user: ["", []],
+    client: ["", []],
     program: ["ALL", [Validators.required]],
     dateRange: new FormControl<DateRangeInterface | null>(null),
   }); 
@@ -95,6 +97,7 @@ export class AuditLogFiltersComponent implements AfterViewInit {
     const auditLogFilters: AuditLogFiltersFormValues = {
       action: formValues.action as AuditLogAction | "ALL",
       user: formValues.user as string,
+      client: formValues.client as string,
       program: formValues.program as AuditLogProgram | "ALL",
       details: "", // Assuming 'details' is not part of the form, or needs to be added
       startDate: formValues.dateRange ? formValues.dateRange.startDate : '',

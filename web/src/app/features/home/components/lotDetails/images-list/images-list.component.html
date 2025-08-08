@@ -20,7 +20,9 @@
           <mat-card-subtitle>{{ image.nomeAluno }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p class="text-1xl mb-3">Imagem disponível até: {{ image.expirationImageDate| date: 'dd/MM/yyyy' }}</p>
+          @if(!this.createdByComputex) {
+            <p class="text-1xl mb-3">Imagem disponível até: {{ image.expirationImageDate| date: 'dd/MM/yyyy' }}</p>
+          } 
           @if(image.haveModification && this.isActive(image.id)) {
             <div class="flex justify-center items-center">
               <button matButton="filled" (click)="viewAudit.emit(image.id); $event.stopPropagation();">

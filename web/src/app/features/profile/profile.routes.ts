@@ -3,10 +3,12 @@ import { ProfileClientPageComponent } from "./pages/profile-client-page/profile-
 import { ProfileUserPageComponent } from "./pages/profile-user-page/profile-user-page.component";
 import { roleGuard } from "../../core/guards/role.guard";
 import { ProfileRedirectComponent } from "./profile-redirect.component";
+import { profileGuard } from "../../core/guards/profile.guard";
 
 const PROFILE_ROUTES: Routes = [
   {
     path: '',
+    canActivate: [profileGuard],
     component: ProfileRedirectComponent
   },
   {
@@ -20,7 +22,7 @@ const PROFILE_ROUTES: Routes = [
     path: 'user', 
     component: ProfileUserPageComponent,
     canActivate: [roleGuard],
-    data: { roles: ['CLIENT_USER'] },
+    data: { roles: ['COMPUTEX', 'CLIENT_USER'] },
     title: 'Perfil do usuário | ABCDE'
   }
 ];

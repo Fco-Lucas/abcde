@@ -16,6 +16,7 @@ export interface LotInterface {
   name: string;
   numberImages: number;
   status: LotStatusEnum;
+  createdByComputex: boolean;
 }
 
 export interface PageableLotList {

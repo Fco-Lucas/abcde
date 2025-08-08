@@ -24,6 +24,7 @@ export class ImagesListComponent {
   @Input() images: LotImagePageableInterface[] = [];
   @Input() isLoading: boolean = false;
   @Input() selectedImageId: number | null = null;
+  @Input() createdByComputex: boolean = false;
 
   @Output() imageSelected = new EventEmitter<number>();
   @Output() viewAudit = new EventEmitter<number>();

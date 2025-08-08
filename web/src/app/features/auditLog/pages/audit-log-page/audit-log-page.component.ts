@@ -75,6 +75,7 @@ export class AuditLogPageComponent {
           pagination.pageIndex,
           pagination.pageSize,
           filters.action === "ALL" ? "" : filters.action,
+          filters.client,
           filters.user,
           filters.program === "ALL" ? "" : filters.program,
           filters.details,

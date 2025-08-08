@@ -58,7 +58,7 @@ export class AuditLogListComponent {
     }
   }
 
-  public displayedColumns: string[] = ['createdAt', 'user', 'action', 'program', 'details'];
+  public displayedColumns: string[] = ['createdAt', 'client', 'user', 'action', 'program', 'details'];
   
   public dataSource = new MatTableDataSource<AuditLogInterface>();
   

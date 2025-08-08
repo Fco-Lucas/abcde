@@ -15,6 +15,7 @@ export class AuditLogService {
     page: number = 0, 
     size: number = 10,
     action: AuditLogAction | "" = "",
+    client: string = "",
     user: string = "", 
     program: AuditLogProgram | "" = "", 
     details: string = "", 
@@ -25,6 +26,7 @@ export class AuditLogService {
       .set("page", page.toString())
       .set("size", size.toString())
       .set("action", action)
+      .set("client", client)
       .set("user", user)
       .set("program", program)
       .set("details", details)

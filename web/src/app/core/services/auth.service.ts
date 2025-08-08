@@ -47,43 +47,55 @@ export class AuthService {
   private loadAuthenticatedUserRoleFromToken(): void {
     const token = this.getToken();
     if (token && !this.isTokenExpired()) {
-      try {
-        const decodedToken = jwtDecode<TokenPayload>(token);
-
-        this.isAuthenticatedSubject.next(true);
-        this.currentUserRoleSubject.next(decodedToken.role);
-        this.currentUserIdSubject.next(decodedToken.id);
-      } catch (error) {
+      const decodedToken = this.getDecodedToken();
+      if (!decodedToken) {
         this.removeToken();
+        return;
       }
+      
+      this.isAuthenticatedSubject.next(true);
+      this.currentUserRoleSubject.next(decodedToken.role);
+      this.currentUserIdSubject.next(decodedToken.id);
     } else {
       this.removeToken();
     }
   }
 
-  private storeToken(token: string): void {
-    try {
-      // 1. Usa jwt-decode para pegar a data de expiração.
-      const decodedToken = jwtDecode<TokenPayload>(token);
-      const expiresAt = new Date(decodedToken.exp! * 1000);
+  public getDecodedToken(): TokenPayload | null {
+    const token = this.getToken();
+    if (!token) return null;
 
-      this.cookieService.set(
-        AUTH_TOKEN_COOKIE_NAME,
-        token,
-        { 
-          expires: expiresAt,
-          path: '/',
-          secure: environment.production,
-          sameSite: 'Lax'
-        }
-      );
-      this.isAuthenticatedSubject.next(true);
-      this.currentUserRoleSubject.next(decodedToken.role);
-      this.currentUserIdSubject.next(decodedToken.id);
+    try {
+      return jwtDecode<TokenPayload>(token);
     } catch (error) {
-      console.error("Erro ao decodificar o token para armazenar no cookie:", error);
-      this.logout();
+      console.error("Erro ao decodificar o token:", error);
+      return null;
     }
+  }
+
+  private storeToken(token: string): void {
+    // 1. Usa jwt-decode para pegar a data de expiração.
+    const decodedToken = jwtDecode<TokenPayload>(token);
+    if (!decodedToken) {
+      this.removeToken();
+      return;
+    }
+    const expiresAt = new Date(decodedToken.exp! * 1000);
+
+    this.cookieService.set(
+      AUTH_TOKEN_COOKIE_NAME,
+      token,
+      { 
+        expires: expiresAt,
+        path: '/',
+        // secure: environment.production,
+        secure: false,
+        sameSite: 'Lax'
+      }
+    );
+    this.isAuthenticatedSubject.next(true);
+    this.currentUserRoleSubject.next(decodedToken.role);
+    this.currentUserIdSubject.next(decodedToken.id);
   }
 
   public removeToken(): void {
@@ -101,14 +113,13 @@ export class AuthService {
     const token = this.getToken();
     if (!token) return true;
 
-    try {
-      const decodedToken = jwtDecode<TokenPayload>(token);
-      const expirationDate = decodedToken.exp! * 1000;
-      return expirationDate < Date.now();
-    } catch (error) {
-      console.error(`JWT TOKEN inválido ou expiraado:`, error);
-      return true;
+    const decodedToken = jwtDecode<TokenPayload>(token);
+    if (!decodedToken) {
+      this.removeToken();
+      return true; // Retorna true simulando com se tivesse expirado
     }
+    const expirationDate = decodedToken.exp! * 1000;
+    return expirationDate < Date.now();
   }
 
   login(credentials: AuthPayload): Observable<AuthResponse> {

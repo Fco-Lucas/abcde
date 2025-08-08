@@ -27,7 +27,7 @@
 
     <!-- Botão customizado que aciona o input -->
     <button 
-      mat-stroked-button 
+      matButton="filled"
       type="button" 
       class="w-full !py-6"
       (click)="inputFile.click()">
@@ -70,7 +70,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close type="button">Cancelar</button>
-    <button type="submit" mat-raised-button color="primary" [disabled]="isSubmitButtonDisabled()">
+    <button type="submit" matButton="filled" color="primary" [disabled]="isSubmitButtonDisabled()">
       @if (isLoading()) {
         <mat-spinner diameter="24"></mat-spinner>
       } @else {

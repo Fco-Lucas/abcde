@@ -17,7 +17,9 @@ export enum AuditLogProgram {
 export interface AuditLogInterface {
   id: number;
   action: AuditLogAction;
-  userId: string;
+  clientId: string;
+  clientName: string;
+  userId: string | null;
   userName: string;
   program: AuditLogProgram;
   details: string;

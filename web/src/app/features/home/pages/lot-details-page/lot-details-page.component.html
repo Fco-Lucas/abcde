@@ -78,6 +78,7 @@
               [images]="lotImages()"
               [isLoading]="isLoadingImages()"
               [selectedImageId]="selectedImageId()"
+              [createdByComputex]="this.lot().createdByComputex"
               (imageSelected)="onImageSelected($event)"
               (viewAudit)="onOpenDialogAuditLogQuestions($event)"
             ></app-images-list>

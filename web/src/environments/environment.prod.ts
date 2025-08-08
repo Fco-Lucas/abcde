@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://sua-api-de-producao.com/api/v1/'
+  apiUrl: 'http://172.16.0.48:8181/api/v1/'
 };
