@@ -23,6 +23,9 @@ public class AuditLog {
     @Column(nullable = false, length = 100)
     private AuditAction action;
 
+    @Column(nullable = false, name = "client_id")
+    private UUID clientId;
+
     @CreatedBy
     @Column(nullable = false, name = "user_id")
     private UUID userId;
@@ -38,9 +41,10 @@ public class AuditLog {
     @Column(nullable = false, updatable = false, name = "created_at")
     private LocalDateTime createdAt;
 
-    public AuditLog(Long id, AuditAction action, UUID userId, AuditProgram program, String details, LocalDateTime createdAt) {
+    public AuditLog(Long id, AuditAction action, UUID clientId, UUID userId, AuditProgram program, String details, LocalDateTime createdAt) {
         this.id = id;
         this.action = action;
+        this.clientId = clientId;
         this.userId = userId;
         this.program = program;
         this.details = details;
@@ -64,6 +68,14 @@ public class AuditLog {
 
     public void setAction(AuditAction action) {
         this.action = action;
+    }
+
+    public UUID getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(UUID clientId) {
+        this.clientId = clientId;
     }
 
     public UUID getUserId() {
@@ -115,6 +127,7 @@ public class AuditLog {
         return "AuditLog{" +
                 "id=" + id +
                 ", action=" + action +
+                ", clientId=" + clientId +
                 ", userId=" + userId +
                 ", program=" + program +
                 ", details='" + details + '\'' +

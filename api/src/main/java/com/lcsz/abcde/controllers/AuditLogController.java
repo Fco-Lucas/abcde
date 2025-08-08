@@ -38,6 +38,7 @@ public class AuditLogController {
     public ResponseEntity<PageableDto> getAllAuditLogPageable(
             Pageable pageable,
             @RequestParam(required = false) AuditAction action,
+            @RequestParam(required = false) String client,
             @RequestParam(required = false) String user,
             @RequestParam(required = false) AuditProgram program,
             @RequestParam(required = false) String details,
@@ -47,6 +48,7 @@ public class AuditLogController {
         Page<AuditLogResponseDto> entries = this.service.getAllPageable(
                 pageable,
                 action,
+                client,
                 user,
                 program,
                 details,
@@ -56,13 +58,13 @@ public class AuditLogController {
         return ResponseEntity.status(HttpStatus.OK).body(PageableMapper.toDto(entries));
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AuditLogResponseDto> getAuditLogById(
-            @PathVariable Long id
-    ) {
-        AuditLogResponseDto responseDto = this.service.getByIdDto(id);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-    }
+//    @GetMapping("/{id}")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<AuditLogResponseDto> getAuditLogById(
+//            @PathVariable Long id
+//    ) {
+//        AuditLogResponseDto responseDto = this.service.getByIdDto(id);
+//        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+//    }
 
 }

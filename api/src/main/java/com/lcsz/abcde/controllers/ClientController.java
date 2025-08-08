@@ -118,7 +118,7 @@ public class ClientController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('COMPUTEX')")
+    @PreAuthorize("hasAuthority('COMPUTEX') or #id == principal.id")
     public ResponseEntity<Void> updateClient(@PathVariable UUID id, @RequestBody @Valid ClientUpdateDto dto) {
         this.service.updateClient(id, dto);
         return ResponseEntity.noContent().build();

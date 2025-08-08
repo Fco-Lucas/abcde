@@ -12,11 +12,12 @@ public class LotResponseDto {
     private String name;
     private Integer numberImages;
     private LotStatus status;
+    private Boolean createdByComputex = false;
 
     public LotResponseDto() {
     }
 
-    public LotResponseDto(Long id, UUID userId, String userName, String userCnpj, String name, Integer numberImages, LotStatus status) {
+    public LotResponseDto(Long id, UUID userId, String userName, String userCnpj, String name, Integer numberImages, LotStatus status, Boolean createdByComputex) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
@@ -24,6 +25,7 @@ public class LotResponseDto {
         this.name = name;
         this.numberImages = numberImages;
         this.status = status;
+        this.createdByComputex = createdByComputex;
     }
 
     public Long getId() {
@@ -82,6 +84,14 @@ public class LotResponseDto {
         this.status = status;
     }
 
+    public Boolean getCreatedByComputex() {
+        return createdByComputex;
+    }
+
+    public void setCreatedByComputex(Boolean createdByComputex) {
+        this.createdByComputex = createdByComputex;
+    }
+
     @Override
     public String toString() {
         return "LotResponseDto{" +
@@ -91,7 +101,8 @@ public class LotResponseDto {
                 ", userCnpj=" + userCnpj +
                 ", name=" + name +
                 ", numberImages=" + numberImages +
-                ", status='" + status + '\'' +
+                ", status=" + status +
+                ", createdByComputex='" + createdByComputex + '\'' +
                 '}';
     }
 }

@@ -57,19 +57,43 @@ public class AuthenticatedUserProvider {
         return authUser == null ? null : getAuthenticatedUser().getRole();
     }
 
-    // Retorna o nome do usuário autenticado
-    public String getAuthenticatedUserName(UUID userId) {
-        Client client = this.clientService.getByIdOrNull(userId);
+    public String getAuthenticatedUserRole(UUID userId) {
+        final String COMPUTEX_CNPJ = "12302493000101";
 
-        if(client == null) {
-            ClientUser clientUser = this.clientUserService.getByIdOrNull(userId);
-            if(clientUser == null) throw new RuntimeException(String.format("Usuário com id: '%s' não é nem um cliente e nem um usuário do cliente", userId));
-
-            return clientUser.getName();
+        ClientUser clientUser = this.clientUserService.getByIdOrNull(userId);
+        if(clientUser != null) {
+            Client client = this.clientService.getClientById(clientUser.getClientId());
+            return COMPUTEX_CNPJ.equals(client.getCnpj()) ? "COMPUTEX" : "CLIENT_USER";
         }
 
-        return client.getName();
+        Client client = this.clientService.getByIdOrNull(userId);
+        if(client == null) throw new RuntimeException("Ao tentar buscar o cargo do usuário que criou o lote, com base no seu ID não foi encontrado nem cliente e nem usuário do cliente");
+        return COMPUTEX_CNPJ.equals(client.getCnpj()) ? "COMPUTEX" : "CLIENT";
     }
+
+    // Retorna se o usuário autenticado é um cliente
+    public Boolean authenticatedUserIsClient() {
+        return this.getAuthenticatedUser().isClient();
+    }
+
+    // Retorna se o usuário autenticado é um usuário do cliente
+    public Boolean authenticatedUserIsClientUser() {
+        return this.getAuthenticatedUser().isClientUser();
+    }
+
+    // Retorna o nome do usuário autenticado
+//    public String getAuthenticatedUserName(UUID userId) {
+//        Client client = this.clientService.getByIdOrNull(userId);
+//
+//        if(client == null) {
+//            ClientUser clientUser = this.clientUserService.getByIdOrNull(userId);
+//            if(clientUser == null) throw new RuntimeException(String.format("Usuário com id: '%s' não é nem um cliente e nem um usuário do cliente", userId));
+//
+//            return clientUser.getName();
+//        }
+//
+//        return client.getName();
+//    }
 
     public PermissionResponseDto getAuthenticatedUserPermissions() {
         UUID userId = this.getAuthenticatedUserId();
@@ -96,11 +120,19 @@ public class AuthenticatedUserProvider {
         }
     }
 
+    // Retorna o client com base no id do usuário
+    public Client getClientAuthenticatedUser(UUID userId) {
+        return this.getClientForUser(userId);
+    }
+
     // Retorna o cliente do usuário autenticado
     public Client getClientAuthenticatedUser() {
         // Obtem o ID do usuário autenticado
         UUID userId = this.getAuthenticatedUserId();
+        return this.getClientForUser(userId);
+    }
 
+    private Client getClientForUser(UUID userId) {
         Client client = this.clientService.getByIdOrNull(userId);
 
         if(client == null) {

@@ -27,7 +27,8 @@ public interface AuditLogQuestionRepository extends JpaRepository<AuditLogQuesti
         INNER JOIN clients C ON A.client_id = C.id
         WHERE A.image_id = :imageId
           AND (:user IS NULL OR C.name ILIKE :user OR CU.name ILIKE :user)
-          AND A.created_at BETWEEN :startDate AND :endDate
+          AND A.created_at BETWEEN :startDate AND :endDate 
+        ORDER BY A.id DESC
     """, nativeQuery = true)
     Page<AuditLogQuestionProjection> getAllPageable(
         Pageable pageable,

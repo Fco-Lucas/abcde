@@ -9,6 +9,8 @@ import java.util.UUID;
 public class AuditLogResponseDto {
     private Long id;
     private AuditAction action;
+    private UUID clientId;
+    private String clientName;
     private UUID userId;
     private String userName;
     private AuditProgram program;
@@ -18,9 +20,11 @@ public class AuditLogResponseDto {
     public AuditLogResponseDto() {
     }
 
-    public AuditLogResponseDto(Long id, AuditAction action, UUID userId, String userName, AuditProgram program, String details, LocalDateTime createdAt) {
+    public AuditLogResponseDto(Long id, AuditAction action, UUID clientId, String clientName, UUID userId, String userName, AuditProgram program, String details, LocalDateTime createdAt) {
         this.id = id;
         this.action = action;
+        this.clientId = clientId;
+        this.clientName = clientName;
         this.userId = userId;
         this.userName = userName;
         this.program = program;
@@ -42,6 +46,22 @@ public class AuditLogResponseDto {
 
     public void setAction(AuditAction action) {
         this.action = action;
+    }
+
+    public UUID getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(UUID clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 
     public UUID getUserId() {
@@ -89,6 +109,8 @@ public class AuditLogResponseDto {
         return "AuditLogResponseDto{" +
                 "id=" + id +
                 ", action=" + action +
+                ", clientId=" + clientId +
+                ", clientName=" + clientName +
                 ", userId=" + userId +
                 ", userName='" + userName + '\'' +
                 ", program=" + program +

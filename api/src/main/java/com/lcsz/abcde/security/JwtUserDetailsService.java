@@ -27,10 +27,11 @@ public class JwtUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         // Checa se é CNPJ válido (14 números, com ou sem máscara)
         String numericLogin = login.replaceAll("[^\\d]", "");
+        String cnpjComputex = "12302493000101";
         if (numericLogin.length() == 14) {
             Client client = clientService.getByCnpj(login, ClientStatus.ACTIVE);
             if (client == null) throw new UsernameNotFoundException("Client não encontrado com CNPJ: " + login);
-            String role = numericLogin.equals("12302493000101") ? "COMPUTEX" : "CLIENT";
+            String role = numericLogin.equals(cnpjComputex) ? "COMPUTEX" : "CLIENT";
             return new JwtUserDetails(client, role);
         }
 
@@ -38,7 +39,12 @@ public class JwtUserDetailsService implements UserDetailsService {
         ClientUser clientUser = clientUserService.getByEmail(login, ClientUserStatus.ACTIVE);
         if (clientUser == null) throw new UsernameNotFoundException("ClientUser não encontrado com e-mail: " + login);
 
-        return new JwtUserDetails(clientUser);
+        // Checa se é um usuário da COMPUTEX
+        UUID userClientId = clientUser.getClientId();
+        Client client = clientService.getClientById(userClientId);
+        if (client == null) throw new UsernameNotFoundException("Cliente do usuário não encontrado com CNPJ: " + login);
+        String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT_USER";
+        return new JwtUserDetails(clientUser, role);
     }
 
     public JwtToken getTokenAuthenticated(String login) {

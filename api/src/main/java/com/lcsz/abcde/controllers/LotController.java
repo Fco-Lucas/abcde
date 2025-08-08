@@ -7,6 +7,7 @@ import com.lcsz.abcde.dtos.lot.LotUpdateDto;
 import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.enums.lot.LotStatus;
 import com.lcsz.abcde.mappers.PageableMapper;
+import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.repositorys.projection.LotProjection;
 import com.lcsz.abcde.security.AuthenticatedUserProvider;
 import com.lcsz.abcde.services.LotService;
@@ -26,19 +27,13 @@ import java.util.UUID;
 @RequestMapping("api/v1/lots")
 public class LotController {
     private final LotService lotService;
-    private final AuthenticatedUserProvider userProvider;
-    public LotController(LotService lotService, AuthenticatedUserProvider userProvider) {
+    public LotController(LotService lotService) {
         this.lotService = lotService;
-        this.userProvider = userProvider;
     }
 
     @PostMapping()
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LotResponseDto> createLot(@RequestBody @Valid LotCreateDto dto) {
-        // Verifica se o usuário possui permissão para criar lote
-        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
-        if(!userPermission.getUpload_files()) throw new RuntimeException("Usuário sem autorização para criar lotes");
-
         LotResponseDto responseDto = this.lotService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
@@ -52,13 +47,7 @@ public class LotController {
         @RequestParam(required = false) String client,
         @RequestParam(required = false) LotStatus status
     ) {
-        // Verifica se o usuário possui permissão para visualizar lotes
-        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
-        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
-
-        UUID authUserId = this.userProvider.getAuthenticatedUserId();
-
-        Page<LotResponseDto> lots = this.lotService.getAllPageable(pageable, name, clientUser, client, status, authUserId);
+        Page<LotResponseDto> lots = this.lotService.getAllPageable(pageable, name, clientUser, client, status);
 
         return ResponseEntity.status(HttpStatus.OK).body(PageableMapper.toDto(lots));
     }
@@ -68,20 +57,13 @@ public class LotController {
     public ResponseEntity<LotResponseDto> getLotById(
             @PathVariable Long id
     ) {
-        // Verifica se o usuário possui permissão para visualizar lotes
-        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
-        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
-
-        return ResponseEntity.status(HttpStatus.OK).body(this.lotService.getLotByIdDto(id));
+        LotResponseDto responseDto = this.lotService.getLotByIdDto(id);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> updateLot(@PathVariable Long id, @RequestBody @Valid LotUpdateDto dto) {
-        // Verifica se o usuário possui permissão para atualizar lote
-        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
-        if(!userPermission.getUpload_files()) throw new RuntimeException("Usuário sem autorização para atualizar lotes");
-
         this.lotService.update(id, dto);
         return ResponseEntity.noContent().build();
     }
@@ -97,10 +79,6 @@ public class LotController {
 
     @GetMapping("/{id}/download-txt")
     public ResponseEntity<byte[]> downloadTxt(@PathVariable Long id) {
-        // Verifica se o usuário possui permissão para visualizar lotes
-        PermissionResponseDto userPermission = this.userProvider.getAuthenticatedUserPermissions();
-        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
-
         byte[] contentBytes = this.lotService.generateTxt(id);
 
         return ResponseEntity.ok()

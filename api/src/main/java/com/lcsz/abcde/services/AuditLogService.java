@@ -7,6 +7,7 @@ import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.AuditLogMapper;
 import com.lcsz.abcde.models.AuditLog;
+import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.repositorys.AuditLogRepository;
 import com.lcsz.abcde.repositorys.projection.AuditLogProjection;
 import com.lcsz.abcde.security.AuthenticatedUserProvider;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuditLogService {
@@ -31,8 +33,20 @@ public class AuditLogService {
 
     @Transactional(readOnly = false)
     public AuditLogResponseDto create(AuditLogCreateDto dto) {
+        // Define o id do usuário autenticado, se não foi informado no dto obtém pelo provider;
+        UUID userId;
+        if(dto.getUserId() == null) userId = this.provider.getAuthenticatedUserId();
+        else userId = dto.getUserId();
+
+        // Busca o cliente do usuário autenticado
+        Client client = this.provider.getClientAuthenticatedUser(userId);
+        UUID clientId = client.getId();
+
         // Converte o dto recebido para STRING
         AuditLog auditLog = AuditLogMapper.toCreateEntity(dto);
+        auditLog.setClientId(clientId);
+        auditLog.setUserId(userId);
+
         AuditLog saved = this.repository.save(auditLog);
         return AuditLogMapper.toDto(saved);
     }
@@ -41,45 +55,52 @@ public class AuditLogService {
     public Page<AuditLogResponseDto> getAllPageable(
             Pageable pageable,
             AuditAction action,
+            String client,
             String user,
             AuditProgram program,
             String details,
             String startDate,
             String endDate
     ) {
+        String filterAction = action == null ? null : action.toString();
+        String filterClient = (client == null || client.isBlank()) ? "" : "%" + client + "%";
         String filterUser = (user == null || user.isBlank()) ? null : "%" + user + "%";
+        String filterProgram = program == null ? null : program.toString();
         String filterDetails = (details == null || details.isBlank()) ? null : "%" + details + "%";
         LocalDateTime start = (startDate == null || startDate.isBlank()) ? POSTGRES_MIN : LocalDateTime.parse(startDate);
         LocalDateTime end = (endDate == null || endDate.isBlank()) ? POSTGRES_MAX : LocalDateTime.parse(endDate);
 
         Page<AuditLogProjection> entries = this.repository.findAllPageable(
             pageable,
-            action,
+            filterAction,
+            filterProgram,
             filterUser,
-            program,
-            filterDetails,
             start,
-            end
+            end,
+            filterClient,
+            filterDetails
         );
 
         return entries.map(entrie -> {
-            return this.getByIdDto(entrie.getId());
+            AuditLogResponseDto dto = AuditLogMapper.toPageableDto(entrie);
+            if(dto.getUserName() == null || dto.getUserName().isBlank()) dto.setUserName(dto.getClientName());
+            return dto;
         });
     }
 
-    @Transactional(readOnly = true)
-    public AuditLog getById(Long id) {
-        return this.repository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Registro da auditoria com ID: '%s' não encontrado", id))
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public AuditLogResponseDto getByIdDto(Long id) {
-        AuditLog auditLog = this.getById(id);
-        String userName = this.provider.getAuthenticatedUserName(auditLog.getUserId());
-        AuditLogResponseDto responseDto = AuditLogMapper.toDto(auditLog);
-        responseDto.setUserName(userName);
-        return responseDto;
-    }
+//    @Transactional(readOnly = true)
+//    public AuditLog getById(Long id) {
+//        return this.repository.findById(id).orElseThrow(
+//                () -> new EntityNotFoundException(String.format("Registro da auditoria com ID: '%s' não encontrado", id))
+//        );
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public AuditLogResponseDto getByIdDto(Long id) {
+//        AuditLog auditLog = this.getById(id);
+//        String userName = this.provider.getAuthenticatedUserName(auditLog.getUserId());
+//        AuditLogResponseDto responseDto = AuditLogMapper.toDto(auditLog);
+//        responseDto.setUserName(userName);
+//        return responseDto;
+//    }
 }

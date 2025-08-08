@@ -3,6 +3,7 @@ package com.lcsz.abcde.mappers;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.auditLog.AuditLogResponseDto;
 import com.lcsz.abcde.models.AuditLog;
+import com.lcsz.abcde.repositorys.projection.AuditLogProjection;
 import org.modelmapper.ModelMapper;
 
 import java.util.List;
@@ -19,6 +20,10 @@ public class AuditLogMapper {
 
     public static AuditLog toCreateEntity(AuditLogCreateDto createDto) {
         return mapper.map(createDto, AuditLog.class);
+    }
+
+    public static AuditLogResponseDto toPageableDto(AuditLogProjection projection) {
+        return mapper.map(projection, AuditLogResponseDto.class);
     }
 
     public static AuditLogResponseDto toDto(AuditLog log) {

@@ -11,6 +11,7 @@ import java.util.UUID;
 public class JwtUserDetails extends User {
     private final Client client;
     private final ClientUser clientUser;
+    private final String role;
 
     public JwtUserDetails(Client client, String role) {
         super(
@@ -20,16 +21,18 @@ public class JwtUserDetails extends User {
         );
         this.client = client;
         this.clientUser = null;
+        this.role = role;
     }
 
-    public JwtUserDetails(ClientUser clientUser) {
+    public JwtUserDetails(ClientUser clientUser, String role) {
         super(
                 clientUser.getEmail(),
                 clientUser.getPassword(),
-                List.of(new SimpleGrantedAuthority("CLIENT_USER"))
+                List.of(new SimpleGrantedAuthority(role))
         );
         this.client = null;
         this.clientUser = clientUser;
+        this.role = role;
     }
 
     public UUID getId() {
@@ -37,10 +40,7 @@ public class JwtUserDetails extends User {
     }
 
     public String getRole() {
-        if(client != null)
-            return client.getCnpj().equals("12302493000101") ? "COMPUTEX" : "CLIENT";
-
-        return "CLIENT_USER";
+        return role;
     }
 
     public boolean isClient() {

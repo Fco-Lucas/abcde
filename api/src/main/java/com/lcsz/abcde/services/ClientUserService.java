@@ -166,7 +166,7 @@ public class ClientUserService {
         ClientUser updated = this.repository.save(clientUser);
 
         String details = String.format(
-            "Usuário com ID: %s teve o status alterado para INACTIVE (exclusão lógica).", updated.getId()
+            "Usuário com ID: %s teve o status alterado para INATIVO (exclusão lógica).", updated.getId()
         );
 
         AuditLogCreateDto logDto = new AuditLogCreateDto(

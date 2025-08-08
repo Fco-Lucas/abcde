@@ -72,7 +72,7 @@ public class AuthController {
     @PostMapping()
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> auth(@RequestBody @Valid AuthLoginDto dto, HttpServletRequest request) {
-        log.info("Processo de authenticação pelo login {}", dto.getLogin());
+        // log.info("Processo de authenticação pelo login {}", dto.getLogin());
 
         try {
             UsernamePasswordAuthenticationToken authenticationToken =
@@ -93,7 +93,7 @@ public class AuthController {
 
             return ResponseEntity.ok(token);
         } catch (AuthenticationException ex) {
-            log.error("Bad Credentials from login {}", dto.getLogin());
+            // log.error("Bad Credentials from login {}", dto.getLogin());
             return ResponseEntity
                     .badRequest()
                     .body(new ExceptionMessage(request, HttpStatus.BAD_REQUEST, "Credênciais inválidas, certifique-se de possuir uma conta registrada com o CNPJ/Email e senha informada"));

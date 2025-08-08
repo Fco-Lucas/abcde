@@ -13,23 +13,35 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
-    @Query("""
-        SELECT a FROM AuditLog a
-            LEFT JOIN Client c ON a.userId = c.id
-            LEFT JOIN ClientUser u ON a.userId = u.id
-        WHERE (:action IS NULL OR a.action = :action)
-          AND (:user IS NULL OR c.name ILIKE :user OR u.name ILIKE :user)
-          AND (:program IS NULL OR a.program = :program)
-          AND (:details IS NULL OR a.details ILIKE :details)
-          AND a.createdAt BETWEEN :startDate AND :endDate
-    """)
+    @Query(value = """
+        SELECT 
+            A.id,
+            A.action,
+            C.id AS clientId,
+            C.name AS clientName,
+            CU.id AS userId,
+            CU.name AS userName,
+            A.program,
+            A.details AS details,
+            A.created_at AS createdAt
+        FROM auditlog A
+            INNER JOIN clients C ON A.client_id = C.id
+            LEFT JOIN clients_users CU ON A.user_id = CU.id
+        WHERE (:action IS NULL OR A.action = CAST(:action AS TEXT))
+          AND (:program IS NULL OR A.program = CAST(:program AS TEXT))
+          AND (:user IS NULL OR C.name ILIKE :user OR CU.name ILIKE :user)
+          AND A.created_at BETWEEN :startDate AND :endDate 
+          AND (COALESCE(:client, '') = '' OR C.name ILIKE :client) 
+        ORDER BY A.id DESC
+    """, nativeQuery = true)
     Page<AuditLogProjection> findAllPageable(
             Pageable pageable,
-            @Param("action") AuditAction action,
+            @Param("action") String action,
+            @Param("program") String program,
             @Param("user") String user,
-            @Param("program") AuditProgram program,
-            @Param("details") String details,
             @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate
+            @Param("endDate") LocalDateTime endDate,
+            @Param("client") String client,
+            @Param("details") String details
     );
 }

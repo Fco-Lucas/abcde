@@ -1,5 +1,6 @@
 package com.lcsz.abcde.services;
 
+import com.lcsz.abcde.AppProperties;
 import com.lcsz.abcde.dtos.ScanImageDadosResponseDto;
 import com.lcsz.abcde.dtos.ScanImageResponseDto;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
@@ -54,6 +55,7 @@ public class LotImageService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final AuditLogService auditLogService;
     private final AuditLogQuestionService auditLogQuestionService;
+    private final AppProperties appProperties;
 
     LotImageService(
         LotImageRepository lotImageRepository,
@@ -61,7 +63,8 @@ public class LotImageService {
         LotImageQuestionService lotImageQuestionService,
         AuthenticatedUserProvider authenticatedUserProvider,
         AuditLogService auditLogService,
-        AuditLogQuestionService auditLogQuestionService
+        AuditLogQuestionService auditLogQuestionService,
+        AppProperties appProperties
     ) {
         this.lotImageRepository = lotImageRepository;
         this.lotService = lotService;
@@ -69,14 +72,15 @@ public class LotImageService {
         this.authenticatedUserProvider = authenticatedUserProvider;
         this.auditLogService = auditLogService;
         this.auditLogQuestionService = auditLogQuestionService;
+        this.appProperties = appProperties;
     }
 
     private String getImageUrl(Long lotId, String key) {
-        return "http://localhost:8181/gabaritos/" + lotId.toString() + "/" + key;
+        return appProperties.getBaseImagesUrl() + lotId + "/" + key;
     }
 
     private String getAbsoluteImagePath(Long lotId, String key) {
-        return "C:/workspace/abcde/api/uploads/gabaritos/" + lotId.toString() + "/" + key;
+        return appProperties.getBaseImagesPath() + lotId + "/" + key;
     }
 
     @Transactional(readOnly = false)
@@ -124,28 +128,31 @@ public class LotImageService {
         String filterStudent = (student == null || student.isBlank()) ? null : "%" + student + "%";
         Page<LotImageProjection> lotImages = this.lotImageRepository.findAllPageable(pageable, lotId, filterStudent);
 
+        // Busca o campo 'image_active_days' do cliente de acordo com o usuário que criou o lote
         Integer imageActiveDays = this.lotService.getImageActiveDaysFromLotId(lotId);
 
-        String authUserRole = this.authenticatedUserProvider.getAuthenticatedUserRole();
-        if(authUserRole == null) throw new RuntimeException("Cargo do usuário autenticado não encontrado");
+        // Busca o cargo do usuário que criou o lote
+        String userRole = this.lotService.getRoleFromLotId(lotId);
 
         return lotImages.map(lotImage -> {
+            // Cria o dto
+            LotImagePageableResponseDto responseDto = LotImageMapper.toPageableDto(lotImage);
+
             LocalDateTime createdAt = lotImage.getCreatedAt();
             String pathImage = this.getAbsoluteImagePath(lotId, lotImage.getKey());
-            Path path = Paths.get(pathImage);
 
             LocalDateTime expirationDate = null;
 
             if (createdAt != null && imageActiveDays != null) {
                 expirationDate = createdAt.plusDays(imageActiveDays);
 
-                if (!authUserRole.equals("COMPUTEX")) {
+                // Se o cargo for diferente de COMPUTEX exclui
+                if (!userRole.equals("COMPUTEX")) {
                     long daysSinceCreation = ChronoUnit.DAYS.between(createdAt, LocalDateTime.now());
                     if (daysSinceCreation >= imageActiveDays) this.excludeFile(pathImage);
                 }
             }
 
-            LotImagePageableResponseDto responseDto = LotImageMapper.toPageableDto(lotImage);
             responseDto.setExpirationImageDate(expirationDate);
 
             return responseDto;
@@ -181,7 +188,7 @@ public class LotImageService {
         LotImage updated = this.lotImageRepository.save(lotImage);
 
         String details = String.format(
-                "Gabarito com ID: %s teve o status alterado para INACTIVE (exclusão lógica).", updated.getId()
+                "Gabarito com ID: %s teve o status alterado para INATIVO (exclusão lógica).", updated.getId()
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DELETE, AuditProgram.LOT_IMAGE, details);
         this.auditLogService.create(logDto);
@@ -206,7 +213,7 @@ public class LotImageService {
         request.put("path_image", pathImage);
         request.put("debug", false);
 
-        String url = "http://localhost:8000/scanImage";
+        String url = appProperties.getApiPythonUrl();
 
         try {
             ResponseEntity<ScanImageResponseDto> response = restTemplate.postForEntity(
@@ -263,7 +270,6 @@ public class LotImageService {
         int i = originalFileName.lastIndexOf('.');
         if (i >= 0) extension = originalFileName.substring(i); // inclui o ponto, ex: ".png"
         String fileKey = this.generateHashKey(file);
-        System.out.printf("HASH: %s%n", fileKey);
         String fileName = fileKey + extension;
 
         // Verifica se já existe alguma imagem no lote com a mesma key

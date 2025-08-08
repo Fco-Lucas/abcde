@@ -9,7 +9,10 @@ import java.util.UUID;
 public interface AuditLogProjection {
     Long getId();
     AuditAction getAction();
+    UUID getClientId();
+    String getClientName();
     UUID getUserId();
+    String getUserName();
     AuditProgram getProgram();
     String getDetails();
     LocalDateTime getCreatedAt();
