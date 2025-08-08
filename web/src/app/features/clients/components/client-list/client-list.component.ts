@@ -42,6 +42,7 @@ export class ClientListComponent implements OnChanges {
   @Input() totalElements: number = 0;
   @Input() pageSize: number = 10;
   @Input() pageIndex: number = 0;
+  @Input() isComputexClientUser: boolean = false;
 
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() updateClient = new EventEmitter<Client>();

@@ -7,6 +7,8 @@
           [userRole]="this.userRole()!"
           (submitForm)="onFilterSubmit($event)"
         ></app-lot-filters>
+      }@else {
+        <div class="hidden md:block md:flex-1"></div>
       }
 
       @if (this.permissions()?.upload_files) {
@@ -37,6 +39,10 @@
             (onClickedLot)="onOpenLotDetails($event)"
           >
           </app-lot-list>
+        }@else {
+          <app-ui-not-found
+            title="Você não tem permissão para visualizar os lotes criados"
+          ></app-ui-not-found>
         }
       }
     }

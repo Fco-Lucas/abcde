@@ -19,6 +19,7 @@ import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-erro
 import { DialogUpdateClientComponent, DialogUpdateClientData, UpdateClientFormValues } from '../../components/dialog-update-client/dialog-update-client.component';
 import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface ClientsPageState {
   clients: Client[];
@@ -48,6 +49,7 @@ interface ClientQuery {
   templateUrl: './clients-page.component.html',
 })
 export class ClientsPageComponent {
+  private authService = inject(AuthService);
   private clientService = inject(ClientService);
   private confirmationDialogService = inject(ConfirmationDialogService);
   private notification = inject(NotificationService);
@@ -77,6 +79,15 @@ export class ClientsPageComponent {
     if (this.isLoading() && this.clients().length === 0) return 'loading';
     if (this.error()) return 'error';
     return 'success';
+  });
+
+  public readonly isComputexClientUser = computed<boolean>(() => {
+    const decoded = this.authService.getDecodedToken();
+    if(!decoded) return false;
+
+    const isCnpj = /^\d{14}$/.test(decoded.sub);
+    
+    return !isCnpj
   });
 
   constructor() {

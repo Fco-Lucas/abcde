@@ -30,6 +30,7 @@
             [totalElements]="totalElements()"
             [pageSize]="pagination().pageSize"
             [pageIndex]="pagination().pageIndex"
+            [isComputexClientUser]="this.isComputexClientUser()"
             (pageChange)="onPageChange($event)"
             (updateClient)="onUpdateClient($event)"
             (deleteClient)="onDeleteClient($event)"

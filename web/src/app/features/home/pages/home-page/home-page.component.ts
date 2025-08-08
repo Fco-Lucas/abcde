@@ -22,6 +22,7 @@ import { LotService } from '../../services/lot.service';
 import { catchError, combineLatest, of, shareReplay, switchMap, tap } from 'rxjs';
 import { LotStateService } from '../../services/lot-state.service';
 import { Router } from '@angular/router';
+import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/ui-not-found.component';
 
 interface HomeState {
   permissions: PermissionInterface | null;
@@ -48,7 +49,8 @@ interface HomeLotsQuery {
     LotFiltersComponent,
     LotListComponent,
     MatProgressSpinnerModule,
-    UiErrorComponent
+    UiErrorComponent,
+    UiNotFoundComponent
   ],
   templateUrl: './home-page.component.html',
 })
@@ -110,6 +112,11 @@ export class HomePageComponent {
       switchMap(([permissions, currentQuery]) => {
         // Atualiza as permissões no estado
         this.state.update(s => ({ ...s, permissions }));
+
+        if(!permissions.read_files) {
+          this.state.update(s => ({ ...s, lots: [], totalElements: 0, loading: false }))
+          return of(null);
+        }
         
         const { pagination, filters } = currentQuery;
         const filterStatus = filters.status === "ALL" ? "" : filters.status;
