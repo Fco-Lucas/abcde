@@ -3,7 +3,7 @@ from pyzbar.pyzbar import decode
 
 # Verifica a posição do QR Code para corrigir a orientação da imagem se estiver de cabeça para baixo.
 def corrigir_orientacao_imagem(imagem, debugMode=False, debugPath="."):
-  print("\n[INFO] Etapa 1: Verificando e corrigindo a orientação da imagem...")
+  if debugMode: print("\n[INFO] Etapa 1: Verificando e corrigindo a orientação da imagem...")
   
   # Encontra o QR code para usar como âncora
   barcodes = decode(imagem)
@@ -24,7 +24,7 @@ def corrigir_orientacao_imagem(imagem, debugMode=False, debugPath="."):
   
   # Verifica se o centro do QR Code está na metade inferior da imagem
   if centro_y_qr > (altura_total_imagem / 2):
-    print("[INFO] Imagem de cabeça para baixo detectada. Rotacionando 180 graus...")
+    if debugMode: print("[INFO] Imagem de cabeça para baixo detectada. Rotacionando 180 graus...")
     imagem_corrigida = cv2.rotate(imagem, cv2.ROTATE_180)
     
     if debugMode:
@@ -32,5 +32,5 @@ def corrigir_orientacao_imagem(imagem, debugMode=False, debugPath="."):
         
     return imagem_corrigida
   else:
-    print("[INFO] Orientação da imagem está correta.")
+    if debugMode: print("[INFO] Orientação da imagem está correta.")
     return imagem # Retorna a imagem original sem alterações

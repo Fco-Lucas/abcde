@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
 import cv2
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 from alinhamento import alinhar_pagina
 from deteccao_blocos import encontrar_blocos
@@ -42,7 +44,7 @@ def processar_imagem(req: ImagemRequest):
         cv2.imwrite(f"{debug_path}/debug_etapa2_imagem_alinhada.png", imagem_alinhada)
 
     # Etapa 3 - QR Code e Falta
-    dados_qr, bbox_qr = ler_info_qr_code(imagem_alinhada)
+    dados_qr, bbox_qr = ler_info_qr_code(imagem_alinhada, debug_mode)
     aluno_faltou = verificar_falta_aluno(imagem_alinhada, bbox_qr, debug_mode, debug_path)
 
     try:
@@ -61,7 +63,7 @@ def processar_imagem(req: ImagemRequest):
         cv2.imwrite(f"{debug_path}/debug_etapa3_areas_identificadas.png", debug_extras)
 
     # Etapa 4 - Encontrar blocos
-    blocos = encontrar_blocos(imagem_alinhada)
+    blocos = encontrar_blocos(imagem_alinhada, debug_mode)
     if debug_mode:
         debug_blocos = imagem_alinhada.copy()
         for contorno in blocos:

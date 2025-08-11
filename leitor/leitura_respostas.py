@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath, pathFileToSave, aluno_faltou, qtdQuestoes):
-    print("\n[INFO] Etapa 5: Lendo respostas com controle total...")
+    if debugMode: print("\n[INFO] Etapa 5: Lendo respostas com controle total...")
     respostas = []
     gray = cv2.cvtColor(imagem_alinhada, cv2.COLOR_BGR2GRAY)
     debug_image = imagem_alinhada.copy()

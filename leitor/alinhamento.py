@@ -9,14 +9,14 @@ def alinhar_pagina(image, debugMode, debugPath):
     original_image = image.copy()
     
     # Pré-processamento
-    print("[INFO] Pré-processando a imagem...")
+    if debugMode: print("[INFO] Pré-processando a imagem...")
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # Usar um desfoque um pouco menor pode ajudar a preservar a borda externa
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edged = cv2.Canny(blurred, 50, 150)
 
     # ### MUDANÇA 1: Operação de Fechamento para unir as bordas quebradas ###
-    print("[INFO] Unindo as bordas da página com operação morfológica...")
+    if debugMode: print("[INFO] Unindo as bordas da página com operação morfológica...")
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
     closed_edges = cv2.morphologyEx(edged, cv2.MORPH_CLOSE, kernel)
     
@@ -26,7 +26,7 @@ def alinhar_pagina(image, debugMode, debugPath):
         print("[DEBUG] Imagem 'debug_etapa2_bordas_fechadas.png' salva.")
 
     # ### MUDANÇA 2: Lógica de busca de contorno mais inteligente ###
-    print("[INFO] Procurando o contorno da página de forma inteligente...")
+    if debugMode: print("[INFO] Procurando o contorno da página de forma inteligente...")
     cnts, _ = cv2.findContours(closed_edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     if not cnts:
@@ -50,7 +50,7 @@ def alinhar_pagina(image, debugMode, debugPath):
             # Isso evita pegar contornos internos pequenos que por acaso tenham 4 cantos
             if cv2.contourArea(c) > (image.shape[0] * image.shape[1] * 0.4):
                 page_contour = approx
-                print("[INFO] Contorno da página válido encontrado!")
+                if debugMode: print("[INFO] Contorno da página válido encontrado!")
                 break # Encontramos, podemos parar o loop
 
     if page_contour is None:
@@ -59,7 +59,7 @@ def alinhar_pagina(image, debugMode, debugPath):
         page_contour = max(cnts, key=cv2.contourArea)
 
     # Encontra os 4 cantos extremos
-    print("[INFO] Encontrando os 4 cantos do contorno...")
+    if debugMode: print("[INFO] Encontrando os 4 cantos do contorno...")
     # Como 'page_contour' já vem de approxPolyDP, ele já tem os 4 cantos.
     # A lógica de ordenação dos cantos ainda é necessária.
     pts = page_contour.reshape(4, 2)
@@ -81,7 +81,7 @@ def alinhar_pagina(image, debugMode, debugPath):
         print("[DEBUG] Imagem 'debug_etapa2_cantos_detectados.png' salva.")
 
     # Aplica a correção de perspectiva
-    print("[INFO] Aplicando correção de perspectiva...")
+    if debugMode: print("[INFO] Aplicando correção de perspectiva...")
     (tl, tr, br, bl) = rect
     widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
     widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
@@ -92,5 +92,5 @@ def alinhar_pagina(image, debugMode, debugPath):
     dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], dtype="float32")
     M = cv2.getPerspectiveTransform(rect, dst)
     warped = cv2.warpPerspective(original_image, M, (maxWidth, maxHeight))
-    print("[INFO] Alinhamento concluído.")
+    if debugMode: print("[INFO] Alinhamento concluído.")
     return warped

@@ -3,14 +3,14 @@ from pyzbar.pyzbar import decode
 import cv2
 import numpy as np
 
-def ler_info_qr_code(imagem):
+def ler_info_qr_code(imagem, debugMode):
   barcodes = decode(imagem)
   if barcodes:
     barcode = barcodes[0]
     dados_qr = barcode.data.decode('utf-8')
     (x, y, w, h) = barcode.rect
     bbox = (x, y, w, h)
-    print(f"[INFO] QR Code detectado. Dados: {dados_qr}")
+    if debugMode: print(f"[INFO] QR Code detectado. Dados: {dados_qr}")
     return dados_qr, bbox
   print("[AVISO] Nenhum QR Code foi encontrado na imagem.")
   return None, None
@@ -57,7 +57,7 @@ def verificar_falta_aluno(imagem, bbox_qr_code, debugMode=False, debugPath="."):
     # -----------------------------------
 
     fill_ratio = cv2.countNonZero(thresh) / thresh.size
-    print(f"[INFO] Proporção de preenchimento da marcação de falta: {fill_ratio:.2f}")
+    if debugMode: print(f"[INFO] Proporção de preenchimento da marcação de falta: {fill_ratio:.2f}")
 
     aluno_faltou = fill_ratio > FILL_RATIO_THRESHOLD
     

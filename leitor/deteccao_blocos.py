@@ -1,7 +1,7 @@
 import cv2
 
-def encontrar_blocos(image_alinhada):
-    print("\n[INFO] Etapa 4: Encontrando blocos de respostas...")
+def encontrar_blocos(image_alinhada, debugMode):
+    if debugMode: print("\n[INFO] Etapa 4: Encontrando blocos de respostas...")
     page_h, page_w = image_alinhada.shape[:2]
     gray = cv2.cvtColor(image_alinhada, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
