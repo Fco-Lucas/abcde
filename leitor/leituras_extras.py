@@ -1,19 +1,33 @@
-# leitura_extras.py
 from pyzbar.pyzbar import decode
+from qr_code_corrections import CORRECOES_BYTES_QR
 import cv2
 import numpy as np
 
 def ler_info_qr_code(imagem, debugMode):
-  barcodes = decode(imagem)
-  if barcodes:
-    barcode = barcodes[0]
-    dados_qr = barcode.data.decode('utf-8')
-    (x, y, w, h) = barcode.rect
-    bbox = (x, y, w, h)
-    if debugMode: print(f"[INFO] QR Code detectado. Dados: {dados_qr}")
-    return dados_qr, bbox
-  print("[AVISO] Nenhum QR Code foi encontrado na imagem.")
-  return None, None
+    barcodes = decode(imagem)
+    if barcodes:
+        barcode = barcodes[0]
+        dados_raw = barcode.data
+        
+        # Aplica as correções nos bytes brutos
+        dados_corrigidos = dados_raw
+        for bytes_problema, char_correto in CORRECOES_BYTES_QR.items():
+            if bytes_problema in dados_corrigidos:
+                dados_corrigidos = dados_corrigidos.replace(bytes_problema, char_correto.encode('utf-8'))
+        
+        # Agora decodifica para UTF-8
+        dados_qr = dados_corrigidos.decode('utf-8')
+        
+        (x, y, w, h) = barcode.rect
+        bbox = (x, y, w, h)
+        
+        if debugMode: 
+            print(f"[INFO] QR Code detectado. Dados: {dados_qr}")
+        
+        return dados_qr, bbox
+    
+    print("[AVISO] Nenhum QR Code foi encontrado na imagem.")
+    return None, None
 
 def verificar_falta_aluno(imagem, bbox_qr_code, debugMode=False, debugPath="."):
     if bbox_qr_code is None:

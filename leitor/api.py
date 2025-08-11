@@ -2,8 +2,6 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
 import cv2
-import sys
-sys.stdout.reconfigure(encoding='utf-8')
 
 from alinhamento import alinhar_pagina
 from deteccao_blocos import encontrar_blocos
