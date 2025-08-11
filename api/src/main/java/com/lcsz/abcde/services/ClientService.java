@@ -216,6 +216,13 @@ public class ClientService {
     }
 
     @Transactional(readOnly = true)
+    public ClientResponseDto getByCnpjDto(String cnpj) {
+        Client client = this.getByCnpj(cnpj, ClientStatus.ACTIVE);
+        if (client == null) throw new EntityNotFoundException(String.format("Cliente com CNPJ: '%s' não encontrado", cnpj));
+        return ClientMapper.toDto(client);
+    }
+
+    @Transactional(readOnly = true)
     public Client getByIdOrNull(UUID id) {
         return this.repository.findById(id).orElse(null);
     }

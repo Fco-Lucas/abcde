@@ -144,4 +144,11 @@ public class ClientController {
         this.service.restorePassword(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/getByCnpj/{cnpj}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ClientResponseDto> getByCnpj(@PathVariable String cnpj) {
+        ClientResponseDto responseDto = this.service.getByCnpjDto(cnpj);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
 }
