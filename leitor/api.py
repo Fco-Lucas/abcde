@@ -45,6 +45,11 @@ def processar_imagem(req: ImagemRequest):
     dados_qr, bbox_qr = ler_info_qr_code(imagem_alinhada)
     aluno_faltou = verificar_falta_aluno(imagem_alinhada, bbox_qr, debug_mode, debug_path)
 
+    try:
+        matricula, nomeAluno, etapa, prova, gabarito, qtdQuestoes = dados_qr.split("-")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="QR Code inválido ou em formato incorreto")
+
     if debug_mode and bbox_qr:
         debug_extras = imagem_alinhada.copy()
         (x, y, w, h) = bbox_qr
@@ -65,13 +70,8 @@ def processar_imagem(req: ImagemRequest):
         cv2.imwrite(f"{debug_path}/debug_etapa4_blocos.png", debug_blocos)
 
     # Etapa 5 - Ler respostas
-    respostas = ler_respostas(imagem_alinhada, blocos, debug_mode, debug_path, req.path_image)
+    respostas = ler_respostas(imagem_alinhada, blocos, debug_mode, debug_path, req.path_image, aluno_faltou, int(qtdQuestoes))
     respostas_formatadas = {f"{i:02d}": r for i, r in enumerate(respostas, start=1)}
-
-    try:
-        matricula, nomeAluno, etapa, prova, gabarito, qtdQuestoes = dados_qr.split("-")
-    except ValueError:
-        raise HTTPException(status_code=400, detail="QR Code inválido ou em formato incorreto")
 
     dados = {
         "matricula": matricula,

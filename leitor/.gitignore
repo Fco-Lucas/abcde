@@ -1,2 +1,6 @@
-debug/
 __pycache__/
+venv/
+debug/
+test/
+test.py
+images/

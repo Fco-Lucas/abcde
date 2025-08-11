@@ -22,13 +22,13 @@ def verificar_falta_aluno(imagem, bbox_qr_code, debugMode=False, debugPath="."):
     (x_qr, y_qr, w_qr, h_qr) = bbox_qr_code
 
     # Distância vertical do QR Code até o topo da ROI (em % da altura do QR)
-    Y_OFFSET_PCT = 0.35
+    Y_OFFSET_PCT = 0.23
     # Altura da ROI (em % da altura do QR)
-    H_ROI_PCT = 0.18
+    H_ROI_PCT = 0.16
     # Deslocamento horizontal da ROI (em % da largura do QR)
-    X_OFFSET_PCT = 0.96
+    X_OFFSET_PCT = 0.88
     # Largura da ROI (em % da largura do QR)
-    W_ROI_PCT = 0.19
+    W_ROI_PCT = 0.16
     # Limiar de preenchimento para considerar a marcação como "feita"
     FILL_RATIO_THRESHOLD = 0.50 # 50% da imagem tem que está marcada no mínimo
 
