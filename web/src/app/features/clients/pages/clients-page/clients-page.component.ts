@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 
 import { MatIconModule } from '@angular/material/icon';
 import { ClientFiltersComponent, ClientFiltersFormValues } from '../../components/client-filters/client-filters.component';
@@ -17,9 +17,10 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { DialogUpdateClientComponent, DialogUpdateClientData, UpdateClientFormValues } from '../../components/dialog-update-client/dialog-update-client.component';
-import { catchError, finalize, of, switchMap, tap } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { catchError, finalize, map, of, switchMap, tap } from 'rxjs';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ClientUsersService } from '../../services/client-users.service';
 
 interface ClientsPageState {
   clients: Client[];
@@ -54,6 +55,7 @@ export class ClientsPageComponent {
   private confirmationDialogService = inject(ConfirmationDialogService);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private destroyRef = inject(DestroyRef);
 
   private query = signal<ClientQuery>({
     filters: {},
@@ -74,6 +76,7 @@ export class ClientsPageComponent {
   public readonly isLoading = computed(() => this.state().loading);
   public readonly error = computed(() => this.state().error);
   public readonly pagination = computed(() => this.query().pagination);
+  public readonly authClientCnpj = signal<string | null>(null);
 
   public readonly viewState = computed<'loading' | 'error' | 'success'>(() => {
     if (this.isLoading() && this.clients().length === 0) return 'loading';
@@ -84,13 +87,28 @@ export class ClientsPageComponent {
   public readonly isComputexClientUser = computed<boolean>(() => {
     const decoded = this.authService.getDecodedToken();
     if(!decoded) return false;
-
     const isCnpj = /^\d{14}$/.test(decoded.sub);
-    
-    return !isCnpj
+    return !isCnpj;
   });
 
   constructor() {
+    effect(() => {
+      if (this.isComputexClientUser() && this.authClientCnpj() === null) {
+        const computex_cnpj: string = "12302493000101";
+        this.clientService.getByCnpj(computex_cnpj).pipe(
+          map(response => response.cnpj),
+          catchError(err => {
+            console.error("Erro ao buscar CNPJ do cliente do usuário autenticado:", err);
+            this.notification.showError("Não foi possível obter os dados do seu usuário.");
+            return of(null);
+          }),
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe(cnpj => {
+          if (cnpj) this.authClientCnpj.set(cnpj);
+        });
+      }
+    });
+
     toObservable(this.query).pipe(
       tap(() => this.state.update(s => ({ ...s, loading: true, error: null }))),
       switchMap(currentQuery => {

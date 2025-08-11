@@ -29,6 +29,10 @@ export class ClientService {
     return this.http.get<Client>(`${this.apiUrl}clients/${clientId}`);
   }
 
+  getByCnpj(clientCnpj: string): Observable<Client> {
+    return this.http.get<Client>(`${this.apiUrl}clients/getByCnpj/${clientCnpj}`);
+  }
+
   updateClient(clientId: string, data: UpdateClientInterface): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}clients/${clientId}`, data);
   }

@@ -35,7 +35,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class ClientListComponent implements OnChanges {
   private authService = inject(AuthService);
 
-  public authenticatedClientId = toSignal(this.authService.currentUserId$);
+  public authUserId = toSignal(this.authService.currentUserId$);
 
   @Input() clients: Client[] = [];
   @Input() isLoading: boolean = false;
@@ -43,6 +43,7 @@ export class ClientListComponent implements OnChanges {
   @Input() pageSize: number = 10;
   @Input() pageIndex: number = 0;
   @Input() isComputexClientUser: boolean = false;
+  @Input() authClientCnpj: string | null = null;
 
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() updateClient = new EventEmitter<Client>();

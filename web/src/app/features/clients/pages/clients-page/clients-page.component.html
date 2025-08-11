@@ -31,6 +31,7 @@
             [pageSize]="pagination().pageSize"
             [pageIndex]="pagination().pageIndex"
             [isComputexClientUser]="this.isComputexClientUser()"
+            [authClientCnpj]="this.authClientCnpj()"
             (pageChange)="onPageChange($event)"
             (updateClient)="onUpdateClient($event)"
             (deleteClient)="onDeleteClient($event)"
