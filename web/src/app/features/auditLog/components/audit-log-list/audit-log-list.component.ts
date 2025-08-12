@@ -36,6 +36,8 @@ export class AuditLogListComponent {
         return "Login";
       case "PROCESSED":
         return "Upload de imagens";
+      case "DOWNLOADTXT":
+        return "Baixar .txt"
       default:
         return '-';
     }

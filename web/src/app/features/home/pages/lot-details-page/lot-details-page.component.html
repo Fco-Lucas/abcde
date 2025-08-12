@@ -27,9 +27,9 @@
           </button>
 
           @if(this.lot().status === "COMPLETED") {
-            <button mat-menu-item aria-label="Baixar .txt" class="w-full" aria-label="Baixar .txt" (click)="onDownloadTxt()">
+            <button mat-menu-item class="w-full" aria-label="Baixar .txt / Importar dados" (click)="onDownloadTxt()">
               <mat-icon>download</mat-icon>
-              Baixar .txt
+              Baixar .txt / Importar dados
             </button>
           }
           @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {

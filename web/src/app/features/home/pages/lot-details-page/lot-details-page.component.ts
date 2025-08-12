@@ -472,7 +472,11 @@ export class LotDetailsPageComponent {
   }
 
   onDownloadTxt() {
-    this.lotService.downloadTxt(this.lot().id).subscribe({
+    this.loader.showLoad("Baixando informações...");
+
+    this.lotService.downloadTxt(this.lot().id).pipe(
+      finalize(() => this.loader.hideLoad())
+    ).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');

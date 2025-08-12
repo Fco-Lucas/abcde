@@ -3,7 +3,8 @@ export enum AuditLogAction {
   UPDATE = "UPDATE",
   DELETE = "DELETE",
   LOGIN = "LOGIN",
-  PROCESSED = "PROCESSED"
+  PROCESSED = "PROCESSED",
+  DOWNLOADTXT = "DOWNLOADTXT"
 }
 
 export enum AuditLogProgram {
