@@ -1,4 +1,4 @@
-package com.lcsz.abcde.dtos.lot;
+package com.lcsz.abcde.dtos;
 
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 
@@ -13,12 +13,14 @@ public class ExportDataImagesDto {
     private Integer turma;
     private String etapa;
     private Integer prova;
+    private String gabarito;
+    private Integer presenca;
     private List<LotImageQuestionResponseDto> questions;
 
     public ExportDataImagesDto() {
     }
 
-    public ExportDataImagesDto(Integer matricula, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, List<LotImageQuestionResponseDto> questions) {
+    public ExportDataImagesDto(Integer matricula, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito, Integer presenca, List<LotImageQuestionResponseDto> questions) {
         this.matricula = matricula;
         this.codigoEscola = codigoEscola;
         this.ano = ano;
@@ -27,6 +29,8 @@ public class ExportDataImagesDto {
         this.turma = turma;
         this.etapa = etapa;
         this.prova = prova;
+        this.gabarito = gabarito;
+        this.presenca = presenca;
         this.questions = questions;
     }
 
@@ -94,6 +98,22 @@ public class ExportDataImagesDto {
         this.prova = prova;
     }
 
+    public String getGabarito() {
+        return gabarito;
+    }
+
+    public void setGabarito(String gabarito) {
+        this.gabarito = gabarito;
+    }
+
+    public Integer getPresenca() {
+        return presenca;
+    }
+
+    public void setPresenca(Integer presenca) {
+        this.presenca = presenca;
+    }
+
     public List<LotImageQuestionResponseDto> getQuestions() {
         return questions;
     }
@@ -113,6 +133,8 @@ public class ExportDataImagesDto {
                 ", turma=" + turma +
                 ", etapa='" + etapa + '\'' +
                 ", prova=" + prova +
+                ", gabarito=" + gabarito +
+                ", presenca=" + presenca +
                 ", questions=" + questions +
                 '}';
     }

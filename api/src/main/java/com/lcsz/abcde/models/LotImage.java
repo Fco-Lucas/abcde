@@ -25,6 +25,16 @@ public class LotImage {
     private Integer matricula;
     @Column(nullable = false, length = 70, name = "nome_aluno")
     private String nomeAluno;
+    @Column(nullable = false, name = "codigo_escola")
+    private Integer codigoEscola;
+    @Column(nullable = false)
+    private Integer ano;
+    @Column(nullable = false, name = "grau_serie")
+    private Integer grauSerie;
+    @Column(nullable = false, length = 1)
+    private String turno;
+    @Column(nullable = false)
+    private Integer turma;
     @Column(nullable = false, length = 1)
     private String etapa;
     @Column(nullable = false)
@@ -47,13 +57,18 @@ public class LotImage {
     public LotImage() {
     }
 
-    public LotImage(Long id, Long lotId, String key, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt) {
+    public LotImage(Long id, Long lotId, String key, String originalName, Integer matricula, String nomeAluno, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.lotId = lotId;
         this.key = key;
         this.originalName = originalName;
         this.matricula = matricula;
         this.nomeAluno = nomeAluno;
+        this.codigoEscola = codigoEscola;
+        this.ano = ano;
+        this.grauSerie = grauSerie;
+        this.turno = turno;
+        this.turma = turma;
         this.etapa = etapa;
         this.prova = prova;
         this.gabarito = gabarito;
@@ -112,6 +127,46 @@ public class LotImage {
         this.nomeAluno = nomeAluno;
     }
 
+    public Integer getCodigoEscola() {
+        return codigoEscola;
+    }
+
+    public void setCodigoEscola(Integer codigoEscola) {
+        this.codigoEscola = codigoEscola;
+    }
+
+    public Integer getAno() {
+        return ano;
+    }
+
+    public void setAno(Integer ano) {
+        this.ano = ano;
+    }
+
+    public Integer getGrauSerie() {
+        return grauSerie;
+    }
+
+    public void setGrauSerie(Integer grauSerie) {
+        this.grauSerie = grauSerie;
+    }
+
+    public String getTurno() {
+        return turno;
+    }
+
+    public void setTurno(String turno) {
+        this.turno = turno;
+    }
+
+    public Integer getTurma() {
+        return turma;
+    }
+
+    public void setTurma(Integer turma) {
+        this.turma = turma;
+    }
+
     public String getEtapa() {
         return etapa;
     }
@@ -144,10 +199,6 @@ public class LotImage {
         this.presenca = presenca;
     }
 
-    public LotImageStatus getStatus() {
-        return status;
-    }
-
     public Integer getQtdQuestoes() {
         return qtdQuestoes;
     }
@@ -162,6 +213,10 @@ public class LotImage {
 
     public void setHaveModification(Boolean haveModification) {
         this.haveModification = haveModification;
+    }
+
+    public LotImageStatus getStatus() {
+        return status;
     }
 
     public void setStatus(LotImageStatus status) {
@@ -193,10 +248,15 @@ public class LotImage {
         return "LotImage{" +
                 "id=" + id +
                 ", lotId=" + lotId +
-                ", key=" + key +
+                ", key='" + key + '\'' +
                 ", originalName='" + originalName + '\'' +
                 ", matricula=" + matricula +
-                ", nomeAluno=" + nomeAluno +
+                ", nomeAluno='" + nomeAluno + '\'' +
+                ", codigoEscola=" + codigoEscola +
+                ", ano=" + ano +
+                ", grauSerie=" + grauSerie +
+                ", turno='" + turno + '\'' +
+                ", turma=" + turma +
                 ", etapa='" + etapa + '\'' +
                 ", prova=" + prova +
                 ", gabarito='" + gabarito + '\'' +

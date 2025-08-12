@@ -91,6 +91,11 @@ public class LotImageService {
         lotImage.setOriginalName(dto.getOriginalName());
         lotImage.setMatricula(dto.getMatricula());
         lotImage.setNomeAluno(dto.getNomeAluno());
+        lotImage.setCodigoEscola(dto.getCodigoEscola());
+        lotImage.setAno(dto.getAno());
+        lotImage.setGrauSerie(dto.getGrauSerie());
+        lotImage.setTurno(dto.getTurno());
+        lotImage.setTurma(dto.getTurma());
         lotImage.setEtapa(dto.getEtapa());
         lotImage.setProva(dto.getProva());
         lotImage.setGabarito(dto.getGabarito());
@@ -169,11 +174,18 @@ public class LotImageService {
     @Transactional(readOnly = true)
     public LotImageResponseDto getByIdDto(Long id) {
         LotImage lotImage = this.getById(id);
+        LotImageResponseDto responseDto = LotImageMapper.toDto(lotImage);
+
+        // Busca as questões da imagem
         List<LotImageQuestionResponseDto> questions = this.lotImageQuestionService.getAllByImageId(id);
 
-        LotImageResponseDto responseDto = LotImageMapper.toDto(lotImage);
+        // Verifica se a imagem existe no diretório, se não existir seta null na URL
+        String imageUrl = this.getImageUrl(lotImage.getLotId(), lotImage.getKey());
+        String imageAbsolutePath = this.getAbsoluteImagePath(lotImage.getLotId(), lotImage.getKey());
+        String url = Files.exists(Paths.get(imageAbsolutePath)) ? imageUrl : null;
+
         responseDto.setQuestions(questions);
-        responseDto.setUrl(this.getImageUrl(lotImage.getLotId(), lotImage.getKey()));
+        responseDto.setUrl(url);
         return responseDto;
     }
 
@@ -299,6 +311,11 @@ public class LotImageService {
                 originalFileName,
                 dados.getMatricula(),
                 dados.getNomeAluno(),
+                dados.getCodigoEscola(),
+                dados.getAno(),
+                dados.getGrauSerie(),
+                dados.getTurno(),
+                dados.getTurma(),
                 dados.getEtapa(),
                 dados.getProva(),
                 dados.getGabarito(),

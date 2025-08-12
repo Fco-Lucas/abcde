@@ -1,9 +1,9 @@
 package com.lcsz.abcde.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lcsz.abcde.dtos.ExportDto;
+import com.lcsz.abcde.dtos.ExportDataDto;
+import com.lcsz.abcde.dtos.ExportDataImagesDto;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
-import com.lcsz.abcde.dtos.clients.ClientResponseDto;
 import com.lcsz.abcde.dtos.lot.LotCreateDto;
 import com.lcsz.abcde.dtos.lot.LotResponseDto;
 import com.lcsz.abcde.dtos.lot.LotUpdateDto;
@@ -48,14 +48,16 @@ public class LotService {
     private final ClientUserService clientUserService;
     private final AuditLogService auditLogService;
     private final AuthenticatedUserProvider provider;
+    private final ObjectMapper objectMapper;
 
-    LotService(LotRepository lotRepository, LotImageService lotImageService, ClientService clientService, ClientUserService clientUserService, AuditLogService auditLogService, AuthenticatedUserProvider provider) {
+    LotService(LotRepository lotRepository, LotImageService lotImageService, ClientService clientService, ClientUserService clientUserService, AuditLogService auditLogService, AuthenticatedUserProvider provider, ObjectMapper objectMapper) {
         this.lotRepository = lotRepository;
         this.lotImageService = lotImageService;
         this.clientService = clientService;
         this.clientUserService = clientUserService;
         this.auditLogService = auditLogService;
         this.provider = provider;
+        this.objectMapper = objectMapper;
     }
 
     public String formatLotForLog(LotResponseDto dto) {
@@ -264,13 +266,11 @@ public class LotService {
         return this.provider.getAuthenticatedUserRole(userId);
     }
 
-    public void exportData(LotResponseDto lot, List<LotImageResponseDto> imageResponseDtos, String urlToPost) {
+    public void exportData(String urlToPost, LotResponseDto lot, ExportDataDto exportDataDto) {
         try {
-            ExportDto exportDto = ExportMapper.toDto(lot, imageResponseDtos);
-
             // Converte para JSON
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(exportDto);
+            String json = objectMapper.writeValueAsString(exportDataDto);
+            // System.out.println(json);
 
             // Cria o request
             HttpRequest request = HttpRequest.newBuilder()
@@ -281,23 +281,23 @@ public class LotService {
 
             // Envia de forma assíncrona (não bloqueia)
             HttpClient.newHttpClient()
-                    .sendAsync(request, HttpResponse.BodyHandlers.discarding()) // ignora resposta
-                    .exceptionally(ex -> {
-                        String details = String.format(
-                                "Erro ao enviar POST para a url '%s' ao baixar o text do lote contendo as seguintes informações: %s. ERRO: %s",
-                                urlToPost, this.formatLotForLog(lot), ex.getMessage()
-                        );
-                        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DOWNLOADTXT, AuditProgram.LOT, details);
-                        this.auditLogService.create(logDto);
-                        return null;
-                    });
+                    .sendAsync(request, HttpResponse.BodyHandlers.discarding());
 
-        } catch (Exception e) {
+            // Confirma o envio, não se importando com o resultado
             String details = String.format(
-                    "Erro ao enviar POST para a url '%s' ao baixar o text do lote contendo as seguintes informações: %s. ERRO: %s",
-                    urlToPost, this.formatLotForLog(lot), e.getMessage()
+                    "POST para '%s' disparado para baixar o .txt do lote contendo: %s",
+                    urlToPost, this.formatLotForLog(lot)
             );
             AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DOWNLOADTXT, AuditProgram.LOT, details);
+            this.auditLogService.create(logDto);
+        } catch (Exception e) {
+            String details = String.format(
+                    "Erro ao preparar POST para a url '%s' ao baixar o .txt do lote contendo as seguintes informações: %s. ERRO: %s",
+                    urlToPost, this.formatLotForLog(lot), e.getMessage()
+            );
+            AuditLogCreateDto logDto = new AuditLogCreateDto(
+                    AuditAction.DOWNLOADTXT, AuditProgram.LOT, details
+            );
             this.auditLogService.create(logDto);
         }
     }
@@ -307,10 +307,10 @@ public class LotService {
         PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
         if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
 
-
         LotResponseDto lot = this.getLotByIdDto(lotId);
+
         List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
-        List<LotImageResponseDto> imageResponseDtos = new ArrayList<>();
+        List<ExportDataImagesDto> exportDataImagesDtos = new ArrayList<>();
 
         StringBuilder content = new StringBuilder("imagem,matricula");
 
@@ -320,13 +320,12 @@ public class LotService {
         }
 
         for (LotImage lotImage : lotImages) {
-            imageResponseDtos.add(this.lotImageService.getByIdDto(lotImage.getId()));
-
             String matricula = String.format("%08d", lotImage.getMatricula()); // 8 dígitos com 0 à esquerda
             String etapa = lotImage.getEtapa();
             String prova = String.format("%02d", lotImage.getProva());         // 2 dígitos com 0 à esquerda
             String gabarito = lotImage.getGabarito();
             Integer presenca = lotImage.getPresenca();                         // 1 ou 0
+            List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
 
             // Linha: nome da imagem + dados do QR Code
             String linha = "\n" + lotImage.getOriginalName() + "," +
@@ -336,7 +335,6 @@ public class LotService {
 
             // Adiciona respostas das questões se o aluno está presente, caso contrário somente as vírgulas
             if(presenca == 1) {
-                List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
                 for (LotImageQuestionResponseDto question : questions) {
                     String alt = question.getAlternative();
                     String alternative = (alt != null && alt.length() == 1) ? alt : "W";
@@ -353,6 +351,8 @@ public class LotService {
             }else {
                 content.append(",".repeat(90));
             }
+
+            exportDataImagesDtos.add(ExportMapper.toImageDto(lotImage, questions));
         }
 
         // Obtém o cliente
@@ -360,7 +360,10 @@ public class LotService {
         String urlToPost = client.getUrlToPost();
 
         // Caso o cliente possua urlToPost informada, faz o post com o JSON dos dados para a URL sem aguardar um resultado
-        if(urlToPost != null && !urlToPost.isBlank()) this.exportData(lot, imageResponseDtos, urlToPost);
+        if(urlToPost != null && !urlToPost.isBlank()) {
+            ExportDataDto exportDataDto = ExportMapper.toDto(exportDataImagesDtos);
+            this.exportData(urlToPost, lot, exportDataDto);
+        }
 
         return content.toString().getBytes(StandardCharsets.UTF_8);
     }

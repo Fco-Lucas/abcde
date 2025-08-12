@@ -5,6 +5,11 @@ CREATE TABLE lots_images (
     original_name VARCHAR(255) NOT NULL,
     matricula INTEGER NOT NULL, -- Até 2 bilhões
     nome_aluno VARCHAR(70) NOT NULL,
+    codigo_escola SMALLINT NOT NULL,
+    ano INTEGER NOT NULL,
+    grau_serie SMALLINT NOT NULL,
+    turno CHAR(1) NOT NULL CHECK (turno IN ('M', 'T', 'N')),
+    turma SMALLINT NOT NULL,
     etapa VARCHAR(1) NOT NULL,
     prova SMALLINT NOT NULL, -- 0 a 99
     gabarito VARCHAR(1) NOT NULL,

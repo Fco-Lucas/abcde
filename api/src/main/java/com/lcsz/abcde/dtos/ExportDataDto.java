@@ -1,4 +1,4 @@
-package com.lcsz.abcde.dtos.lot;
+package com.lcsz.abcde.dtos;
 
 
 import java.util.List;

@@ -13,6 +13,11 @@ public class LotImageResponseDto {
     private String originalName;
     private Integer matricula;
     private String nomeAluno;
+    private Integer codigoEscola;
+    private Integer ano;
+    private Integer grauSerie;
+    private String turno;
+    private Integer turma;
     private String etapa;
     private Integer prova;
     private String gabarito;
@@ -26,13 +31,18 @@ public class LotImageResponseDto {
     public LotImageResponseDto() {
     }
 
-    public LotImageResponseDto(Long id, Long lotId, String url, String originalName, Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt, List<LotImageQuestionResponseDto> questions) {
+    public LotImageResponseDto(Long id, Long lotId, String url, String originalName, Integer matricula, String nomeAluno, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt, List<LotImageQuestionResponseDto> questions) {
         this.id = id;
         this.lotId = lotId;
         this.url = url;
         this.originalName = originalName;
         this.matricula = matricula;
         this.nomeAluno = nomeAluno;
+        this.codigoEscola = codigoEscola;
+        this.ano = ano;
+        this.grauSerie = grauSerie;
+        this.turno = turno;
+        this.turma = turma;
         this.etapa = etapa;
         this.prova = prova;
         this.gabarito = gabarito;
@@ -92,6 +102,46 @@ public class LotImageResponseDto {
         this.nomeAluno = nomeAluno;
     }
 
+    public Integer getCodigoEscola() {
+        return codigoEscola;
+    }
+
+    public void setCodigoEscola(Integer codigoEscola) {
+        this.codigoEscola = codigoEscola;
+    }
+
+    public Integer getAno() {
+        return ano;
+    }
+
+    public void setAno(Integer ano) {
+        this.ano = ano;
+    }
+
+    public Integer getGrauSerie() {
+        return grauSerie;
+    }
+
+    public void setGrauSerie(Integer grauSerie) {
+        this.grauSerie = grauSerie;
+    }
+
+    public String getTurno() {
+        return turno;
+    }
+
+    public void setTurno(String turno) {
+        this.turno = turno;
+    }
+
+    public Integer getTurma() {
+        return turma;
+    }
+
+    public void setTurma(Integer turma) {
+        this.turma = turma;
+    }
+
     public String getEtapa() {
         return etapa;
     }
@@ -124,22 +174,6 @@ public class LotImageResponseDto {
         this.presenca = presenca;
     }
 
-    public LotImageStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(LotImageStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public Integer getQtdQuestoes() {
         return qtdQuestoes;
     }
@@ -156,6 +190,22 @@ public class LotImageResponseDto {
         this.haveModification = haveModification;
     }
 
+    public LotImageStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(LotImageStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public List<LotImageQuestionResponseDto> getQuestions() {
         return questions;
     }
@@ -169,9 +219,15 @@ public class LotImageResponseDto {
         return "LotImageResponseDto{" +
                 "id=" + id +
                 ", lotId=" + lotId +
-                ", url=" + url +
+                ", url='" + url + '\'' +
                 ", originalName='" + originalName + '\'' +
                 ", matricula=" + matricula +
+                ", nomeAluno='" + nomeAluno + '\'' +
+                ", codigoEscola=" + codigoEscola +
+                ", ano=" + ano +
+                ", grauSerie=" + grauSerie +
+                ", turno='" + turno + '\'' +
+                ", turma=" + turma +
                 ", etapa='" + etapa + '\'' +
                 ", prova=" + prova +
                 ", gabarito='" + gabarito + '\'' +

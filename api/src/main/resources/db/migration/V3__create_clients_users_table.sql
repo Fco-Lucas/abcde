@@ -1,5 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 CREATE TABLE clients_users (
-    id UUID NOT NULL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     client_id UUID NOT NULL REFERENCES clients(id),
     name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
