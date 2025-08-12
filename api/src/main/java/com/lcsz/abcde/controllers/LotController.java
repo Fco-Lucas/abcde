@@ -77,6 +77,12 @@ public class LotController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}/export-data")
+    public ResponseEntity<Void> exportData(@PathVariable Long id) {
+        this.lotService.exportDataToEndpoint(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}/download-txt")
     public ResponseEntity<byte[]> downloadTxt(@PathVariable Long id) {
         byte[] contentBytes = this.lotService.generateTxt(id);

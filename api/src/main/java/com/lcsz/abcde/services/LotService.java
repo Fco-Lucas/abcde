@@ -266,7 +266,7 @@ public class LotService {
         return this.provider.getAuthenticatedUserRole(userId);
     }
 
-    public void exportData(String urlToPost, LotResponseDto lot, ExportDataDto exportDataDto) {
+    private void exportData(String urlToPost, LotResponseDto lot, ExportDataDto exportDataDto) {
         try {
             // Converte para JSON
             String json = objectMapper.writeValueAsString(exportDataDto);
@@ -302,15 +302,37 @@ public class LotService {
         }
     }
 
-    public byte[] generateTxt(Long lotId) {
+    public void exportDataToEndpoint(Long lotId) {
         // Verifica se o usuário possui permissão para visualizar lotes
         PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
         if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
 
         LotResponseDto lot = this.getLotByIdDto(lotId);
-
         List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
         List<ExportDataImagesDto> exportDataImagesDtos = new ArrayList<>();
+
+        for (LotImage lotImage : lotImages) {
+            List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
+            exportDataImagesDtos.add(ExportMapper.toImageDto(lotImage, questions));
+        }
+
+        // Obtém o cliente
+        Client client = this.clientService.getByCnpj(lot.getUserCnpj(), ClientStatus.ACTIVE);
+        String urlToPost = client.getUrlToPost();
+
+        // Caso o cliente possua urlToPost informada, faz o post com o JSON dos dados para a URL sem aguardar um resultado
+        if(urlToPost != null && !urlToPost.isBlank()) {
+            ExportDataDto exportDataDto = ExportMapper.toDto(exportDataImagesDtos);
+            this.exportData(urlToPost, lot, exportDataDto);
+        }
+    }
+
+    public byte[] generateTxt(Long lotId) {
+        // Verifica se o usuário possui permissão para visualizar lotes
+        PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
+        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
+
+        List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
 
         StringBuilder content = new StringBuilder("imagem,matricula");
 
@@ -351,18 +373,6 @@ public class LotService {
             }else {
                 content.append(",".repeat(90));
             }
-
-            exportDataImagesDtos.add(ExportMapper.toImageDto(lotImage, questions));
-        }
-
-        // Obtém o cliente
-        Client client = this.clientService.getByCnpj(lot.getUserCnpj(), ClientStatus.ACTIVE);
-        String urlToPost = client.getUrlToPost();
-
-        // Caso o cliente possua urlToPost informada, faz o post com o JSON dos dados para a URL sem aguardar um resultado
-        if(urlToPost != null && !urlToPost.isBlank()) {
-            ExportDataDto exportDataDto = ExportMapper.toDto(exportDataImagesDtos);
-            this.exportData(urlToPost, lot, exportDataDto);
         }
 
         return content.toString().getBytes(StandardCharsets.UTF_8);
