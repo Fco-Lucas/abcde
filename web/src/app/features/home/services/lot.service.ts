@@ -51,4 +51,8 @@ export class LotService {
       responseType: 'blob'
     });
   }
+
+  exportData(id: number): Observable<void> {
+    return this.http.get<void>(`${this.apiUrl}lots/${id}/export-data`);
+  }
 }

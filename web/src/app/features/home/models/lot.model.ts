@@ -13,6 +13,7 @@ export interface LotInterface {
   id: number;
   userId: string;
   userName: string;
+  userCnpj: string;
   name: string;
   numberImages: number;
   status: LotStatusEnum;

@@ -42,10 +42,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { LoadingService } from '../../../../core/services/loading.service';
+import type { Client } from '../../../clients/models/client.model';
 
 interface LotDetailsState {
   lot: LotInterface;
   userPermissions: PermissionInterface;
+  clientLot: Client;
   lotImages: LotImagePageableInterface[];
   totalImages: number;
   loadingImages: boolean;
@@ -98,6 +100,7 @@ export class LotDetailsPageComponent {
   private state = signal<LotDetailsState>({
     lot: this.lotStateService.selectedLot()!,
     userPermissions: this.lotStateService.userPermissions()!,
+    clientLot: this.lotStateService.clientLot()!,
     lotImages: [],
     totalImages: 0,
     loadingImages: true,
@@ -110,6 +113,7 @@ export class LotDetailsPageComponent {
 
   public readonly lot = computed(() => this.state().lot);
   public readonly userPermissions = computed(() => this.state().userPermissions);
+  public readonly clientLot = computed(() => this.state().clientLot);
   public readonly lotImages = computed(() => this.state().lotImages);
   public readonly totalImages = computed(() => this.state().totalImages);
   public readonly isLoadingImages = computed(() => this.state().loadingImages);
@@ -156,7 +160,7 @@ export class LotDetailsPageComponent {
   });
 
   constructor() {
-    if (!this.lot() || !this.userPermissions()) {
+    if (!this.lot() || !this.userPermissions() || !this.clientLot()) {
       this.router.navigate(['/app/home']);
       return;
     }
@@ -468,6 +472,17 @@ export class LotDetailsPageComponent {
       error: (err) => {
         this.notification.showError(err.message);
       }
+    });
+  }
+
+  onExportData() {
+    this.loader.showLoad("Enviando dados do lote para URL...");
+
+    this.lotService.exportData(this.lot().id).pipe(
+      finalize(() => this.loader.hideLoad())
+    ).subscribe({
+      next: (_) => this.notification.showSuccess("Dados do lote enviados com sucesso"),
+      error: (_) => this.notification.showError("Ocorreu um erro ao gerar o arquivo .txt do lote, tente novamente mais tarde!")
     });
   }
 

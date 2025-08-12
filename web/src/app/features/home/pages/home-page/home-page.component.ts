@@ -19,10 +19,13 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { LotService } from '../../services/lot.service';
-import { catchError, combineLatest, of, shareReplay, switchMap, tap } from 'rxjs';
+import { catchError, combineLatest, firstValueFrom, of, shareReplay, switchMap, tap } from 'rxjs';
 import { LotStateService } from '../../services/lot-state.service';
 import { Router } from '@angular/router';
 import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/ui-not-found.component';
+import { ClientService } from '../../../clients/services/client.service';
+import type { Client } from '../../../clients/models/client.model';
+import { LoadingService } from '../../../../core/services/loading.service';
 
 interface HomeState {
   permissions: PermissionInterface | null;
@@ -59,8 +62,10 @@ export class HomePageComponent {
   private lotService = inject(LotService);
   private lotStateService = inject(LotStateService);
   private authService = inject(AuthService);
+  private clientService = inject(ClientService);
   private permissionsService = inject(PermissionsService);
   private notification = inject(NotificationService);
+  private loader = inject(LoadingService);
   private router = inject(Router);
 
   private query = signal<HomeLotsQuery>({
@@ -184,14 +189,37 @@ export class HomePageComponent {
       .afterClosed().subscribe(() => this.forceReload());
   }
 
-  onOpenLotDetails(lot: LotInterface) {
+  private async getClientLotByCnpj(cnpj: string): Promise<Client | null> {
+    try {
+      return await firstValueFrom(this.clientService.getByCnpj(cnpj));
+    } catch (err) {
+      this.notification.showError("Ocorreu um erro ao buscar o cliente na qual pertence o lote");
+      return null;
+    }
+  }
+
+  async onOpenLotDetails(lot: LotInterface) {
+    this.loader.showLoad("Buscando informações...");
+
     const permissions = this.permissions();
-    if(!permissions) {
+    if (!permissions) {
       this.notification.showError("Erro ao obter as permissões do usuário");
+      this.loader.hideLoad();
       return;
     }
+
+    const clientLot = await this.getClientLotByCnpj(lot.userCnpj);
+    if (!clientLot) {
+      this.notification.showError("Erro ao obter o cliente que criou o lote");
+      this.loader.hideLoad();
+      return;
+    }
+
     this.lotStateService.selectLot(lot);
     this.lotStateService.setPermissions(permissions);
+    this.lotStateService.setClientLot(clientLot);
+
+    this.loader.hideLoad();
     this.router.navigate(["/app/loteDetails"]);
   }
 }

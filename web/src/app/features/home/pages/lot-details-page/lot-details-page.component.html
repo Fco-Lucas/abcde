@@ -26,10 +26,16 @@
             Processos auditados
           </button>
 
+          @if(this.lot().status === "COMPLETED" && this.clientLot().urlToPost && this.clientLot().urlToPost !== "") {
+            <button mat-menu-item class="w-full" aria-label="Enviar dados para URL fornecida no cadastro" (click)="onExportData()">
+              <mat-icon>upload</mat-icon>
+              Enviar dados para URL
+            </button>
+          }
           @if(this.lot().status === "COMPLETED") {
-            <button mat-menu-item class="w-full" aria-label="Baixar .txt / Importar dados" (click)="onDownloadTxt()">
+            <button mat-menu-item class="w-full" aria-label="Baixar .txt" (click)="onDownloadTxt()">
               <mat-icon>download</mat-icon>
-              Baixar .txt / Importar dados
+              Baixar .txt
             </button>
           }
           @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {
