@@ -58,15 +58,3 @@ body {
     button-color: #ffffff
   ));
 }
-
-// src/styles.scss
-.loading-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
-  background-color: transparent;
-  box-shadow: none;
-}
-
-.text-truncate {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}

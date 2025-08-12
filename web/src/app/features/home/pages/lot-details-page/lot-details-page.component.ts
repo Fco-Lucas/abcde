@@ -41,6 +41,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
+import { LoadingService } from '../../../../core/services/loading.service';
 
 interface LotDetailsState {
   lot: LotInterface;
@@ -85,6 +86,7 @@ export class LotDetailsPageComponent {
   private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
   private formDirty = signal(false);
+  private loader = inject(LoadingService);
 
   private imagesQuery = signal<ImagesQuery>({
     filters: {},
@@ -273,7 +275,12 @@ export class LotDetailsPageComponent {
       return;
     }
 
+    this.loader.showLoad("Salvando alterações...");
+
     this.lotImageService.updateLotImageQuestions(this.lot()!.id, imageDetails.id, changedQuestions)
+      .pipe(
+        finalize(() => this.loader.hideLoad())
+      )
       .subscribe({
         next: () => {
           this.notification.showSuccess("Respostas salvas com sucesso!");
@@ -353,8 +360,12 @@ export class LotDetailsPageComponent {
     });
   }
 
-  public readonly shouldShowSaveFab = computed(() => {
-    return this.formDirty() && !this.isLotCompleted() && !this.hasUnansweredQuestions();
+  public readonly shouldShowSaveFab = computed<boolean>(() => {
+    const formDirty = this.formDirty();
+    const isLotCompleted = this.isLotCompleted();
+    const hasUnansweredQuestions = this.hasUnansweredQuestions();
+    
+    return formDirty && !isLotCompleted && !hasUnansweredQuestions;
   });
 
   get usedQuestions() {
@@ -477,7 +488,13 @@ export class LotDetailsPageComponent {
   }
 
   onDownloadLot() {
-    this.lotImageService.downloadAll(this.lot().id).subscribe({
+    this.loader.showLoad("Baixando imagens...");
+    
+    this.lotImageService.downloadAll(this.lot().id).pipe(
+      finalize(() => {
+        this.loader.hideLoad();
+      })
+    ).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
