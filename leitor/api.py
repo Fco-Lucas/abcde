@@ -46,7 +46,7 @@ def processar_imagem(req: ImagemRequest):
     aluno_faltou = verificar_falta_aluno(imagem_alinhada, bbox_qr, debug_mode, debug_path)
 
     try:
-        matricula, nomeAluno, etapa, prova, gabarito, qtdQuestoes = dados_qr.split("-")
+        matricula, nomeAluno, etapa, prova, gabarito, qtdQuestoes, codigoEscola, ano, grauSerie, turno, turma = dados_qr.split("-")
     except ValueError:
         raise HTTPException(status_code=400, detail="QR Code inválido ou em formato incorreto")
 
@@ -80,6 +80,11 @@ def processar_imagem(req: ImagemRequest):
         "prova": prova,
         "gabarito": gabarito,
         "qtdQuestoes": qtdQuestoes,
+        "codigoEscola": codigoEscola,
+        "ano": ano,
+        "grauSerie": grauSerie,
+        "turno": turno,
+        "turma": turma,
         "presenca": 0 if aluno_faltou else 1
     }
 
