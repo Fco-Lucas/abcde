@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath, pathFileToSave, aluno_faltou, qtdQuestoes):
     if debugMode: print("\n[INFO] Etapa 5: Lendo respostas com controle total...")
@@ -99,6 +100,12 @@ def ler_respostas(imagem_alinhada, blocos, debugMode, debugPath, pathFileToSave,
         print("[DEBUG] Imagem 'resultado_etapa5_debug_visual.png' gerada com controle total.")
 
     if not debugMode:
-        cv2.imwrite(pathFileToSave, debug_image)
+        ext = os.path.splitext(pathFileToSave)[1].lower()
+        if ext in [".jpg", ".jpeg"]:
+            cv2.imwrite(pathFileToSave, debug_image, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        elif ext == ".png":
+            cv2.imwrite(pathFileToSave, debug_image, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+        else:
+            cv2.imwrite(pathFileToSave, debug_image)  # fallback sem compressão
 
     return respostas
