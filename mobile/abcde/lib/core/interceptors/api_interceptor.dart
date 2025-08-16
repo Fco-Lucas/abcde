@@ -9,6 +9,7 @@ class CustomInterceptor extends Interceptor {
     // 1. Verificamos se o erro tem uma resposta da API
     if (err.response != null) {
       final responseData = err.response!.data;
+      print("Resposta do servidor: ${responseData}");
       String? apiErrorMessage;
 
       // 2. Verificamos se a resposta contém nossa chave 'message'

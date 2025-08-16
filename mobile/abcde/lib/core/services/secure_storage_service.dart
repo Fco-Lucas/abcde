@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:abcde/core/models/jwt_data_model.dart';
+import 'package:abcde/core/services/jwt_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -6,50 +10,64 @@ part 'secure_storage_service.g.dart';
 
 @riverpod
 SecureStorageService secureStorageService(Ref ref) {
-  return SecureStorageService();
+  final jwtService = ref.watch(jwtServiceProvider);
+  return SecureStorageService(jwtService);
 }
 
 class SecureStorageService {
-  // instância do storage
+  final JwtService _jwtService;
   final _secureStorage = const FlutterSecureStorage();
 
+  SecureStorageService(this._jwtService);
+
   static const _authTokenKey = 'authToken';
-  static const _authTokenExpiryKey = 'authTokenExpiry';
+  static const _jwtDataKey = 'jwtData';
 
   Future<void> saveToken(String token) async {
-    // Define a data de expiração. Ex: 1 dias a partir de agora.
-    final expiryDate = DateTime.now().add(const Duration(days: 1));
+    // Decodifica o token usando o serviço especializado.
+    final jwtData = _jwtService.decodeToken(token);
 
-    // Salva tanto o token quanto a data de expiração (convertida para String)
+    // Salva o token bruto.
     await _secureStorage.write(key: _authTokenKey, value: token);
-    await _secureStorage.write(key: _authTokenExpiryKey, value: expiryDate.toIso8601String());
+
+    // Converte o modelo de dados do usuário para uma string JSON e salva.
+    await _secureStorage.write(
+      key: _jwtDataKey,
+      value: jsonEncode(jwtData.toJson()),
+    );
   }
-
-  Future<String?> getToken() async {
+  
+  Future<String?> getAuthToken() async {
     final token = await _secureStorage.read(key: _authTokenKey);
-    final expiryDateString = await _secureStorage.read(key: _authTokenExpiryKey);
+    final jwtData = await getJwtData();
 
-    // Se não houver token ou data de expiração, retorna nulo
-    if (token == null || expiryDateString == null) {
+    if (token == null || jwtData == null) {
       return null;
     }
 
-    // Converte a data de volta para um objeto DateTime
-    final expiryDate = DateTime.parse(expiryDateString);
+    // O JWT 'exp' é um timestamp em segundos. Convertemos para milissegundos.
+    final expiryDate = DateTime.fromMillisecondsSinceEpoch(jwtData.exp * 1000);
 
-    // Verifica se a data de expiração já passou
     if (expiryDate.isBefore(DateTime.now())) {
-      // Se o token expirou, apaga os dados e retorna nulo
-      await deleteToken();
+      await deleteAll(); // O token expirou, limpa tudo.
       return null;
     }
 
-    // Se tudo estiver certo, retorna o token
     return token;
   }
 
-  Future<void> deleteToken() async {
+  /// Retorna os dados do usuário decodificados.
+  Future<JwtDataModel?> getJwtData() async {
+    final jwtDataString = await _secureStorage.read(key: _jwtDataKey);
+    if (jwtDataString == null) {
+      return null;
+    }
+    return JwtDataModel.fromJson(jsonDecode(jwtDataString));
+  }
+
+  /// Apaga todos os dados de autenticação.
+  Future<void> deleteAll() async {
     await _secureStorage.delete(key: _authTokenKey);
-    await _secureStorage.delete(key: _authTokenExpiryKey);
+    await _secureStorage.delete(key: _jwtDataKey);
   }
 }

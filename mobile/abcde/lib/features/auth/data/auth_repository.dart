@@ -37,10 +37,10 @@ class AuthRepository {
   }
 
   Future<String?> getToken() async {
-    return await _storageService.getToken();
+    return await _storageService.getAuthToken();
   }
 
   Future<void> logout() async {
-    await _storageService.deleteToken();
+    await _storageService.deleteAll();
   }
 }

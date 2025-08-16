@@ -10,7 +10,7 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await _storageService.getToken();
+    final token = await _storageService.getAuthToken();
 
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';

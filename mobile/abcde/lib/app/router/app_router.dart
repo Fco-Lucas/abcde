@@ -1,8 +1,13 @@
+import 'package:abcde/app/widgets/main_scaffold.dart';
+import 'package:abcde/features/audit/presentation/view/audit_page.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_controller.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_state.dart';
 import 'package:abcde/features/auth/presentation/view/login_page.dart';
 import 'package:abcde/features/auth/presentation/view/register_page.dart';
+import 'package:abcde/features/clients/presentation/view/clients_page.dart';
+import 'package:abcde/features/clients/users/presentation/view/client_users_page.dart';
 import 'package:abcde/features/home/presentation/view/home_page.dart';
+import 'package:abcde/features/profile/presentation/view/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,20 +54,27 @@ GoRouter router(Ref ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      // Rotas públicas (fora da ShellRoute)
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(path: '/register', builder: (context, state) => const RegisterPage()),
 
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterPage(),
-      ),
-
-      // Rotas protegidas
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomePage(),
+      // Rotas privadas (dentro da ShellRoute)
+      ShellRoute(
+        builder: (context, state, child) => MainScaffold(child: child),
+        // As rotas filhas são as telas que serão exibidas dentro do MainScaffold.
+        routes: [
+          GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+          GoRoute(path: '/clients', builder: (context, state) => const ClientsPage()),
+          GoRoute(
+            path: '/clientUsers/:clientId',
+            builder: (context, state) {
+              final clientId = state.pathParameters['clientId']!;
+              return ClientUsersPage(clientId: clientId);
+            },
+          ),
+          GoRoute(path: '/audit', builder: (context, state) => const AuditPage()),
+          GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
+        ],
       ),
     ],
   );

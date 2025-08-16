@@ -47,7 +47,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // Se for um CNPJ, pega o valor sem a máscara, senão, usa o valor como está.
       if (isCnpj) {
         loginValue = loginValue.replaceAll(RegExp(r'[^0-9]'), '');
-        print(loginValue);
       }
 
       final requestModel = LoginRequestModel(
