@@ -1,4 +1,6 @@
+import 'package:abcde/app/widgets/theme_toogle.dart';
 import 'package:abcde/core/providers/jwt_data_provider.dart';
+import 'package:abcde/features/auth/presentation/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,11 +11,30 @@ class MainScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final jwtData = ref.watch(jwtDataProvider).value;
+    final jwtDataAsync = ref.watch(jwtDataProvider);
+    final jwtData = jwtDataAsync.value;
+
+    if (jwtData == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    String calculateTitle(BuildContext context) {
+      final String location = GoRouterState.of(context).matchedLocation;
+      if (location.startsWith('/home')) return 'Início';
+      if (location.startsWith('/clients')) return "Clientes";
+      if (location.startsWith('/clientUsers')) return 'Usuários do cliente';
+      if (location.startsWith('/audit')) return 'Auditoria';
+      if (location.startsWith('/profile')) return 'Perfil';
+      return 'Início';
+    }
 
     int calculateSelectedIndex(BuildContext context) {
       final String location = GoRouterState.of(context).matchedLocation;
-      final role = jwtData?.role;
+      final role = jwtData.role;
 
       if (location.startsWith('/home')) return 0;
       if (role == 'COMPUTEX') {
@@ -30,7 +51,7 @@ class MainScaffold extends ConsumerWidget {
     }
 
     void onItemTapped(int index) {
-      final role = jwtData?.role;
+      final role = jwtData.role;
       switch (index) {
         case 0:
           context.go('/home');
@@ -39,10 +60,8 @@ class MainScaffold extends ConsumerWidget {
           if (role == 'COMPUTEX') {
             context.go('/clients');
           } else if (role == 'CLIENT') {
-            final clientId = jwtData?.id;
-            if (clientId != null) {
-              context.go('/clientUsers/$clientId');
-            }
+            final clientId = jwtData.id;
+            context.go('/clientUsers/$clientId');
           } else if (role == 'CLIENT_USER') {
             context.go('/profile');
           }
@@ -64,7 +83,7 @@ class MainScaffold extends ConsumerWidget {
 
     List<BottomNavigationBarItem> buildNavItems() {
       // Seu código aqui para construir os itens continua perfeito.
-      final role = jwtData?.role;
+      final role = jwtData.role;
       if (role == 'COMPUTEX') {
         return const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
@@ -88,6 +107,18 @@ class MainScaffold extends ConsumerWidget {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(calculateTitle(context)),
+        actions: [
+          ThemeToogle(),
+          IconButton(
+            onPressed: () {
+              ref.read(authControllerProvider.notifier).logout();
+            }, 
+            icon: Icon(Icons.logout)
+          )
+        ],
+      ),
       body: child,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

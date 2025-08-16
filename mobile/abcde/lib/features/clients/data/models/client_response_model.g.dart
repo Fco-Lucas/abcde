@@ -11,7 +11,7 @@ _ClientResponseModel _$ClientResponseModelFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       name: json['name'] as String,
       cnpj: json['cnpj'] as String,
-      urlToPost: json['urlToPost'] as String,
+      urlToPost: json['urlToPost'] as String?,
       imageActiveDays: (json['imageActiveDays'] as num).toInt(),
       status: $enumDecode(_$ClientStatusEnumMap, json['status']),
       users: json['users'] as List<dynamic>,

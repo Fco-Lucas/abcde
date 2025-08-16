@@ -10,7 +10,7 @@ abstract class ClientResponseModel with _$ClientResponseModel {
     required String id,
     required String name,
     required String cnpj,
-    required String urlToPost,
+    String? urlToPost,
     required int imageActiveDays,
     required ClientStatus status,
     required List users

@@ -1,0 +1,4 @@
+enum ProfileAction {
+  updateClient,
+  updatePassword,
+}

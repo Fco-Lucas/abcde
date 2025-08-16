@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ClientResponseModel {
 
- String get id; String get name; String get cnpj; String get urlToPost; int get imageActiveDays; ClientStatus get status; List get users;
+ String get id; String get name; String get cnpj; String? get urlToPost; int get imageActiveDays; ClientStatus get status; List get users;
 /// Create a copy of ClientResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $ClientResponseModelCopyWith<$Res>  {
   factory $ClientResponseModelCopyWith(ClientResponseModel value, $Res Function(ClientResponseModel) _then) = _$ClientResponseModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String cnpj, String urlToPost, int imageActiveDays, ClientStatus status, List users
+ String id, String name, String cnpj, String? urlToPost, int imageActiveDays, ClientStatus status, List users
 });
 
 
@@ -65,13 +65,13 @@ class _$ClientResponseModelCopyWithImpl<$Res>
 
 /// Create a copy of ClientResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? cnpj = null,Object? urlToPost = null,Object? imageActiveDays = null,Object? status = null,Object? users = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? cnpj = null,Object? urlToPost = freezed,Object? imageActiveDays = null,Object? status = null,Object? users = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,cnpj: null == cnpj ? _self.cnpj : cnpj // ignore: cast_nullable_to_non_nullable
-as String,urlToPost: null == urlToPost ? _self.urlToPost : urlToPost // ignore: cast_nullable_to_non_nullable
-as String,imageActiveDays: null == imageActiveDays ? _self.imageActiveDays : imageActiveDays // ignore: cast_nullable_to_non_nullable
+as String,urlToPost: freezed == urlToPost ? _self.urlToPost : urlToPost // ignore: cast_nullable_to_non_nullable
+as String?,imageActiveDays: null == imageActiveDays ? _self.imageActiveDays : imageActiveDays // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ClientStatus,users: null == users ? _self.users : users // ignore: cast_nullable_to_non_nullable
 as List,
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String cnpj,  String urlToPost,  int imageActiveDays,  ClientStatus status,  List users)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String cnpj,  String? urlToPost,  int imageActiveDays,  ClientStatus status,  List users)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ClientResponseModel() when $default != null:
 return $default(_that.id,_that.name,_that.cnpj,_that.urlToPost,_that.imageActiveDays,_that.status,_that.users);case _:
@@ -180,7 +180,7 @@ return $default(_that.id,_that.name,_that.cnpj,_that.urlToPost,_that.imageActive
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String cnpj,  String urlToPost,  int imageActiveDays,  ClientStatus status,  List users)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String cnpj,  String? urlToPost,  int imageActiveDays,  ClientStatus status,  List users)  $default,) {final _that = this;
 switch (_that) {
 case _ClientResponseModel():
 return $default(_that.id,_that.name,_that.cnpj,_that.urlToPost,_that.imageActiveDays,_that.status,_that.users);case _:
@@ -200,7 +200,7 @@ return $default(_that.id,_that.name,_that.cnpj,_that.urlToPost,_that.imageActive
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String cnpj,  String urlToPost,  int imageActiveDays,  ClientStatus status,  List users)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String cnpj,  String? urlToPost,  int imageActiveDays,  ClientStatus status,  List users)?  $default,) {final _that = this;
 switch (_that) {
 case _ClientResponseModel() when $default != null:
 return $default(_that.id,_that.name,_that.cnpj,_that.urlToPost,_that.imageActiveDays,_that.status,_that.users);case _:
@@ -215,13 +215,13 @@ return $default(_that.id,_that.name,_that.cnpj,_that.urlToPost,_that.imageActive
 @JsonSerializable()
 
 class _ClientResponseModel implements ClientResponseModel {
-  const _ClientResponseModel({required this.id, required this.name, required this.cnpj, required this.urlToPost, required this.imageActiveDays, required this.status, required final  List users}): _users = users;
+  const _ClientResponseModel({required this.id, required this.name, required this.cnpj, this.urlToPost, required this.imageActiveDays, required this.status, required final  List users}): _users = users;
   factory _ClientResponseModel.fromJson(Map<String, dynamic> json) => _$ClientResponseModelFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  String cnpj;
-@override final  String urlToPost;
+@override final  String? urlToPost;
 @override final  int imageActiveDays;
 @override final  ClientStatus status;
  final  List _users;
@@ -265,7 +265,7 @@ abstract mixin class _$ClientResponseModelCopyWith<$Res> implements $ClientRespo
   factory _$ClientResponseModelCopyWith(_ClientResponseModel value, $Res Function(_ClientResponseModel) _then) = __$ClientResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String cnpj, String urlToPost, int imageActiveDays, ClientStatus status, List users
+ String id, String name, String cnpj, String? urlToPost, int imageActiveDays, ClientStatus status, List users
 });
 
 
@@ -282,13 +282,13 @@ class __$ClientResponseModelCopyWithImpl<$Res>
 
 /// Create a copy of ClientResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? cnpj = null,Object? urlToPost = null,Object? imageActiveDays = null,Object? status = null,Object? users = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? cnpj = null,Object? urlToPost = freezed,Object? imageActiveDays = null,Object? status = null,Object? users = null,}) {
   return _then(_ClientResponseModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,cnpj: null == cnpj ? _self.cnpj : cnpj // ignore: cast_nullable_to_non_nullable
-as String,urlToPost: null == urlToPost ? _self.urlToPost : urlToPost // ignore: cast_nullable_to_non_nullable
-as String,imageActiveDays: null == imageActiveDays ? _self.imageActiveDays : imageActiveDays // ignore: cast_nullable_to_non_nullable
+as String,urlToPost: freezed == urlToPost ? _self.urlToPost : urlToPost // ignore: cast_nullable_to_non_nullable
+as String?,imageActiveDays: null == imageActiveDays ? _self.imageActiveDays : imageActiveDays // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ClientStatus,users: null == users ? _self._users : users // ignore: cast_nullable_to_non_nullable
 as List,
