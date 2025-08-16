@@ -79,9 +79,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final jwtData = ref.watch(jwtDataProvider).value;
 
-    if (jwtData == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    if (jwtData == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     final authUserRole = jwtData.role;
     final authUserId = jwtData.id;

@@ -1,5 +1,7 @@
 import 'package:abcde/app/widgets/theme_toogle.dart';
+import 'package:abcde/core/providers/fab_visibility_provider.dart';
 import 'package:abcde/core/providers/jwt_data_provider.dart';
+import 'package:abcde/core/providers/shell_action_provider.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,6 +108,20 @@ class MainScaffold extends ConsumerWidget {
       return [];
     }
 
+    Widget? buildFloatingActionButton() {
+      final String location = GoRouterState.of(context).matchedLocation;
+      final action = ref.watch(shellActionProvider);
+      final isFabVisible = ref.watch(fabVisibilityProvider);
+
+      if (location.startsWith('/audit') && isFabVisible && action != null) {
+        return FloatingActionButton(
+          onPressed: action, // <-- Simplesmente chama a ação do provider
+          child: const Icon(Icons.filter_list),
+        );
+      }
+      return null; // Retorna nulo para todas as outras telas
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(calculateTitle(context)),
@@ -126,6 +142,7 @@ class MainScaffold extends ConsumerWidget {
         onTap: onItemTapped,
         items: buildNavItems(),
       ),
+      floatingActionButton: buildFloatingActionButton(),
     );
   }
 }
