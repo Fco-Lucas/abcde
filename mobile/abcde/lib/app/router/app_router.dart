@@ -8,6 +8,7 @@ import 'package:abcde/features/clients/presentation/view/clients_page.dart';
 import 'package:abcde/features/clients/users/presentation/view/client_users_page.dart';
 import 'package:abcde/features/home/presentation/view/home_page.dart';
 import 'package:abcde/features/profile/presentation/view/profile_page.dart';
+import 'package:abcde/features/splash/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,7 @@ GoRouter router(Ref ref) {
   final authState = ref.watch(authControllerProvider);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     redirect: (BuildContext context, GoRouterState state) {
       final status = authState.when(
         initial: () => 'loading',
@@ -30,31 +31,32 @@ GoRouter router(Ref ref) {
 
       final isLoggedIn = status == 'loggedIn';
       final isLoading = status == 'loading';
+      final onSplashPage = state.matchedLocation == '/splash';
 
-      // Se o estado ainda está sendo verificado, não fazemos nada.
+      // Se ainda estiver carregando, o usuário deve permanecer na splash page.
       if (isLoading) {
-        return null;
+        return onSplashPage ? null : '/splash';
       }
 
-      final isAuthRoute = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+      final onAuthRoute = state.matchedLocation == '/login' || state.matchedLocation == '/register';
 
-      // Se o usuário está logado e tentando ir para a tela de login,
-      // o levamos para a home.
-      if (isLoggedIn && isAuthRoute) {
-        return '/home';
+      // Se o carregamento terminou e o usuário está logado:
+      if (isLoggedIn) {
+        // Se ele estava na splash ou em uma rota de auth, vai para a home.
+        if (onSplashPage || onAuthRoute) return '/home';
+      } 
+      // Se o carregamento terminou e o usuário NÃO está logado:
+      else {
+        // Se ele estava na splash ou em uma rota protegida, vai para o login.
+        if (onSplashPage || !onAuthRoute) return '/login';
       }
 
-      // Se o usuário NÃO está logado e tentando acessar qualquer
-      // rota protegida, o levamos para o login.
-      if (!isLoggedIn && !isAuthRoute) {
-        return '/login';
-      }
-
-      // Em todos os outros casos, ele pode ir para onde queria.
+      // 4. Em todos os outros casos, não faz nada.
       return null;
     },
     routes: [
       // Rotas públicas (fora da ShellRoute)
+      GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(path: '/register', builder: (context, state) => const RegisterPage()),
 
