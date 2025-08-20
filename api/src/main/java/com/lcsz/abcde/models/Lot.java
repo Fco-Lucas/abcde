@@ -1,6 +1,7 @@
 package com.lcsz.abcde.models;
 
 import com.lcsz.abcde.enums.lot.LotStatus;
+import com.lcsz.abcde.enums.lot.LotType;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -25,6 +26,9 @@ public class Lot implements Serializable {
     private String name;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private LotType type;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LotStatus status;
     @CreatedDate
     @Column(name = "created_at", nullable = false)
@@ -33,11 +37,12 @@ public class Lot implements Serializable {
     public Lot() {
     }
 
-    public Lot(Long id, UUID userId, String userCnpj, String name, LotStatus status, LocalDateTime createdAt) {
+    public Lot(Long id, UUID userId, String userCnpj, String name, LotType type, LotStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.userCnpj = userCnpj;
         this.name = name;
+        this.type = type;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -72,6 +77,14 @@ public class Lot implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public LotType getType() {
+        return type;
+    }
+
+    public void setType(LotType type) {
+        this.type = type;
     }
 
     public LotStatus getStatus() {
@@ -109,6 +122,7 @@ public class Lot implements Serializable {
                 ", userId=" + userId +
                 ", userCnpj=" + userCnpj +
                 ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 '}';

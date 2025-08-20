@@ -1,6 +1,7 @@
 package com.lcsz.abcde.dtos.lot;
 
 import com.lcsz.abcde.enums.lot.LotStatus;
+import com.lcsz.abcde.enums.lot.LotType;
 
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ public class LotResponseDto {
     private String userName;
     private String userCnpj;
     private String name;
+    private LotType type;
     private Integer numberImages;
     private LotStatus status;
     private Boolean createdByComputex = false;
@@ -17,12 +19,13 @@ public class LotResponseDto {
     public LotResponseDto() {
     }
 
-    public LotResponseDto(Long id, UUID userId, String userName, String userCnpj, String name, Integer numberImages, LotStatus status, Boolean createdByComputex) {
+    public LotResponseDto(Long id, UUID userId, String userName, String userCnpj, String name, LotType type, Integer numberImages, LotStatus status, Boolean createdByComputex) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
         this.userCnpj = userCnpj;
         this.name = name;
+        this.type = type;
         this.numberImages = numberImages;
         this.status = status;
         this.createdByComputex = createdByComputex;
@@ -68,6 +71,14 @@ public class LotResponseDto {
         this.name = name;
     }
 
+    public LotType getType() {
+        return type;
+    }
+
+    public void setType(LotType type) {
+        this.type = type;
+    }
+
     public Integer getNumberImages() {
         return numberImages;
     }
@@ -100,6 +111,7 @@ public class LotResponseDto {
                 ", userName=" + userName +
                 ", userCnpj=" + userCnpj +
                 ", name=" + name +
+                ", type=" + type +
                 ", numberImages=" + numberImages +
                 ", status=" + status +
                 ", createdByComputex='" + createdByComputex + '\'' +

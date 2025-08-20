@@ -61,8 +61,8 @@ public class LotService {
     }
 
     public String formatLotForLog(LotResponseDto dto) {
-        return String.format("{id='%s', nome='%s'}",
-                dto.getId(), dto.getName());
+        return String.format("{id='%s', nome='%s', tipo='%s'}",
+                dto.getId(), dto.getName(), dto.getType());
     }
 
     @Transactional(readOnly = false)
@@ -79,7 +79,7 @@ public class LotService {
         String userName = clientUser == null ? client.getName() : clientUser.getName();
 
         // Verifica se já existe um lote criado com o nome informado pro cliente
-        Optional<Lot> lotExistis = this.lotRepository.findByNameAndUserId(dto.getName(), client.getCnpj());
+        Optional<Lot> lotExistis = this.lotRepository.findExistsLot(dto.getName(), client.getCnpj(), dto.getType());
         if(lotExistis.isPresent())
             throw new EntityExistsException(String.format("Lote com nome '%s' já cadastrado", dto.getName()));
 
@@ -87,6 +87,7 @@ public class LotService {
         lot.setUserId(dto.getUserId());
         lot.setUserCnpj(client.getCnpj());
         lot.setName(dto.getName());
+        lot.setType(dto.getType());
         lot.setStatus(LotStatus.INCOMPLETED);
 
         Lot saved = this.lotRepository.save(lot);

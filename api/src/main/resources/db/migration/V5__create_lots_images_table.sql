@@ -2,17 +2,8 @@ CREATE TABLE lots_images (
     id BIGSERIAL PRIMARY KEY,
     lot_id BIGINT NOT NULL REFERENCES lots(id) ON DELETE CASCADE,
     key VARCHAR(100) NOT NULL,
-    original_name VARCHAR(255) NOT NULL,
     matricula INTEGER NOT NULL, -- Até 2 bilhões
     nome_aluno VARCHAR(70) NOT NULL,
-    codigo_escola SMALLINT NOT NULL,
-    ano INTEGER NOT NULL,
-    grau_serie SMALLINT NOT NULL,
-    turno CHAR(1) NOT NULL CHECK (turno IN ('M', 'T', 'N')),
-    turma SMALLINT NOT NULL,
-    etapa VARCHAR(1) NOT NULL,
-    prova SMALLINT NOT NULL, -- 0 a 99
-    gabarito VARCHAR(1) NOT NULL,
     presenca SMALLINT NOT NULL,
     qtd_questoes INTEGER NOT NULL,
     have_modification BOOLEAN NOT NULL DEFAULT false,

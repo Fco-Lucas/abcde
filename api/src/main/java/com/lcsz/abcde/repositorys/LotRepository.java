@@ -1,6 +1,7 @@
 package com.lcsz.abcde.repositorys;
 
 import com.lcsz.abcde.enums.lot.LotStatus;
+import com.lcsz.abcde.enums.lot.LotType;
 import com.lcsz.abcde.models.Lot;
 import com.lcsz.abcde.repositorys.projection.LotProjection;
 import org.springframework.data.domain.Page;
@@ -14,9 +15,13 @@ import java.util.UUID;
 
 public interface LotRepository extends JpaRepository<Lot, Long> {
     @Query("""
-        SELECT l FROM Lot l WHERE l.name = :name AND l.userCnpj = :cnpj AND l.status != 'DELETED'
+        SELECT l FROM Lot l WHERE l.name = :name AND l.userCnpj = :cnpj AND l.type = :type AND l.status != 'DELETED'
     """)
-    Optional<Lot> findByNameAndUserId(String name, String cnpj);
+    Optional<Lot> findExistsLot(
+            @Param("name") String name,
+            @Param("cnpj") String cnpj,
+            @Param("type") LotType type
+    );
 
     @Query("""
         SELECT l FROM Lot l

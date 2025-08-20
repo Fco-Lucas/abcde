@@ -1,5 +1,7 @@
 package com.lcsz.abcde.repositorys.projection;
 
+import com.lcsz.abcde.enums.lot.LotType;
+
 import java.util.UUID;
 
 public interface LotProjection {
@@ -7,5 +9,6 @@ public interface LotProjection {
     UUID getUserId();
     String getUserCnpj();
     String getName();
+    LotType getType();
     String getStatus();
 }
