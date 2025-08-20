@@ -1,12 +1,18 @@
-export interface LotCreateInterface {
-  userId: string;
-  name: string;
-}
-
 export enum LotStatusEnum {
   COMPLETED = "COMPLETED",
   INCOMPLETED = "INCOMPLETED",
   DELETED = "DELETED"
+}
+
+export enum LotTypeEnum {
+  ABCDE = "ABCDE",
+  VTB = "VTB",
+}
+
+export interface LotCreateInterface {
+  userId: string;
+  name: string;
+  type: LotTypeEnum;
 }
 
 export interface LotInterface {
@@ -15,6 +21,7 @@ export interface LotInterface {
   userName: string;
   userCnpj: string;
   name: string;
+  type: LotTypeEnum;
   numberImages: number;
   status: LotStatusEnum;
   createdByComputex: boolean;

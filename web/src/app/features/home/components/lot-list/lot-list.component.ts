@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { LotStatusBadgeComponent } from '../lot-status-badge/lot-status-badge.component';
 import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/ui-not-found.component';
+import { LotTypeBadgeComponent } from '../lot-type-badge/lot-type-badge.component';
 
 @Component({
   selector: 'app-lot-list',
@@ -17,7 +18,8 @@ import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/
     MatProgressSpinner,
     MatPaginatorModule,
     LotStatusBadgeComponent,
-    UiNotFoundComponent
+    UiNotFoundComponent,
+    LotTypeBadgeComponent
   ],
   templateUrl: './lot-list.component.html',
 })
