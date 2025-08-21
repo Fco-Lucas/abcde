@@ -482,7 +482,7 @@ export class LotDetailsPageComponent {
       finalize(() => this.loader.hideLoad())
     ).subscribe({
       next: (_) => this.notification.showSuccess("Dados do lote enviados com sucesso"),
-      error: (_) => this.notification.showError("Ocorreu um erro ao gerar o arquivo .txt do lote, tente novamente mais tarde!")
+      error: (_) => this.notification.showError("Ocorreu um erro ao exportar os dados do lote para a URL informada, tente novamente mais tarde!")
     });
   }
 
@@ -502,6 +502,26 @@ export class LotDetailsPageComponent {
       },
       error: (err) => {
         this.notification.showError("Ocorreu um erro ao gerar o arquivo .txt do lote, tente novamente mais tarde!");
+      }
+    });
+  }
+
+  onDonwloadDat() {
+    this.loader.showLoad("Baixando informações...");
+
+    this.lotService.downloadDat(this.lot().id).pipe(
+      finalize(() => this.loader.hideLoad())
+    ).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `lote-${this.lot().name}.dat`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.notification.showError("Ocorreu um erro ao gerar o arquivo .dat do lote, tente novamente mais tarde!");
       }
     });
   }

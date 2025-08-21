@@ -32,10 +32,15 @@
               Enviar dados para URL
             </button>
           }
-          @if(this.lot().status === "COMPLETED") {
+          @if(this.lot().status === "COMPLETED" && this.lot().type === "ABCDE") {
             <button mat-menu-item class="w-full" aria-label="Baixar .txt" (click)="onDownloadTxt()">
               <mat-icon>download</mat-icon>
               Baixar .txt
+            </button>
+          } @else if(this.lot().status === "COMPLETED" && this.lot().type === "VTB") {
+            <button mat-menu-item class="w-full" aria-label="Baixar .txt" (click)="onDonwloadDat()">
+              <mat-icon>download</mat-icon>
+              Baixar .dat
             </button>
           }
           @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {
