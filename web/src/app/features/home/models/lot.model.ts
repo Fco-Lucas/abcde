@@ -22,6 +22,7 @@ export interface LotInterface {
   userCnpj: string;
   name: string;
   type: LotTypeEnum;
+  createdAt: string;
   numberImages: number;
   status: LotStatusEnum;
   createdByComputex: boolean;
