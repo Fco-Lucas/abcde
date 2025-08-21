@@ -16,7 +16,11 @@ public class LotImageMapper {
     }
 
     public static LotImage toEntityCreate(LotImageCreateDto createDto) {
-        return new ModelMapper().map(createDto, LotImage.class);
+        ModelMapper mapper = new ModelMapper();
+        mapper.typeMap(LotImageCreateDto.class, LotImage.class).addMappings(map -> {
+            map.skip(LotImage::setId); // nunca sobrescrever o id
+        });
+        return mapper.map(createDto, LotImage.class);
     }
 
     public static LotImageResponseDto toDto(LotImage lotImage) {

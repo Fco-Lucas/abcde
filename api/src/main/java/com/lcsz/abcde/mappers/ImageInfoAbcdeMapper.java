@@ -8,6 +8,13 @@ import org.modelmapper.ModelMapper;
 public class ImageInfoAbcdeMapper {
     private static final ModelMapper mapper = new ModelMapper();
 
+    static {
+        // Configura o mapper para ignorar o ID ao criar uma nova entidade
+        mapper.typeMap(ImageInfoAbcdeCreateDto.class, ImageInfoAbcde.class)
+                .addMappings(mapper -> mapper.skip(ImageInfoAbcde::setId));
+    }
+
+
     public static ImageInfoAbcde toEntityCreate(ImageInfoAbcdeCreateDto createDto) {
         return mapper.map(createDto, ImageInfoAbcde.class);
     }

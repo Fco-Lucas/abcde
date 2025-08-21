@@ -3,6 +3,10 @@ package com.lcsz.abcde.services;
 import com.lcsz.abcde.AppProperties;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.auditLogQuestion.AuditLogQuestionCreateDto;
+import com.lcsz.abcde.dtos.imageInfoAbcde.ImageInfoAbcdeCreateDto;
+import com.lcsz.abcde.dtos.imageInfoAbcde.ImageInfoAbcdeResponseDto;
+import com.lcsz.abcde.dtos.imageInfoVtb.ImageInfoVtbCreateDto;
+import com.lcsz.abcde.dtos.imageInfoVtb.ImageInfoVtbResponseDto;
 import com.lcsz.abcde.dtos.lotImage.*;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionCreateDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
@@ -169,6 +173,12 @@ public class LotImageService {
         LotImage lotImage = this.getById(id);
         LotImageResponseDto responseDto = LotImageMapper.toDto(lotImage);
 
+        Lot lot = this.lotService.getLotById(lotImage.getLotId());
+        LotType type = lot.getType();
+
+        if(type == LotType.ABCDE) responseDto.setAbcdeInfo(this.getImageAbcdeInfo(lotImage.getId()));
+        else responseDto.setVtbInfo(this.getImageVtbInfo(lotImage.getId()));
+
         // Busca as questões da imagem
         List<LotImageQuestionResponseDto> questions = this.lotImageQuestionService.getAllByImageId(id);
 
@@ -180,6 +190,16 @@ public class LotImageService {
         responseDto.setQuestions(questions);
         responseDto.setUrl(url);
         return responseDto;
+    }
+
+    @Transactional(readOnly = true)
+    public ImageInfoAbcdeResponseDto getImageAbcdeInfo(Long lotImageId) {
+        return this.imageInfoAbcdeService.getByImageId(lotImageId);
+    }
+
+    @Transactional(readOnly = true)
+    public ImageInfoVtbResponseDto getImageVtbInfo(Long lotImageId) {
+        return this.imageInfoVtbService.getByImageId(lotImageId);
     }
 
     @Transactional(readOnly = false)
@@ -199,15 +219,28 @@ public class LotImageService {
         this.auditLogService.create(logDto);
     }
 
-    public String formatLotImageForLog(LotImageResponseDto dto) {
-        StringBuilder questions = new StringBuilder();
+    public String formatLotImageForLog(LotImageResponseDto dto, StringBuilder questionsLog) {
+        if(dto.getAbcdeInfo() != null) {
+            ImageInfoAbcdeResponseDto abcdeInfo = dto.getAbcdeInfo();
 
-        dto.getQuestions().forEach(question -> {
-            questions.append(String.format("{questão=%s, alternativa=%s}", question.getNumber(), question.getAlternative()));
-        });
+            String abcdeInfoLog = String.format(
+                "{id='%s', nome_original_da_imagem='%s', codigo_escola='%s', ano='%s', grauSerie='%s', turno='%s', turma='%s', etapa='%s', prova='%s', gabarito='%s'}",
+                abcdeInfo.getId(), abcdeInfo.getOriginalName(), abcdeInfo.getCodigoEscola(), abcdeInfo.getAno(), abcdeInfo.getGrauSerie(), abcdeInfo.getTurno(), abcdeInfo.getTurma(), abcdeInfo.getEtapa(), abcdeInfo.getProva(), abcdeInfo.getGabarito()
+            );
 
-        return String.format("{id='%s', id_do_Lote='%s', matricula='%s', presenca='%s', quantidade_de_questões='%s', questões='%s'}",
-                dto.getId(), dto.getLotId(), dto.getMatricula(), dto.getPresenca(), dto.getQtdQuestoes(), questions);
+            return String.format("{id='%s', id_do_Lote='%s' matricula='%s', presenca='%s', quantidade_de_questões='%s', informações_do_abcde='%s', questões='%s'}",
+                    dto.getId(), dto.getLotId(), dto.getMatricula(), dto.getPresenca(), dto.getQtdQuestoes(), abcdeInfoLog, questionsLog);
+        }else if(dto.getVtbInfo() != null) {
+            ImageInfoVtbResponseDto vtbInfo = dto.getVtbInfo();
+
+            String vtbInfoLog = String.format(
+                "{id='%s', vtbCodigo='%s', vtbFracao='%s', faseGab='%s', prova='%s'}",
+                vtbInfo.getId(), vtbInfo.getVtbCodigo(), vtbInfo.getVtbFracao(), vtbInfo.getFaseGab(), vtbInfo.getProva()
+            );
+
+            return String.format("{id='%s', id_do_Lote='%s' matricula='%s', presenca='%s', quantidade_de_questões='%s', informações_do_vestibular='%s', questões='%s'}",
+                    dto.getId(), dto.getLotId(), dto.getMatricula(), dto.getPresenca(), dto.getQtdQuestoes(), vtbInfoLog, questionsLog);
+        }else throw new RuntimeException("Erro ao registrar log da imagem do lote, tipo inválido");
     }
 
     @Transactional(readOnly = false)
@@ -311,11 +344,13 @@ public class LotImageService {
         Files.copy(file.getInputStream(), path_destiny, StandardCopyOption.REPLACE_EXISTING);
 
         LotImageResponseDto responseDto;
+        StringBuilder questionsLog = new StringBuilder();
 
         // Envia o arquivo para o PYTHON
         String pathImage = this.getAbsoluteImagePath(lotId, fileName);
         if(type == LotType.ABCDE) {
             ScanImageAbcdeResponseDto response = this.scanAbcdeImage(pathImage, type);
+
             Map<String, String> answers = response.getRespostas();
             ScanImageDadosAbcdeResponseDto dados = response.getDados();
 
@@ -331,11 +366,17 @@ public class LotImageService {
                         value
                 );
                 this.lotImageQuestionService.create(questionCreateDto);
+                questionsLog.append(String.format("{questão=%s, alternativa=%s}", Integer.parseInt(key), value));
             });
 
+            // Salva as informações da imagem
+            ImageInfoAbcdeCreateDto imageInfoAbcdeCreateDto = new ImageInfoAbcdeCreateDto(lotImage.getId(), originalFileName, dados.getCodigoEscola(), dados.getAno(), dados.getGrauSerie(), dados.getTurno(), dados.getTurma(), dados.getEtapa(), dados.getProva(), dados.getGabarito());
+            this.imageInfoAbcdeService.create(imageInfoAbcdeCreateDto);
+
             responseDto = this.getByIdDto(lotImage.getId());
-        }else {
+        } else {
             ScanImageVtbResponseDto response = this.scanVtbImage(pathImage, type);
+
             Map<String, String> answers = response.getRespostas();
             ScanImageDadosVtbResponseDto dados = response.getDados();
 
@@ -350,16 +391,21 @@ public class LotImageService {
                         Integer.parseInt(key),
                         value
                 );
+                questionsLog.append(String.format("{questão=%s, alternativa=%s}", Integer.parseInt(key), value));
                 this.lotImageQuestionService.create(questionCreateDto);
             });
+
+            // Salva as informações da imagem
+            ImageInfoVtbCreateDto imageInfoVtbCreateDto = new ImageInfoVtbCreateDto(lotImage.getId(), dados.getVtbCodigo(), dados.getVtbFracao(), dados.getFaseGab(), dados.getProva());
+            this.imageInfoVtbService.create(imageInfoVtbCreateDto);
 
             responseDto = this.getByIdDto(lotImage.getId());
         }
 
         // Log
         String details = String.format(
-            "Gabarito pertencente ao lote com ID: %s processado com sucesso | Dados do gabarito processado: %s",
-            responseDto.getLotId(), this.formatLotImageForLog(responseDto)
+                "Gabarito pertencente ao lote com ID: %s e TIPO: %s processado com sucesso | Dados do gabarito processado: %s",
+                responseDto.getLotId(), type, this.formatLotImageForLog(responseDto, questionsLog)
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.PROCESSED, AuditProgram.LOT_IMAGE, details);
         this.auditLogService.create(logDto);

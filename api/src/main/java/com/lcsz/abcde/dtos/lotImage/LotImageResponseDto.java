@@ -1,5 +1,6 @@
 package com.lcsz.abcde.dtos.lotImage;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.lcsz.abcde.dtos.imageInfoAbcde.ImageInfoAbcdeResponseDto;
 import com.lcsz.abcde.dtos.imageInfoVtb.ImageInfoVtbResponseDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
@@ -19,7 +20,9 @@ public class LotImageResponseDto {
     private Boolean haveModification;
     private LotImageStatus status;
     private LocalDateTime createdAt;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private ImageInfoAbcdeResponseDto abcdeInfo;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private ImageInfoVtbResponseDto vtbInfo;
     private List<LotImageQuestionResponseDto> questions;
 

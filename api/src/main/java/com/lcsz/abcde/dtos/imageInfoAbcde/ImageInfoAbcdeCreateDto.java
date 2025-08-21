@@ -1,7 +1,6 @@
 package com.lcsz.abcde.dtos.imageInfoAbcde;
 
 public class ImageInfoAbcdeCreateDto {
-    private Long id;
     private Long lotImageId;
     private String originalName;
     private Integer codigoEscola;
@@ -16,8 +15,7 @@ public class ImageInfoAbcdeCreateDto {
     public ImageInfoAbcdeCreateDto() {
     }
 
-    public ImageInfoAbcdeCreateDto(Long id, Long lotImageId, String originalName, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito) {
-        this.id = id;
+    public ImageInfoAbcdeCreateDto(Long lotImageId, String originalName, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito) {
         this.lotImageId = lotImageId;
         this.originalName = originalName;
         this.codigoEscola = codigoEscola;
@@ -28,14 +26,6 @@ public class ImageInfoAbcdeCreateDto {
         this.etapa = etapa;
         this.prova = prova;
         this.gabarito = gabarito;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getLotImageId() {
@@ -121,8 +111,7 @@ public class ImageInfoAbcdeCreateDto {
     @Override
     public String toString() {
         return "ImageInfoAbcdeCreateDto{" +
-                "id=" + id +
-                ", lotImageId=" + lotImageId +
+                "lotImageId=" + lotImageId +
                 ", originalName='" + originalName + '\'' +
                 ", codigoEscola=" + codigoEscola +
                 ", ano=" + ano +

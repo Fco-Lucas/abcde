@@ -1,19 +1,24 @@
 package com.lcsz.abcde.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lcsz.abcde.dtos.ExportDataDto;
-import com.lcsz.abcde.dtos.ExportDataImagesDto;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
+import com.lcsz.abcde.dtos.exportData.ExportAbcdeDataDto;
+import com.lcsz.abcde.dtos.exportData.ExportAbcdeImagesDto;
+import com.lcsz.abcde.dtos.exportData.ExportVtbDataDto;
+import com.lcsz.abcde.dtos.exportData.ExportVtbImagesDto;
+import com.lcsz.abcde.dtos.imageInfoAbcde.ImageInfoAbcdeResponseDto;
+import com.lcsz.abcde.dtos.imageInfoVtb.ImageInfoVtbResponseDto;
 import com.lcsz.abcde.dtos.lot.LotCreateDto;
 import com.lcsz.abcde.dtos.lot.LotResponseDto;
 import com.lcsz.abcde.dtos.lot.LotUpdateDto;
-import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 import com.lcsz.abcde.dtos.permissions.PermissionResponseDto;
 import com.lcsz.abcde.enums.auditLog.AuditAction;
 import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.enums.client.ClientStatus;
 import com.lcsz.abcde.enums.lot.LotStatus;
+import com.lcsz.abcde.enums.lot.LotType;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.ExportMapper;
@@ -267,12 +272,8 @@ public class LotService {
         return this.provider.getAuthenticatedUserRole(userId);
     }
 
-    private void exportData(String urlToPost, LotResponseDto lot, ExportDataDto exportDataDto) {
+    private void exportData(String urlToPost, LotResponseDto lot, String json) {
         try {
-            // Converte para JSON
-            String json = objectMapper.writeValueAsString(exportDataDto);
-            // System.out.println(json);
-
             // Cria o request
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(urlToPost))
@@ -286,8 +287,8 @@ public class LotService {
 
             // Confirma o envio, não se importando com o resultado
             String details = String.format(
-                    "POST para '%s' disparado para baixar o .txt do lote contendo: %s",
-                    urlToPost, this.formatLotForLog(lot)
+                    "POST para '%s' disparado para baixar o .txt do lote contendo as seguintes informações: %s, Dados enviados: %s",
+                    urlToPost, this.formatLotForLog(lot), json
             );
             AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.DOWNLOADTXT, AuditProgram.LOT, details);
             this.auditLogService.create(logDto);
@@ -303,28 +304,65 @@ public class LotService {
         }
     }
 
+    private void exportAbcdeData(String urlToPost, LotResponseDto lot, ExportAbcdeDataDto dto) {
+        // Converte para JSON
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(dto);
+            // System.out.println(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Erro ao conveter ExportAbcdeDataDto em JSON");
+        }
+        this.exportData(urlToPost, lot, json);
+    }
+
+    private void exportVtbData(String urlToPost, LotResponseDto lot, ExportVtbDataDto dto) {
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(dto);
+            // System.out.println(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Erro ao conveter ExportVtbDataDto em JSON");
+        }
+        this.exportData(urlToPost, lot, json);
+    }
+
     public void exportDataToEndpoint(Long lotId) {
         // Verifica se o usuário possui permissão para visualizar lotes
         PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
         if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
 
+        // Busca as informações do lote e suas imagens
         LotResponseDto lot = this.getLotByIdDto(lotId);
+        LotType type = lot.getType();
         List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
-        List<ExportDataImagesDto> exportDataImagesDtos = new ArrayList<>();
 
-        for (LotImage lotImage : lotImages) {
-            List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
-            exportDataImagesDtos.add(ExportMapper.toImageDto(lotImage, questions));
-        }
+        // Verifica se o lote está finalizado
+        if(lot.getStatus() != LotStatus.COMPLETED) throw new RuntimeException("Para enviar as informações a URL informada, o lote deve está concluído");
 
-        // Obtém o cliente
+        // Verifica se o cliente possui URL informada
         Client client = this.clientService.getByCnpj(lot.getUserCnpj(), ClientStatus.ACTIVE);
         String urlToPost = client.getUrlToPost();
+        if(urlToPost == null || urlToPost.isBlank()) throw new RuntimeException("O cliente na qual pertence este lote não possui URL informada");
 
-        // Caso o cliente possua urlToPost informada, faz o post com o JSON dos dados para a URL sem aguardar um resultado
-        if(urlToPost != null && !urlToPost.isBlank()) {
-            ExportDataDto exportDataDto = ExportMapper.toDto(exportDataImagesDtos);
-            this.exportData(urlToPost, lot, exportDataDto);
+        if(type == LotType.ABCDE) {
+            List<ExportAbcdeImagesDto> exportAbcdeImagesDtos = new ArrayList<>();
+            for (LotImage lotImage : lotImages) {
+                ImageInfoAbcdeResponseDto imageInfo = this.lotImageService.getImageAbcdeInfo(lotImage.getId());
+                List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
+                exportAbcdeImagesDtos.add(ExportMapper.toExportAbcdeImageDto(lotImage, imageInfo, questions));
+            }
+            ExportAbcdeDataDto exportAbcdeDataDto = ExportMapper.toExportAbcdeDto(lot, exportAbcdeImagesDtos);
+            this.exportAbcdeData(urlToPost, lot, exportAbcdeDataDto);
+        } else {
+            List<ExportVtbImagesDto> exportVtbImagesDtos = new ArrayList<>();
+            for (LotImage lotImage : lotImages) {
+                ImageInfoVtbResponseDto imageInfo = this.lotImageService.getImageVtbInfo(lotImage.getId());
+                List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
+                exportVtbImagesDtos.add(ExportMapper.toExportVtbImageDto(lotImage, imageInfo, questions));
+            }
+            ExportVtbDataDto exportVtbDataDto = ExportMapper.toExportVtbDto(lot, exportVtbImagesDtos);
+            this.exportVtbData(urlToPost, lot, exportVtbDataDto);
         }
     }
 
@@ -332,6 +370,13 @@ public class LotService {
         // Verifica se o usuário possui permissão para visualizar lotes
         PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
         if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
+
+        // Verifica se o lote é do tipo ABCDE
+        Lot lot = this.getLotById(lotId);
+        if(lot.getType() != LotType.ABCDE) throw new RuntimeException("O .txt só pode ser gerado caso o lote seja do tipo ABCDE");
+
+        // Verifica se o lote está finalizado
+        if(lot.getStatus() != LotStatus.COMPLETED) throw new RuntimeException("Para baixar o .txt, o lote deve está concluído");
 
         List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
 
@@ -343,15 +388,17 @@ public class LotService {
         }
 
         for (LotImage lotImage : lotImages) {
+            // Busca as informações da imagem
+            ImageInfoAbcdeResponseDto imageInfo = this.lotImageService.getImageAbcdeInfo(lotImage.getId());
             String matricula = String.format("%08d", lotImage.getMatricula()); // 8 dígitos com 0 à esquerda
-            String etapa = lotImage.getEtapa();
-            String prova = String.format("%02d", lotImage.getProva());         // 2 dígitos com 0 à esquerda
-            String gabarito = lotImage.getGabarito();
+            String etapa = imageInfo.getEtapa();
+            String prova = String.format("%02d", imageInfo.getProva());         // 2 dígitos com 0 à esquerda
+            String gabarito = imageInfo.getGabarito();
             Integer presenca = lotImage.getPresenca();                         // 1 ou 0
             List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
 
             // Linha: nome da imagem + dados do QR Code
-            String linha = "\n" + lotImage.getOriginalName() + "," +
+            String linha = "\n" + imageInfo.getOriginalName() + "," +
                     matricula + etapa + prova + gabarito + presenca;
 
             content.append(linha);
@@ -368,9 +415,58 @@ public class LotService {
                 int quantidadeRespondida = questions.size();
                 int quantidadeFaltante = 90 - quantidadeRespondida;
 
-                for (int i = 0; i < quantidadeFaltante; i++) {
-                    content.append(",Z");
+                content.append(",Z".repeat(Math.max(0, quantidadeFaltante)));
+            }else {
+                content.append(",".repeat(90));
+            }
+        }
+
+        return content.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public byte[] generateDat(Long lotId) {
+        // Verifica se o usuário possui permissão para visualizar lotes
+        PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
+        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
+
+        // Verifica se o lote é do tipo VTB
+        Lot lot = this.getLotById(lotId);
+        if(lot.getType() != LotType.VTB) throw new RuntimeException("O .dat só pode ser gerado caso o lote seja do tipo VTB");
+
+        // Verifica se o lote está finalizado
+        if(lot.getStatus() != LotStatus.COMPLETED) throw new RuntimeException("Para baixar o .dat, o lote deve está concluído");
+
+        List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
+
+        StringBuilder content = new StringBuilder();
+
+        for (LotImage lotImage : lotImages) {
+            // Busca as informações da imagem
+            ImageInfoVtbResponseDto imageInfo = this.lotImageService.getImageVtbInfo(lotImage.getId());
+
+            String matricula = String.format("%08d", lotImage.getMatricula()); // 8 dígitos com 0 à esquerda
+            String vtbFracao = String.format("%2s", imageInfo.getVtbFracao()).replace(' ', '0'); // 2 dígitos com 0 à esquerda
+            String faseGab = imageInfo.getFaseGab().toString();
+            String prova = imageInfo.getProva().toString();
+            Integer presenca = lotImage.getPresenca();
+            List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
+
+            String linha = matricula + vtbFracao + faseGab + prova + presenca;
+            content.append(linha);
+
+            // Adiciona respostas das questões se o aluno está presente, caso contrário somente as vírgulas
+            if(presenca == 1) {
+                for (LotImageQuestionResponseDto question : questions) {
+                    String alt = question.getAlternative();
+                    String alternative = (alt != null && alt.length() == 1) ? alt : "W";
+                    content.append(",").append(alternative);
                 }
+
+                // Completa com 'Z' o que falta
+                int quantidadeRespondida = questions.size();
+                int quantidadeFaltante = 90 - quantidadeRespondida;
+
+                content.append(",Z".repeat(Math.max(0, quantidadeFaltante)));
             }else {
                 content.append(",".repeat(90));
             }

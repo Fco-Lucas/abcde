@@ -1,27 +1,29 @@
-package com.lcsz.abcde.dtos.scanImage;
+package com.lcsz.abcde.dtos.exportData;
 
-public class ScanImageDadosVtbResponseDto {
+import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
+
+import java.util.List;
+
+public class ExportVtbImagesDto {
     private Integer matricula;
     private String vtbCodigo;
     private String vtbFracao;
     private Integer faseGab;
     private Integer prova;
-    private String nomeAluno;
-    private Integer qtdQuestoes;
     private Integer presenca;
+    private List<LotImageQuestionResponseDto> questions;
 
-    public ScanImageDadosVtbResponseDto() {
+    public ExportVtbImagesDto() {
     }
 
-    public ScanImageDadosVtbResponseDto(Integer matricula, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova, String nomeAluno, Integer qtdQuestoes, Integer presenca) {
+    public ExportVtbImagesDto(Integer matricula, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova, Integer presenca, List<LotImageQuestionResponseDto> questions) {
         this.matricula = matricula;
         this.vtbCodigo = vtbCodigo;
         this.vtbFracao = vtbFracao;
         this.faseGab = faseGab;
         this.prova = prova;
-        this.nomeAluno = nomeAluno;
-        this.qtdQuestoes = qtdQuestoes;
         this.presenca = presenca;
+        this.questions = questions;
     }
 
     public Integer getMatricula() {
@@ -64,22 +66,6 @@ public class ScanImageDadosVtbResponseDto {
         this.prova = prova;
     }
 
-    public String getNomeAluno() {
-        return nomeAluno;
-    }
-
-    public void setNomeAluno(String nomeAluno) {
-        this.nomeAluno = nomeAluno;
-    }
-
-    public Integer getQtdQuestoes() {
-        return qtdQuestoes;
-    }
-
-    public void setQtdQuestoes(Integer qtdQuestoes) {
-        this.qtdQuestoes = qtdQuestoes;
-    }
-
     public Integer getPresenca() {
         return presenca;
     }
@@ -88,17 +74,24 @@ public class ScanImageDadosVtbResponseDto {
         this.presenca = presenca;
     }
 
+    public List<LotImageQuestionResponseDto> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<LotImageQuestionResponseDto> questions) {
+        this.questions = questions;
+    }
+
     @Override
     public String toString() {
-        return "ScanImageDadosVtbResponseDto{" +
-                "matricula='" + matricula + '\'' +
+        return "ExportVtbImagesDto{" +
+                "matricula=" + matricula +
                 ", vtbCodigo='" + vtbCodigo + '\'' +
                 ", vtbFracao='" + vtbFracao + '\'' +
                 ", faseGab=" + faseGab +
                 ", prova=" + prova +
-                ", nomeAluno=" + nomeAluno +
-                ", qtdQuestoes=" + qtdQuestoes +
                 ", presenca=" + presenca +
+                ", questions=" + questions +
                 '}';
     }
 }

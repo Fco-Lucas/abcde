@@ -15,7 +15,9 @@ public class ImageInfoVtb implements Serializable {
     private Long id;
     @Column(nullable = false, name = "lot_image_id")
     private Long lotImageId;
-    @Column(nullable = false, name = "vtb_fracao")
+    @Column(nullable = false, name = "vtb_codigo", length = 9)
+    private String vtbCodigo;
+    @Column(nullable = false, name = "vtb_fracao", length = 2)
     private String vtbFracao;
     @Column(nullable = false, name = "fase_gab")
     private Integer faseGab;
@@ -25,9 +27,10 @@ public class ImageInfoVtb implements Serializable {
     public ImageInfoVtb() {
     }
 
-    public ImageInfoVtb(Long id, Long lotImageId, String vtbFracao, Integer faseGab, Integer prova) {
+    public ImageInfoVtb(Long id, Long lotImageId, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova) {
         this.id = id;
         this.lotImageId = lotImageId;
+        this.vtbCodigo = vtbCodigo;
         this.vtbFracao = vtbFracao;
         this.faseGab = faseGab;
         this.prova = prova;
@@ -47,6 +50,14 @@ public class ImageInfoVtb implements Serializable {
 
     public void setLotImageId(Long lotImageId) {
         this.lotImageId = lotImageId;
+    }
+
+    public String getVtbCodigo() {
+        return vtbCodigo;
+    }
+
+    public void setVtbCodigo(String vtbCodigo) {
+        this.vtbCodigo = vtbCodigo;
     }
 
     public String getVtbFracao() {
@@ -74,22 +85,11 @@ public class ImageInfoVtb implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        ImageInfoVtb that = (ImageInfoVtb) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-    @Override
     public String toString() {
         return "ImageInfoVtb{" +
                 "id=" + id +
                 ", lotImageId=" + lotImageId +
+                ", vtbCodigo='" + vtbCodigo + '\'' +
                 ", vtbFracao='" + vtbFracao + '\'' +
                 ", faseGab=" + faseGab +
                 ", prova=" + prova +

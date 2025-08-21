@@ -2,8 +2,8 @@ package com.lcsz.abcde.dtos.imageInfoVtb;
 
 
 public class ImageInfoVtbCreateDto {
-    private Long id;
     private Long lotImageId;
+    private String vtbCodigo;
     private String vtbFracao;
     private Integer faseGab;
     private Integer prova;
@@ -11,20 +11,12 @@ public class ImageInfoVtbCreateDto {
     public ImageInfoVtbCreateDto() {
     }
 
-    public ImageInfoVtbCreateDto(Long id, Long lotImageId, String vtbFracao, Integer faseGab, Integer prova) {
-        this.id = id;
+    public ImageInfoVtbCreateDto(Long lotImageId, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova) {
         this.lotImageId = lotImageId;
+        this.vtbCodigo = vtbCodigo;
         this.vtbFracao = vtbFracao;
         this.faseGab = faseGab;
         this.prova = prova;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getLotImageId() {
@@ -33,6 +25,14 @@ public class ImageInfoVtbCreateDto {
 
     public void setLotImageId(Long lotImageId) {
         this.lotImageId = lotImageId;
+    }
+
+    public String getVtbCodigo() {
+        return vtbCodigo;
+    }
+
+    public void setVtbCodigo(String vtbCodigo) {
+        this.vtbCodigo = vtbCodigo;
     }
 
     public String getVtbFracao() {
@@ -62,8 +62,8 @@ public class ImageInfoVtbCreateDto {
     @Override
     public String toString() {
         return "ImageInfoVtbCreateDto{" +
-                "id=" + id +
-                ", lotImageId=" + lotImageId +
+                "lotImageId=" + lotImageId +
+                ", vtbCodigo='" + vtbCodigo + '\'' +
                 ", vtbFracao='" + vtbFracao + '\'' +
                 ", faseGab=" + faseGab +
                 ", prova=" + prova +

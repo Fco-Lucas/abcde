@@ -1,10 +1,10 @@
-package com.lcsz.abcde.dtos;
+package com.lcsz.abcde.dtos.exportData;
 
 import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
 
 import java.util.List;
 
-public class ExportDataImagesDto {
+public class ExportAbcdeImagesDto {
     private Integer matricula;
     private Integer codigoEscola;
     private Integer ano;
@@ -17,10 +17,10 @@ public class ExportDataImagesDto {
     private Integer presenca;
     private List<LotImageQuestionResponseDto> questions;
 
-    public ExportDataImagesDto() {
+    public ExportAbcdeImagesDto() {
     }
 
-    public ExportDataImagesDto(Integer matricula, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito, Integer presenca, List<LotImageQuestionResponseDto> questions) {
+    public ExportAbcdeImagesDto(Integer matricula, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito, Integer presenca, List<LotImageQuestionResponseDto> questions) {
         this.matricula = matricula;
         this.codigoEscola = codigoEscola;
         this.ano = ano;
@@ -124,7 +124,7 @@ public class ExportDataImagesDto {
 
     @Override
     public String toString() {
-        return "ExportDataImagesDto{" +
+        return "ExportAbcdeImagesDto{" +
                 "matricula=" + matricula +
                 ", codigoEscola=" + codigoEscola +
                 ", ano=" + ano +
@@ -133,7 +133,7 @@ public class ExportDataImagesDto {
                 ", turma=" + turma +
                 ", etapa='" + etapa + '\'' +
                 ", prova=" + prova +
-                ", gabarito=" + gabarito +
+                ", gabarito='" + gabarito + '\'' +
                 ", presenca=" + presenca +
                 ", questions=" + questions +
                 '}';

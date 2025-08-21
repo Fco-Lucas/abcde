@@ -95,4 +95,17 @@ public class LotController {
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(contentBytes);
     }
+
+    @GetMapping("/{id}/download-dat")
+    public ResponseEntity<byte[]> downloadDat(@PathVariable Long id) {
+        byte[] contentBytes = this.lotService.generateDat(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"gabarito-lote-" + id + ".dat\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(contentBytes);
+    }
 }
