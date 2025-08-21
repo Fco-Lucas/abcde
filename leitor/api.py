@@ -54,7 +54,7 @@ def processar_imagem(req: ImagemRequest):
         if lot_type == "ABCDE":
             matricula, nomeAluno, etapa, prova, gabarito, qtdQuestoes, codigoEscola, ano, grauSerie, turno, turma = dados_qr.split("-")
         else:
-            matricula, vtbFracao, faseGab, prova, nomeAluno, qtdQuestoes = dados_qr.split("-");
+            matricula, vtbFracao, faseGab, prova, nomeAluno, qtdQuestoes, vtbCodigo = dados_qr.split("-");
     except ValueError:
         raise HTTPException(status_code=400, detail=f"QR Code inválido ou em formato incorreto, lot_type = {lot_type}, dados obtidos = {dados_qr}")
 
@@ -99,6 +99,7 @@ def processar_imagem(req: ImagemRequest):
     else:
         dados = {
             "matricula": matricula,
+            "vtbCodigo": vtbCodigo,
             "vtbFracao": vtbFracao,
             "faseGab": faseGab,
             "prova": prova,
