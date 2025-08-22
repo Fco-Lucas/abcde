@@ -1,6 +1,7 @@
 CREATE TABLE images_infos_vtb (
     id BIGSERIAL PRIMARY KEY,
     lot_image_id BIGINT NOT NULL REFERENCES lots_images(id) ON DELETE CASCADE,
+    original_name VARCHAR(255) NOT NULL,
     vtb_codigo VARCHAR(9) NOT NULL,
     vtb_fracao VARCHAR(2) NOT NULL,
     fase_gab SMALLINT NOT NULL, -- 0 a 99

@@ -438,12 +438,18 @@ public class LotService {
 
         List<LotImage> lotImages = this.lotImageService.getAllImagesLot(lotId);
 
-        StringBuilder content = new StringBuilder();
+        StringBuilder content = new StringBuilder("imagem,matricula");
+
+        // Sempre seta 90 colunas para as questões
+        for (int i = 1; i <= 90; i++) {
+            content.append(",").append(i);
+        }
 
         for (LotImage lotImage : lotImages) {
             // Busca as informações da imagem
             ImageInfoVtbResponseDto imageInfo = this.lotImageService.getImageVtbInfo(lotImage.getId());
 
+            String originalName = imageInfo.getOriginalName();
             String matricula = String.format("%08d", lotImage.getMatricula()); // 8 dígitos com 0 à esquerda
             String vtbFracao = String.format("%2s", imageInfo.getVtbFracao()).replace(' ', '0'); // 2 dígitos com 0 à esquerda
             String faseGab = imageInfo.getFaseGab().toString();
@@ -451,7 +457,7 @@ public class LotService {
             Integer presenca = lotImage.getPresenca();
             List<LotImageQuestionResponseDto> questions = this.lotImageService.getAllQuestionsLotImage(lotImage.getId());
 
-            String linha = matricula + vtbFracao + faseGab + prova + presenca;
+            String linha = "\n" + originalName + "," + matricula + vtbFracao + faseGab + prova + presenca;
             content.append(linha);
 
             // Adiciona respostas das questões se o aluno está presente, caso contrário somente as vírgulas

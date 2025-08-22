@@ -15,6 +15,8 @@ public class ImageInfoVtb implements Serializable {
     private Long id;
     @Column(nullable = false, name = "lot_image_id")
     private Long lotImageId;
+    @Column(nullable = false, name = "original_name")
+    private String originalName;
     @Column(nullable = false, name = "vtb_codigo", length = 9)
     private String vtbCodigo;
     @Column(nullable = false, name = "vtb_fracao", length = 2)
@@ -27,9 +29,10 @@ public class ImageInfoVtb implements Serializable {
     public ImageInfoVtb() {
     }
 
-    public ImageInfoVtb(Long id, Long lotImageId, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova) {
+    public ImageInfoVtb(Long id, Long lotImageId, String originalName, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova) {
         this.id = id;
         this.lotImageId = lotImageId;
+        this.originalName = originalName;
         this.vtbCodigo = vtbCodigo;
         this.vtbFracao = vtbFracao;
         this.faseGab = faseGab;
@@ -50,6 +53,14 @@ public class ImageInfoVtb implements Serializable {
 
     public void setLotImageId(Long lotImageId) {
         this.lotImageId = lotImageId;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
     }
 
     public String getVtbCodigo() {
@@ -89,6 +100,7 @@ public class ImageInfoVtb implements Serializable {
         return "ImageInfoVtb{" +
                 "id=" + id +
                 ", lotImageId=" + lotImageId +
+                ", originalName=" + originalName +
                 ", vtbCodigo='" + vtbCodigo + '\'' +
                 ", vtbFracao='" + vtbFracao + '\'' +
                 ", faseGab=" + faseGab +

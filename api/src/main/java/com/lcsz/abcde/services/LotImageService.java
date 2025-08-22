@@ -396,7 +396,7 @@ public class LotImageService {
             });
 
             // Salva as informações da imagem
-            ImageInfoVtbCreateDto imageInfoVtbCreateDto = new ImageInfoVtbCreateDto(lotImage.getId(), dados.getVtbCodigo(), dados.getVtbFracao(), dados.getFaseGab(), dados.getProva());
+            ImageInfoVtbCreateDto imageInfoVtbCreateDto = new ImageInfoVtbCreateDto(lotImage.getId(), originalFileName, dados.getVtbCodigo(), dados.getVtbFracao(), dados.getFaseGab(), dados.getProva());
             this.imageInfoVtbService.create(imageInfoVtbCreateDto);
 
             responseDto = this.getByIdDto(lotImage.getId());

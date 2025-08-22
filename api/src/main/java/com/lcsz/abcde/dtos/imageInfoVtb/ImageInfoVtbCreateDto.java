@@ -3,6 +3,7 @@ package com.lcsz.abcde.dtos.imageInfoVtb;
 
 public class ImageInfoVtbCreateDto {
     private Long lotImageId;
+    private String originalName;
     private String vtbCodigo;
     private String vtbFracao;
     private Integer faseGab;
@@ -11,8 +12,9 @@ public class ImageInfoVtbCreateDto {
     public ImageInfoVtbCreateDto() {
     }
 
-    public ImageInfoVtbCreateDto(Long lotImageId, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova) {
+    public ImageInfoVtbCreateDto(Long lotImageId, String originalName, String vtbCodigo, String vtbFracao, Integer faseGab, Integer prova) {
         this.lotImageId = lotImageId;
+        this.originalName = originalName;
         this.vtbCodigo = vtbCodigo;
         this.vtbFracao = vtbFracao;
         this.faseGab = faseGab;
@@ -25,6 +27,14 @@ public class ImageInfoVtbCreateDto {
 
     public void setLotImageId(Long lotImageId) {
         this.lotImageId = lotImageId;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
     }
 
     public String getVtbCodigo() {
@@ -63,6 +73,7 @@ public class ImageInfoVtbCreateDto {
     public String toString() {
         return "ImageInfoVtbCreateDto{" +
                 "lotImageId=" + lotImageId +
+                ", originalName='" + originalName + '\'' +
                 ", vtbCodigo='" + vtbCodigo + '\'' +
                 ", vtbFracao='" + vtbFracao + '\'' +
                 ", faseGab=" + faseGab +
