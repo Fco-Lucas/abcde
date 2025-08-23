@@ -79,7 +79,8 @@ def processar_imagem(req: ImagemRequest):
 
     # Etapa 5 - Ler respostas
     respostas = ler_respostas(imagem_alinhada, blocos, debug_mode, debug_path, req.path_image, aluno_faltou, int(qtdQuestoes))
-    respostas_formatadas = {f"{i:02d}": r for i, r in enumerate(respostas, start=1)}
+    # respostas_formatadas = {f"{i:02d}": r for i, r in enumerate(respostas, start=1)}
+    respostas_formatadas = {str(i): r for i, r in enumerate(respostas, start=1)}
 
     if lot_type == "ABCDE":    
         dados = {
