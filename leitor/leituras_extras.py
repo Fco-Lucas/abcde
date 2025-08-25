@@ -2,6 +2,7 @@ from pyzbar.pyzbar import decode, ZBarSymbol
 from qr_code_corrections import CORRECOES_BYTES_QR
 import cv2
 import numpy as np
+import base64
 
 def ler_info_qr_code(imagem, debugMode=False):
     """
@@ -55,13 +56,6 @@ def ler_info_qr_code(imagem, debugMode=False):
 
     def decode_qr(arr):
         return decode(arr, symbols=[ZBarSymbol.QRCODE])
-
-    def corrigir_bytes(dados_raw: bytes) -> str:
-        dados_corrigidos = dados_raw
-        for bytes_problema, char_correto in CORRECOES_BYTES_QR.items():
-            if bytes_problema in dados_corrigidos:
-                dados_corrigidos = dados_corrigidos.replace(bytes_problema, char_correto.encode('utf-8'))
-        return dados_corrigidos.decode('utf-8', errors='replace')
 
     # Inverso da rotação para mapear ponto do frame rotacionado -> frame antes da rotação (já escalado)
     def inv_map_point(xr, yr, Ws, Hs, angle):
@@ -143,7 +137,12 @@ def ler_info_qr_code(imagem, debugMode=False):
 
                 # Pega o maior bbox (se por acaso achar mais de um)
                 barcode = max(barcodes, key=lambda b: b.rect.width * b.rect.height)
-                dados_qr = corrigir_bytes(barcode.data)
+                
+                # obtém os dados em base64
+                base64_data = barcode.data
+
+                # Decodifica o Base64 → bytes → string UTF-8
+                dados_qr = base64.b64decode(base64_data).decode("utf-8")
 
                 # Mapeia bbox do frame rotacionado de volta à imagem original
                 bbox_orig = map_rect_back_to_original(
@@ -174,11 +173,11 @@ def verificar_falta_aluno(imagem, bbox_qr_code, debugMode=False, debugPath="."):
     (x_qr, y_qr, w_qr, h_qr) = bbox_qr_code
 
     # Distância vertical do QR Code até o topo da ROI (em % da altura do QR)
-    Y_OFFSET_PCT = 0.23
+    Y_OFFSET_PCT = 0.30
     # Altura da ROI (em % da altura do QR)
     H_ROI_PCT = 0.16
     # Deslocamento horizontal da ROI (em % da largura do QR)
-    X_OFFSET_PCT = 0.88
+    X_OFFSET_PCT = 0.92
     # Largura da ROI (em % da largura do QR)
     W_ROI_PCT = 0.16
     # Limiar de preenchimento para considerar a marcação como "feita"
