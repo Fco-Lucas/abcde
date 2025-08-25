@@ -1,5 +1,4 @@
 from pyzbar.pyzbar import decode, ZBarSymbol
-from qr_code_corrections import CORRECOES_BYTES_QR
 import cv2
 import numpy as np
 import base64
