@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ExportMapper {
     public static ExportAbcdeDataDto toExportAbcdeDto(LotResponseDto lot, List<ExportAbcdeImagesDto> lotImages) {
-        return new ExportAbcdeDataDto(lot.getType(), lotImages);
+        return new ExportAbcdeDataDto(lot.getName(), lot.getType(), lotImages);
     }
 
     public static ExportAbcdeImagesDto toExportAbcdeImageDto(LotImage lotImage, ImageInfoAbcdeResponseDto imageInfo, List<LotImageQuestionResponseDto> questions) {
@@ -34,7 +34,7 @@ public class ExportMapper {
     }
 
     public static ExportVtbDataDto toExportVtbDto(LotResponseDto lot, List<ExportVtbImagesDto> lotImages) {
-        return new ExportVtbDataDto(lot.getType(), lotImages);
+        return new ExportVtbDataDto(lot.getName(), lot.getType(), lotImages);
     }
 
     public static ExportVtbImagesDto toExportVtbImageDto(LotImage lotImage, ImageInfoVtbResponseDto imageInfo, List<LotImageQuestionResponseDto> questions) {

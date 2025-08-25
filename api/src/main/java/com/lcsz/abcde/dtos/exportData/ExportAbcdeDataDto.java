@@ -5,15 +5,25 @@ import com.lcsz.abcde.enums.lot.LotType;
 import java.util.List;
 
 public class ExportAbcdeDataDto {
+    private String name;
     private LotType type;
     private List<ExportAbcdeImagesDto> lotImages;
 
     public ExportAbcdeDataDto() {
     }
 
-    public ExportAbcdeDataDto(LotType type, List<ExportAbcdeImagesDto> lotImages) {
+    public ExportAbcdeDataDto(String name, LotType type, List<ExportAbcdeImagesDto> lotImages) {
+        this.name = name;
         this.type = type;
         this.lotImages = lotImages;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public LotType getType() {
@@ -35,6 +45,7 @@ public class ExportAbcdeDataDto {
     @Override
     public String toString() {
         return "ExportDataDto{" +
+                "name=" + name +
                 "type=" + type +
                 ", lotImages=" + lotImages +
                 '}';
