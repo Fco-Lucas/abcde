@@ -261,11 +261,23 @@ export class HomePageComponent {
               prevBtnText: 'Voltar',
             }
           },
-          {  
+          {
+            element: "#lotList",
             popover: { 
               title: 'Lotes criados', 
               description: 'Clique no lote desejado para visualizar as imagens processadas',
               side: "left", 
+              align: 'center',
+              nextBtnText: 'Avançar',
+              prevBtnText: 'Voltar',
+            }
+          },
+          { 
+            element: "#navItemHelp",
+            popover: { 
+              title: 'Mais ajuda', 
+              description: 'Clique no menu ajuda para baixar o PDF contendo mais informações sobre impressão e leitura dos gabaritos + informações gerais do sistema',
+              side: "bottom", 
               align: 'center',
               prevBtnText: 'Voltar',
               doneBtnText: 'Finalizar'

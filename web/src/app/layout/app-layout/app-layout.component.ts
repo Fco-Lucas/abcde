@@ -29,9 +29,14 @@ export class AppLayoutComponent {
       { label: 'Meus Usuários', link: `/app/clients/${id}/users`, roles: ['CLIENT'] },
       { label: 'Meu Perfil', link: '/app/profile', roles: ['COMPUTEX', 'CLIENT', 'CLIENT_USER'] },
       { label: 'Auditoria', link: '/app/auditLog', roles: ['COMPUTEX'] },
+      { label: 'Ajuda', link: '', roles: ['COMPUTEX', 'CLIENT', 'CLIENT_USER'], click: () => this.onHelp(), id: "navItemHelp" },
     ];
     
     return allItems.filter(item => item.roles.includes(role));
+  }
+
+  onHelp() {
+    window.open('/help.pdf', '_blank');
   }
 
   onLogout(): void {

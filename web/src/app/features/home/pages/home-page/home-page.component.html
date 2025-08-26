@@ -30,6 +30,7 @@
       @default {
         @if (this.permissions()?.read_files) {
           <app-lot-list
+            id="lotList"
             [lots]="this.lots()"
             [isLoading]="this.isLoading()"
             [totalElements]="this.totalElements()"

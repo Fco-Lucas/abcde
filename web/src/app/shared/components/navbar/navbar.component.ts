@@ -13,6 +13,8 @@ export interface NavItem {
   label: string;
   link: string;
   roles: AuthenticatedUserRole[]
+  click?: () => void;
+  id?: string;
 }
 
 @Component({
