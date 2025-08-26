@@ -12,7 +12,7 @@
       }
 
       @if (this.permissions()?.upload_files) {
-        <button matButton="filled" class="w-full md:w-auto" (click)="openCreateLotDialog()">
+        <button matButton="filled" class="w-full md:w-auto" id="create-lote-btn" (click)="openCreateLotDialog()">
           <mat-icon>add</mat-icon>
           Novo lote
         </button>

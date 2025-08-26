@@ -9,11 +9,11 @@
           <button matMiniFab class="fabButtons" routerLink="/app/home">
             <mat-icon>arrow_back</mat-icon>
           </button>
-          <button matMiniFab class="fabButtons" aria-label="Filtrar gabaritos" (click)="openDialogFilterImages()">
+          <button matMiniFab class="fabButtons" id="filter-images-btn" aria-label="Filtrar gabaritos" (click)="openDialogFilterImages()">
             <mat-icon>search</mat-icon>
           </button>
         </div>
-        <button class="w-full md:w-auto" matButton="filled" [matMenuTriggerFor]="afterMenu">
+        <button class="w-full md:w-auto" matButton="filled" [matMenuTriggerFor]="afterMenu" id="dropdown-lots">
           Ações
           <mat-icon>keyboard_arrow_down</mat-icon>
         </button>
@@ -86,6 +86,7 @@
           }
           @default {
             <app-images-list
+              id="imagesList"
               [images]="lotImages()"
               [isLoading]="isLoadingImages()"
               [selectedImageId]="selectedImageId()"
@@ -129,13 +130,13 @@
             
           </div>
           
-          <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-3" id="container-updateAlternatives-image">
              <div class="flex items-center justify-between gap-5">
                 <div class="flex flex-col">
                   <p class="text-xl">Alterações:</p>
                   <p class="text-sm text-semibold">(Processos auditados)</p>
                 </div>
-                <button class="w-full md:w-auto" matButton="filled" [matMenuTriggerFor]="afterMenuImage">
+                <button class="w-full md:w-auto" matButton="filled" id="dropdown-images" [matMenuTriggerFor]="afterMenuImage">
                   Ações
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>

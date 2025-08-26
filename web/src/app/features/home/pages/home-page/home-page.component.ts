@@ -1,10 +1,11 @@
-import { Component, inject, signal, ViewChild, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, ViewChild, OnInit, computed, type AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { driver } from "driver.js";
 
 import { LotFiltersComponent, LotFiltersFormValues } from '../../components/lot-filters/lot-filters.component';
 import { LotListComponent } from '../../components/lot-list/lot-list.component';
@@ -19,15 +20,20 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { LotService } from '../../services/lot.service';
-import { catchError, combineLatest, firstValueFrom, of, shareReplay, switchMap, tap } from 'rxjs';
+import { catchError, combineLatest, firstValueFrom, forkJoin, of, shareReplay, switchMap, tap } from 'rxjs';
 import { LotStateService } from '../../services/lot-state.service';
 import { Router } from '@angular/router';
 import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/ui-not-found.component';
 import { ClientService } from '../../../clients/services/client.service';
 import type { Client } from '../../../clients/models/client.model';
 import { LoadingService } from '../../../../core/services/loading.service';
+import { TourScreenService } from '../../../tourScreen/services/tour-screen.service';
+import { TourScreenEnum, type TourScreenInterface, type TourScreenUpdateInterface } from '../../../tourScreen/models/tour-screen.models';
+import { ConfirmationDialogService } from '../../../../core/services/confirmation-dialog.service';
+import type { ConfirmationDialogData } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 interface HomeState {
+  tourScreenInfo: TourScreenInterface | null;
   permissions: PermissionInterface | null;
   lots: LotInterface[];
   totalElements: number;
@@ -64,6 +70,7 @@ export class HomePageComponent {
   private authService = inject(AuthService);
   private clientService = inject(ClientService);
   private permissionsService = inject(PermissionsService);
+  private tourScreenService = inject(TourScreenService);
   private notification = inject(NotificationService);
   private loader = inject(LoadingService);
   private router = inject(Router);
@@ -75,6 +82,7 @@ export class HomePageComponent {
   });
 
   private state = signal<HomeState>({
+    tourScreenInfo: null,
     permissions: null,
     lots: [],
     totalElements: 0,
@@ -82,6 +90,7 @@ export class HomePageComponent {
     error: null,
   });
 
+  public readonly tourScreenInfo = computed(() => this.state().tourScreenInfo);
   public readonly permissions = computed(() => this.state().permissions);
   public readonly lots = computed(() => this.state().lots);
   public readonly totalElements = computed(() => this.state().totalElements);
@@ -103,7 +112,10 @@ export class HomePageComponent {
     const initialData$ = this.authService.currentUserId$.pipe(
       switchMap(userId => {
         if (!userId) throw new Error("ID do usuário autenticado não encontrado.");
-        return this.permissionsService.getUserPermission(userId);
+        return forkJoin({
+          permissions: this.permissionsService.getUserPermission(userId),
+          tourScreenInfo: this.tourScreenService.getByAuthUserIdAndScreen(TourScreenEnum.LOT)
+        });
       }),
       // shareReplay garante que este fluxo só executa UMA VEZ.
       shareReplay({ bufferSize: 1, refCount: true }) 
@@ -114,9 +126,15 @@ export class HomePageComponent {
 
     combineLatest([initialData$, query$]).pipe(
       tap(() => this.state.update(s => ({ ...s, loading: true, error: null }))),
-      switchMap(([permissions, currentQuery]) => {
+      switchMap(([initialData, currentQuery]) => {
+        const { permissions, tourScreenInfo } = initialData;
+
         // Atualiza as permissões no estado
-        this.state.update(s => ({ ...s, permissions }));
+        this.state.update(s => ({ ...s, permissions, tourScreenInfo }));
+
+        if (permissions.upload_files && !tourScreenInfo.completed) {
+          this.startTour();
+        }
 
         if(!permissions.read_files) {
           this.state.update(s => ({ ...s, lots: [], totalElements: 0, loading: false }))
@@ -221,5 +239,59 @@ export class HomePageComponent {
 
     this.loader.hideLoad();
     this.router.navigate(["/app/loteDetails"]);
+  }
+
+  private startTour() {
+    setTimeout(() => {
+      const driverObj = driver({
+        showProgress: true,
+        animate: true,
+        overlayColor: "black",
+        allowClose: true,
+        progressText: "{{current}} de {{total}}",
+        steps: [
+          { 
+            element: '#create-lote-btn', 
+            popover: { 
+              title: 'Criação dos lotes', 
+              description: 'Clique no botão e informe o tipo, nome e as imagens que irão compor o lote',
+              side: "left", 
+              align: 'start',
+              nextBtnText: 'Avançar',
+              prevBtnText: 'Voltar',
+            }
+          },
+          {  
+            popover: { 
+              title: 'Lotes criados', 
+              description: 'Clique no lote desejado para visualizar as imagens processadas',
+              side: "left", 
+              align: 'center',
+              prevBtnText: 'Voltar',
+              doneBtnText: 'Finalizar'
+            }
+          },
+        ],
+        onDestroyed: () => {
+          const tourScreenInfo = this.tourScreenInfo();
+          if(!tourScreenInfo) return;
+
+          const tourScreenId = tourScreenInfo.id;
+          const tourScreenUpdate: TourScreenUpdateInterface = {
+            completed: true
+          };
+          this.tourScreenService.updateTourScreen(tourScreenId, tourScreenUpdate).subscribe({
+            next: (_) => {},
+            error: (_) => {}
+          });
+          this.state.update(s => ({
+            ...s,
+            tourScreenInfo: { ...tourScreenInfo, completed: true }
+          }));
+        }
+      });
+
+      driverObj.drive();
+    }, 500);
   }
 }
