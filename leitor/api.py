@@ -113,3 +113,7 @@ def processar_imagem(req: ImagemRequest):
         "dados": dados,
         "respostas": respostas_formatadas
     }
+
+@app.get("/ping")
+def health_check():
+    return True
