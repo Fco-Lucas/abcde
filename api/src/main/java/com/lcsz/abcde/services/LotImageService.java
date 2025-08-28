@@ -43,6 +43,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -252,7 +255,7 @@ public class LotImageService {
         request.put("lot_type", type);
         request.put("debug", false);
 
-        String url = appProperties.getApiPythonUrl();
+        String url = appProperties.getApiPythonUrl() + "/scanImage";
 
         try {
             ResponseEntity<T> response = restTemplate.exchange(
@@ -268,7 +271,7 @@ public class LotImageService {
                 throw new RuntimeException("Erro ao scanear imagem com Python: status " + response.getStatusCode());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Falha ao chamar API Python: " + e.getMessage(), e);
+            throw new RuntimeException("Falha ao chamar API Python: " + e.getMessage());
         }
     }
 
@@ -337,11 +340,19 @@ public class LotImageService {
 
         // Cria pasta do lote
         Path pastaLote = raiz.resolve(lotId.toString());
+
+        // Cria diretório (e os pais, se não existirem)
         Files.createDirectories(pastaLote);
+
+        // Força permissão 777 (ignora umask do sistema)
+        Files.setPosixFilePermissions(pastaLote,
+                PosixFilePermissions.fromString("rwxrwxrwx"));
 
         // Salva o arquivo na pasta
         Path path_destiny = pastaLote.resolve(fileName);
         Files.copy(file.getInputStream(), path_destiny, StandardCopyOption.REPLACE_EXISTING);
+        Files.setPosixFilePermissions(path_destiny,
+                PosixFilePermissions.fromString("rwxrwxrwx"));
 
         LotImageResponseDto responseDto;
         StringBuilder questionsLog = new StringBuilder();

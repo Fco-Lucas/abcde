@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/lots")
+@RequestMapping("${api.basepath}lots")
 public class LotController {
     private final LotService lotService;
     public LotController(LotService lotService) {

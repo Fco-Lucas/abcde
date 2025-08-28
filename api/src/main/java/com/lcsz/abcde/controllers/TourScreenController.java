@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/tour-screen")
+@RequestMapping("${api.basepath}tour-screen")
 public class TourScreenController {
     private final TourScreenService service;
     private final AuthenticatedUserProvider provider;

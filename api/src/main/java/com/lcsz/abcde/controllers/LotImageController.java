@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/lots/{lotId}/images")
+@RequestMapping("${api.basepath}lots/{lotId}/images")
 public class LotImageController {
     private final LotImageService lotImageService;
     private final AuthenticatedUserProvider userProvider;
