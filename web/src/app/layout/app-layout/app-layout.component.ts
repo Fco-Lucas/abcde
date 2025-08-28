@@ -36,7 +36,12 @@ export class AppLayoutComponent {
   }
 
   onHelp() {
-    window.open('/help.pdf', '_blank');
+    const link = document.createElement('a');
+    link.href = '/help.pdf';
+    link.download = 'manual.pdf'; // nome sugerido
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   onLogout(): void {
