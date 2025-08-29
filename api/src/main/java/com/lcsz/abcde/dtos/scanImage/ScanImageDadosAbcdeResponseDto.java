@@ -1,6 +1,6 @@
-package com.lcsz.abcde.dtos;
+package com.lcsz.abcde.dtos.scanImage;
 
-public class ScanImageDadosResponseDto {
+public class ScanImageDadosAbcdeResponseDto {
     private Integer matricula;
     private String nomeAluno;
     private String etapa;
@@ -14,10 +14,10 @@ public class ScanImageDadosResponseDto {
     private String turno;
     private Integer turma;
 
-    public ScanImageDadosResponseDto() {
+    public ScanImageDadosAbcdeResponseDto() {
     }
 
-    public ScanImageDadosResponseDto(Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer qtdQuestoes, Integer presenca, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma) {
+    public ScanImageDadosAbcdeResponseDto(Integer matricula, String nomeAluno, String etapa, Integer prova, String gabarito, Integer qtdQuestoes, Integer presenca, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma) {
         this.matricula = matricula;
         this.nomeAluno = nomeAluno;
         this.etapa = etapa;
@@ -130,7 +130,7 @@ public class ScanImageDadosResponseDto {
 
     @Override
     public String toString() {
-        return "ScanImageDadosResponseDto{" +
+        return "ScanImageDadosAbcdeResponseDto{" +
                 "matricula=" + matricula +
                 ", nomeAluno='" + nomeAluno + '\'' +
                 ", etapa='" + etapa + '\'' +

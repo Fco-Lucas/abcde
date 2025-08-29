@@ -131,7 +131,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.removeToken();
     this.router.navigate(['/auth/login']);
+    this.removeToken();
   }
 }

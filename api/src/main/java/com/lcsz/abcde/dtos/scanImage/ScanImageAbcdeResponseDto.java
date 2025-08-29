@@ -1,15 +1,15 @@
-package com.lcsz.abcde.dtos;
+package com.lcsz.abcde.dtos.scanImage;
 
 import java.util.Map;
 
-public class ScanImageResponseDto {
+public class ScanImageAbcdeResponseDto {
     private Map<String, String> respostas;
-    private ScanImageDadosResponseDto dados;
+    private ScanImageDadosAbcdeResponseDto dados;
 
-    public ScanImageResponseDto() {
+    public ScanImageAbcdeResponseDto() {
     }
 
-    public ScanImageResponseDto(Map<String, String> respostas, ScanImageDadosResponseDto dados) {
+    public ScanImageAbcdeResponseDto(Map<String, String> respostas, ScanImageDadosAbcdeResponseDto dados) {
         this.respostas = respostas;
         this.dados = dados;
     }
@@ -22,17 +22,17 @@ public class ScanImageResponseDto {
         this.respostas = respostas;
     }
 
-    public ScanImageDadosResponseDto getDados() {
+    public ScanImageDadosAbcdeResponseDto getDados() {
         return dados;
     }
 
-    public void setDados(ScanImageDadosResponseDto dados) {
+    public void setDados(ScanImageDadosAbcdeResponseDto dados) {
         this.dados = dados;
     }
 
     @Override
     public String toString() {
-        return "ScanImageResponseDto{" +
+        return "ScanImageAbcdeResponseDto{" +
                 "respostas=" + respostas +
                 ", dados=" + dados +
                 '}';

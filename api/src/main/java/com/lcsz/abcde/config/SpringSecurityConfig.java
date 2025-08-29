@@ -2,6 +2,7 @@ package com.lcsz.abcde.config;
 
 import com.lcsz.abcde.security.JwtAuthenticationEntryPoint;
 import com.lcsz.abcde.security.JwtAuthorizationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,9 @@ import java.util.List;
 @EnableMethodSecurity
 @Configuration
 public class SpringSecurityConfig {
+    @Value("${api.basepath}")
+    private String apiBasePath;
+
     private static final String[] DOCUMENTATION_OPENAPI = {
             "/docs/index.html",
             "/docs-abcde.html", "/docs-abcde/**",
@@ -40,9 +44,11 @@ public class SpringSecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/clients").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth").permitAll()
+                        .requestMatchers(HttpMethod.POST, apiBasePath + "clients").permitAll()
+                        .requestMatchers(HttpMethod.POST, apiBasePath + "auth").permitAll()
                         .requestMatchers(HttpMethod.GET, "/gabaritos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/ping-spring").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/ping-python").permitAll()
                         .requestMatchers(DOCUMENTATION_OPENAPI).permitAll()
                         .anyRequest().authenticated()
                 ).sessionManagement(

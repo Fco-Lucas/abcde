@@ -11,8 +11,10 @@ import { ThemeToggleComponent } from '../theme-toogle.component/theme-toogle.com
 // Interface para definir a estrutura de um item de navegação
 export interface NavItem {
   label: string;
-  link: string;
+  link?: string;
   roles: AuthenticatedUserRole[]
+  click?: () => void;
+  id?: string;
 }
 
 @Component({

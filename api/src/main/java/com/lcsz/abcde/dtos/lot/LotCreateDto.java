@@ -1,5 +1,6 @@
 package com.lcsz.abcde.dtos.lot;
 
+import com.lcsz.abcde.enums.lot.LotType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,13 +11,16 @@ public class LotCreateDto {
     private UUID userId;
     @NotBlank(message = "O campo 'name' é obrigatório")
     private String name;
+    @NotNull(message = "O campo 'type' é obrigatório")
+    private LotType type;
 
     public LotCreateDto() {
     }
 
-    public LotCreateDto(UUID userId, String name) {
+    public LotCreateDto(UUID userId, String name, LotType type) {
         this.userId = userId;
         this.name = name;
+        this.type = type;
     }
 
     public UUID getUserId() {
@@ -35,11 +39,20 @@ public class LotCreateDto {
         this.name = name;
     }
 
+    public LotType getType() {
+        return type;
+    }
+
+    public void setType(LotType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "LotCreateDto{" +
                 "userId=" + userId +
-                ", name='" + name + '\'' +
+                "name=" + name +
+                ", type='" + type + '\'' +
                 '}';
     }
 }

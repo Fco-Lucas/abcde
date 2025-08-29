@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @Tag(name = "Auth Controller", description = "Contém todas as operações relacionadas aos recursos de autenticação do ABCDE")
 @RestController
-@RequestMapping("api/v1/auth")
+@RequestMapping("${api.basepath}auth")
 public class AuthController {
     private final JwtUserDetailsService detailsService;
     private final AuthenticationManager authenticationManager;

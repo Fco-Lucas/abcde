@@ -7,7 +7,7 @@ import { FormBuilder, FormGroup, FormArray, FormControl, ReactiveFormsModule, Ab
 
 // ✅ Imports do RxJS e Interop
 import { toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, tap, catchError, of, filter, finalize, firstValueFrom } from 'rxjs';
+import { switchMap, tap, catchError, of, filter, finalize, firstValueFrom, take } from 'rxjs';
 
 // Models, Services, e Components
 import { LotStateService } from '../../services/lot-state.service';
@@ -43,8 +43,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { LoadingService } from '../../../../core/services/loading.service';
 import type { Client } from '../../../clients/models/client.model';
+import { TourScreenEnum, type TourScreenInterface, type TourScreenUpdateInterface } from '../../../tourScreen/models/tour-screen.models';
+import { TourScreenService } from '../../../tourScreen/services/tour-screen.service';
+import { driver } from 'driver.js';
 
 interface LotDetailsState {
+  tourScreenInfo: TourScreenInterface | null;
   lot: LotInterface;
   userPermissions: PermissionInterface;
   clientLot: Client;
@@ -82,6 +86,7 @@ export class LotDetailsPageComponent {
   private lotService = inject(LotService);
   private lotStateService = inject(LotStateService);
   private lotImageService = inject(LotImageService);
+  private tourScreenService = inject(TourScreenService);
   private confirmationDialogService = inject(ConfirmationDialogService);
   private notification = inject(NotificationService);
   private http = inject(HttpClient);
@@ -98,6 +103,7 @@ export class LotDetailsPageComponent {
   public selectedImageId = signal<number | null>(null);
 
   private state = signal<LotDetailsState>({
+    tourScreenInfo: null,
     lot: this.lotStateService.selectedLot()!,
     userPermissions: this.lotStateService.userPermissions()!,
     clientLot: this.lotStateService.clientLot()!,
@@ -111,6 +117,7 @@ export class LotDetailsPageComponent {
     error: null,
   });
 
+  public readonly tourScreenInfo = computed(() => this.state().tourScreenInfo);
   public readonly lot = computed(() => this.state().lot);
   public readonly userPermissions = computed(() => this.state().userPermissions);
   public readonly clientLot = computed(() => this.state().clientLot);
@@ -165,6 +172,17 @@ export class LotDetailsPageComponent {
       return;
     }
 
+    // Busca inicial
+    this.tourScreenService.getByAuthUserIdAndScreen(TourScreenEnum.LOTDETAILS)
+      .pipe(take(1)) // garante que só executa uma vez
+      .subscribe(tourScreenInfo => {
+        this.state.update(s => ({ ...s, tourScreenInfo }));
+
+        if(tourScreenInfo.completed || !this.userPermissions().upload_files) return;
+
+        this.startTour();
+      });
+
     // STREAM 1: Reage a filtros/paginação para buscar a LISTA de imagens
     toObservable(this.imagesQuery).pipe(
       tap(() => this.state.update(s => ({ ...s, loadingImages: true, error: null }))),
@@ -217,6 +235,94 @@ export class LotDetailsPageComponent {
         this.state.update(s => ({ ...s, answersForm: this.fb.group({ answers: this.fb.array([]) }), initialAnswers: [] }));
       }
     });
+  }
+
+  private startTour() {
+    setTimeout(() => {
+      const driverObj = driver({
+        showProgress: true,
+        animate: true,
+        overlayColor: "black",
+        allowClose: true,
+        progressText: "{{current}} de {{total}}",
+        steps: [
+          { 
+            element: '#container-updateAlternatives-image', 
+            popover: { 
+              title: 'Alterar gabarito', 
+              description: 'Altere as alternativas das questões da imagem selecionada',
+              side: "left", 
+              align: 'start',
+              nextBtnText: 'Avançar',
+              prevBtnText: 'Voltar',
+            }
+          },
+          {  
+            element: "#dropdown-images",
+            popover: { 
+              title: 'Ações da imagem selecionada', 
+              description: 'Clique no botão para baixar a imagem, ou excluí-la do lote',
+              side: "left", 
+              align: 'start',
+              nextBtnText: 'Avançar',
+              prevBtnText: 'Voltar',
+            }
+          },
+          {  
+            element: "#filter-images-btn",
+            popover: { 
+              title: 'Filtrar imagens do lote', 
+              description: 'Filtrar pela matrícula ou nome dos(as) alunos(as)',
+              side: "right", 
+              align: 'start',
+              nextBtnText: 'Avançar',
+              prevBtnText: 'Voltar',
+            }
+          },
+          {  
+            element: "#dropdown-lots",
+            popover: { 
+              title: 'Ações do lote', 
+              description: 'Atualizar, excluir, baixar imagens e dentre outras funcionalidades disponíveis de acordo com a situação do lote',
+              side: "right", 
+              align: 'start',
+              nextBtnText: 'Avançar',
+              prevBtnText: 'Voltar',
+            }
+          },
+          {  
+            element: "#imagesList",
+            popover: { 
+              title: 'Navegação entre as imagens do lote', 
+              description: 'Para navegar entre as imagens do lote basta selecionar a imagem desejada, caso esteja selecionada, a borda lateral ficará azul, caso o(a) aluno(a) tenha faltado ficará vermelha',
+              side: "right", 
+              align: 'start',
+              prevBtnText: 'Voltar',
+              doneBtnText: "Finalizar"
+            }
+          },
+        ],
+        onDestroyed: () => {
+          const tourScreenInfo = this.tourScreenInfo();
+          if(!tourScreenInfo) return;
+
+          const tourScreenId = tourScreenInfo.id;
+          const tourScreenUpdate: TourScreenUpdateInterface = {
+            completed: true
+          };
+          this.tourScreenService.updateTourScreen(tourScreenId, tourScreenUpdate).subscribe({
+            next: (_) => {},
+            error: (_) => {}
+          });
+          this.state.update(s => ({
+            ...s,
+            tourScreenInfo: { ...tourScreenInfo, completed: true }
+          }));
+        }
+      });
+
+      driverObj.drive();
+    }, 500);
   }
 
   onPageChange(event: PageEvent): void {
@@ -482,7 +588,7 @@ export class LotDetailsPageComponent {
       finalize(() => this.loader.hideLoad())
     ).subscribe({
       next: (_) => this.notification.showSuccess("Dados do lote enviados com sucesso"),
-      error: (_) => this.notification.showError("Ocorreu um erro ao gerar o arquivo .txt do lote, tente novamente mais tarde!")
+      error: (_) => this.notification.showError("Ocorreu um erro ao exportar os dados do lote para a URL informada, tente novamente mais tarde!")
     });
   }
 
@@ -502,6 +608,26 @@ export class LotDetailsPageComponent {
       },
       error: (err) => {
         this.notification.showError("Ocorreu um erro ao gerar o arquivo .txt do lote, tente novamente mais tarde!");
+      }
+    });
+  }
+
+  onDonwloadDat() {
+    this.loader.showLoad("Baixando informações...");
+
+    this.lotService.downloadDat(this.lot().id).pipe(
+      finalize(() => this.loader.hideLoad())
+    ).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `lote-${this.lot().name}.dat`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.notification.showError("Ocorreu um erro ao gerar o arquivo .dat do lote, tente novamente mais tarde!");
       }
     });
   }

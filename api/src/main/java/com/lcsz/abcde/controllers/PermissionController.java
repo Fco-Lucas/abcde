@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @Tag(name = "Permission Controller", description = "Contém todas as operações relacionadas aos recursos de permissões do ABCDE")
 @RestController
-@RequestMapping("api/v1/permissions")
+@RequestMapping("${api.basepath}permissions")
 public class PermissionController {
     private final PermissionService service;
     private final AuthenticatedUserProvider provider;

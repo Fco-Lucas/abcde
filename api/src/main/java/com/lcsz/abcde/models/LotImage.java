@@ -5,13 +5,14 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "lots_images")
 @EntityListeners(AuditingEntityListener.class)
-public class LotImage {
+public class LotImage implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,28 +20,10 @@ public class LotImage {
     private Long lotId;
     @Column(nullable = false, length = 100)
     private String key;
-    @Column(nullable = false, name = "original_name")
-    private String originalName;
     @Column(nullable = false)
     private Integer matricula;
     @Column(nullable = false, length = 70, name = "nome_aluno")
     private String nomeAluno;
-    @Column(nullable = false, name = "codigo_escola")
-    private Integer codigoEscola;
-    @Column(nullable = false)
-    private Integer ano;
-    @Column(nullable = false, name = "grau_serie")
-    private Integer grauSerie;
-    @Column(nullable = false, length = 1)
-    private String turno;
-    @Column(nullable = false)
-    private Integer turma;
-    @Column(nullable = false, length = 1)
-    private String etapa;
-    @Column(nullable = false)
-    private Integer prova;
-    @Column(nullable = false, length = 1)
-    private String gabarito;
     @Column(nullable = false)
     private Integer presenca;
     @Column(nullable = false, name = "qtd_questoes")
@@ -57,21 +40,12 @@ public class LotImage {
     public LotImage() {
     }
 
-    public LotImage(Long id, Long lotId, String key, String originalName, Integer matricula, String nomeAluno, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt) {
+    public LotImage(Long id, Long lotId, String key, Integer matricula, String nomeAluno, Integer presenca, Integer qtdQuestoes, Boolean haveModification, LotImageStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.lotId = lotId;
         this.key = key;
-        this.originalName = originalName;
         this.matricula = matricula;
         this.nomeAluno = nomeAluno;
-        this.codigoEscola = codigoEscola;
-        this.ano = ano;
-        this.grauSerie = grauSerie;
-        this.turno = turno;
-        this.turma = turma;
-        this.etapa = etapa;
-        this.prova = prova;
-        this.gabarito = gabarito;
         this.presenca = presenca;
         this.qtdQuestoes = qtdQuestoes;
         this.haveModification = haveModification;
@@ -103,14 +77,6 @@ public class LotImage {
         this.key = key;
     }
 
-    public String getOriginalName() {
-        return originalName;
-    }
-
-    public void setOriginalName(String originalName) {
-        this.originalName = originalName;
-    }
-
     public Integer getMatricula() {
         return matricula;
     }
@@ -125,70 +91,6 @@ public class LotImage {
 
     public void setNomeAluno(String nomeAluno) {
         this.nomeAluno = nomeAluno;
-    }
-
-    public Integer getCodigoEscola() {
-        return codigoEscola;
-    }
-
-    public void setCodigoEscola(Integer codigoEscola) {
-        this.codigoEscola = codigoEscola;
-    }
-
-    public Integer getAno() {
-        return ano;
-    }
-
-    public void setAno(Integer ano) {
-        this.ano = ano;
-    }
-
-    public Integer getGrauSerie() {
-        return grauSerie;
-    }
-
-    public void setGrauSerie(Integer grauSerie) {
-        this.grauSerie = grauSerie;
-    }
-
-    public String getTurno() {
-        return turno;
-    }
-
-    public void setTurno(String turno) {
-        this.turno = turno;
-    }
-
-    public Integer getTurma() {
-        return turma;
-    }
-
-    public void setTurma(Integer turma) {
-        this.turma = turma;
-    }
-
-    public String getEtapa() {
-        return etapa;
-    }
-
-    public void setEtapa(String etapa) {
-        this.etapa = etapa;
-    }
-
-    public Integer getProva() {
-        return prova;
-    }
-
-    public void setProva(Integer prova) {
-        this.prova = prova;
-    }
-
-    public String getGabarito() {
-        return gabarito;
-    }
-
-    public void setGabarito(String gabarito) {
-        this.gabarito = gabarito;
     }
 
     public Integer getPresenca() {
@@ -249,17 +151,8 @@ public class LotImage {
                 "id=" + id +
                 ", lotId=" + lotId +
                 ", key='" + key + '\'' +
-                ", originalName='" + originalName + '\'' +
                 ", matricula=" + matricula +
                 ", nomeAluno='" + nomeAluno + '\'' +
-                ", codigoEscola=" + codigoEscola +
-                ", ano=" + ano +
-                ", grauSerie=" + grauSerie +
-                ", turno='" + turno + '\'' +
-                ", turma=" + turma +
-                ", etapa='" + etapa + '\'' +
-                ", prova=" + prova +
-                ", gabarito='" + gabarito + '\'' +
                 ", presenca=" + presenca +
                 ", qtdQuestoes=" + qtdQuestoes +
                 ", haveModification=" + haveModification +

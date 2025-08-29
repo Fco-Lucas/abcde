@@ -29,9 +29,19 @@ export class AppLayoutComponent {
       { label: 'Meus Usuários', link: `/app/clients/${id}/users`, roles: ['CLIENT'] },
       { label: 'Meu Perfil', link: '/app/profile', roles: ['COMPUTEX', 'CLIENT', 'CLIENT_USER'] },
       { label: 'Auditoria', link: '/app/auditLog', roles: ['COMPUTEX'] },
+      { label: 'Ajuda', roles: ['COMPUTEX', 'CLIENT', 'CLIENT_USER'], click: () => this.onHelp(), id: "navItemHelp" },
     ];
     
     return allItems.filter(item => item.roles.includes(role));
+  }
+
+  onHelp() {
+    const link = document.createElement('a');
+    link.href = '/help.pdf';
+    link.download = 'manual.pdf'; // nome sugerido
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   onLogout(): void {

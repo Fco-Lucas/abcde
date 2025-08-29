@@ -1,10 +1,20 @@
 <h2 mat-dialog-title>Novo Lote</h2>
 
 <form [formGroup]="createForm" (ngSubmit)="onSubmit()">
-  <mat-dialog-content class="space-y-4">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="type">
+        <mat-option value="ABCDE">ABCDE</mat-option>
+        <mat-option value="VTB">Vestibular</mat-option>
+      </mat-select>
+      @if (typeControl?.hasError("required") && typeControl?.touched) {
+        <mat-error>Tipo é obrigatório</mat-error>
+      }
+    </mat-form-field>
     <!-- Campo de Nome -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Nome do Lote</mat-label>
+      <mat-label>Nome</mat-label>
       <input 
         matInput
         type="text"

@@ -1,5 +1,6 @@
 __pycache__/
 venv/
+.venv/
 debug/
 test/
 test.py

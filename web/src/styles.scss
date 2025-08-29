@@ -1,5 +1,7 @@
 @use '@angular/material' as mat;
 
+@import "driver.js/dist/driver.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

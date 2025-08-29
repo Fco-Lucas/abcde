@@ -7,19 +7,29 @@
     <div class="grid grid-cols-1 gap-3">
       <mat-card *ngFor="let lot of this.lots" class="cursor-pointer" (click)="this.onClickedLot.emit(lot)">
         <mat-card-content class="flex-grow">
-          <div class="grid grid-cols-2 gap-2 items-center">
+          <div class="grid grid-cols-2 gap-2 items-start">
+            
+            <!-- Coluna da esquerda: Nome e Criado por -->
             <div class="flex flex-col">
               <p class="text-2xl">{{ lot.name }}</p>
-              <p class="text-1xl">Criado por: {{ lot.userName }}</p>
+              <p class="text-1xl">
+                Criado por: {{ lot.userName }}
+                @if(this.userRole === "COMPUTEX" && !lot.createdByClient) { | CLIENTE: {{ lot.clientName }} }
+              </p>
+              <p class="text-1xl">Criado em: {{ lot.createdAt | date: "dd/MM/yyyy HH:mm" }}</p>
             </div>
-            <div class="flex justify-end">
-              <app-lot-status-badge
-                [status]="lot.status"
-              ></app-lot-status-badge>
+
+            <!-- Coluna da direita: Badges de Status e Tipo -->
+            <div class="flex justify-end items-start gap-2">
+              <app-lot-status-badge [status]="lot.status"></app-lot-status-badge>
+              <app-lot-type-badge [type]="lot.type"></app-lot-type-badge>
             </div>
-            <div class="col-span-2 flex justify-between items-center gap-1">
-              <p>{{ lot.numberImages }} {{ lot.numberImages > 1 ? "Imagens" : "Imagem" }} </p>
+
+            <!-- Linha abaixo ocupando 2 colunas: Número de imagens -->
+            <div class="col-span-2 flex justify-between items-center gap-1 mt-2">
+              <p>{{ lot.numberImages }} {{ lot.numberImages > 1 ? "Imagens" : "Imagem" }}</p>
             </div>
+
           </div>
         </mat-card-content>
       </mat-card>

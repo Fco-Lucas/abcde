@@ -33,7 +33,7 @@
 
       <div class="hidden md:flex justify-center gap-2">
         <ng-container *ngFor="let item of navItems">
-          <a mat-button [routerLink]="item.link" routerLinkActive="font-bold">{{ item.label }}</a>
+          <a mat-button [id]="item?.id" (click)="item.click?.()" [routerLink]="item.link" routerLinkActive="font-bold">{{ item.label }}</a>
         </ng-container>
       </div>
     </div>

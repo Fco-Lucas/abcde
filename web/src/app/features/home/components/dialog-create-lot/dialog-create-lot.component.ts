@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { LotService } from '../../services/lot.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { LotCreateInterface, LotInterface } from '../../models/lot.model';
+import { LotCreateInterface, LotInterface, LotStatusEnum, LotTypeEnum } from '../../models/lot.model';
 import { finalize } from 'rxjs';
 import { MatListModule } from "@angular/material/list";
 import { LotImageService } from '../../services/lot-image.service';
@@ -22,6 +22,7 @@ export interface DialogCreateLotData {
 }
 
 export interface CreateLotFormValues {
+  type: LotTypeEnum;
   name: string;
   images: FileList | null;
 }
@@ -66,6 +67,7 @@ export class DialogCreateLotComponent implements OnInit {
   public buttonText = signal('Selecionar imagens');
 
   createForm = this.fb.group({
+    type: [LotTypeEnum.ABCDE, [Validators.required]],
     name: ["", [Validators.required]],
     images: [null as FileList | null]
   }); 
@@ -76,6 +78,7 @@ export class DialogCreateLotComponent implements OnInit {
     this.userId = this.data.userId;
   }
 
+  get typeControl() { return this.createForm.get("type"); }
   get nameControl() { return this.createForm.get("name"); }
   get imagesControl() { return this.createForm.get("images"); }
   get hasDuplicatedImages(): boolean { return this.hashedFiles.some(f => f.duplicated); }
@@ -130,6 +133,7 @@ export class DialogCreateLotComponent implements OnInit {
 
     const formValues = this.createForm.getRawValue() as CreateLotFormValues;
     const data: LotCreateInterface = {
+      type: formValues.type,
       name: formValues.name,
       userId: this.userId
     };

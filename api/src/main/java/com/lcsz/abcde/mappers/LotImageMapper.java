@@ -1,5 +1,6 @@
 package com.lcsz.abcde.mappers;
 
+import com.lcsz.abcde.dtos.lotImage.LotImageCreateDto;
 import com.lcsz.abcde.dtos.lotImage.LotImagePageableResponseDto;
 import com.lcsz.abcde.dtos.lotImage.LotImageResponseDto;
 import com.lcsz.abcde.models.LotImage;
@@ -12,6 +13,14 @@ import java.util.stream.Collectors;
 public class LotImageMapper {
     public static LotImagePageableResponseDto toPageableDto(LotImageProjection projection) {
         return new ModelMapper().map(projection, LotImagePageableResponseDto.class);
+    }
+
+    public static LotImage toEntityCreate(LotImageCreateDto createDto) {
+        ModelMapper mapper = new ModelMapper();
+        mapper.typeMap(LotImageCreateDto.class, LotImage.class).addMappings(map -> {
+            map.skip(LotImage::setId); // nunca sobrescrever o id
+        });
+        return mapper.map(createDto, LotImage.class);
     }
 
     public static LotImageResponseDto toDto(LotImage lotImage) {

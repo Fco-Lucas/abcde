@@ -13,12 +13,17 @@ app = FastAPI()
 
 class ImagemRequest(BaseModel):
     path_image: str
+    lot_type: str
     debug: bool = False
 
 @app.post("/scanImage")
 def processar_imagem(req: ImagemRequest):
     debug_mode = req.debug
     debug_path = "debug"
+
+    lot_type = req.lot_type
+    if lot_type != "ABCDE" and lot_type != "VTB":
+        raise HTTPException(status_code=404, detail="Campo lot_type com valor inválido")
 
     if not os.path.exists(req.path_image):
         raise HTTPException(status_code=404, detail="Imagem não encontrada")
@@ -46,9 +51,12 @@ def processar_imagem(req: ImagemRequest):
     aluno_faltou = verificar_falta_aluno(imagem_alinhada, bbox_qr, debug_mode, debug_path)
 
     try:
-        matricula, nomeAluno, etapa, prova, gabarito, qtdQuestoes, codigoEscola, ano, grauSerie, turno, turma = dados_qr.split("-")
+        if lot_type == "ABCDE":
+            matricula, nomeAluno, etapa, prova, gabarito, qtdQuestoes, codigoEscola, ano, grauSerie, turno, turma = dados_qr.split("-")
+        else:
+            matricula, vtbFracao, faseGab, prova, nomeAluno, qtdQuestoes, vtbCodigo = dados_qr.split("-");
     except ValueError:
-        raise HTTPException(status_code=400, detail="QR Code inválido ou em formato incorreto")
+        raise HTTPException(status_code=400, detail=f"QR Code inválido ou em formato incorreto, lot_type = {lot_type}, dados obtidos = {dados_qr}")
 
     if debug_mode and bbox_qr:
         debug_extras = imagem_alinhada.copy()
@@ -71,24 +79,41 @@ def processar_imagem(req: ImagemRequest):
 
     # Etapa 5 - Ler respostas
     respostas = ler_respostas(imagem_alinhada, blocos, debug_mode, debug_path, req.path_image, aluno_faltou, int(qtdQuestoes))
-    respostas_formatadas = {f"{i:02d}": r for i, r in enumerate(respostas, start=1)}
+    # respostas_formatadas = {f"{i:02d}": r for i, r in enumerate(respostas, start=1)}
+    respostas_formatadas = {str(i): r for i, r in enumerate(respostas, start=1)}
 
-    dados = {
-        "matricula": matricula,
-        "nomeAluno": nomeAluno,
-        "etapa": etapa,
-        "prova": prova,
-        "gabarito": gabarito,
-        "qtdQuestoes": qtdQuestoes,
-        "codigoEscola": codigoEscola,
-        "ano": ano,
-        "grauSerie": grauSerie,
-        "turno": turno,
-        "turma": turma,
-        "presenca": 0 if aluno_faltou else 1
-    }
+    if lot_type == "ABCDE":    
+        dados = {
+            "matricula": matricula,
+            "nomeAluno": nomeAluno,
+            "etapa": etapa,
+            "prova": prova,
+            "gabarito": gabarito,
+            "qtdQuestoes": qtdQuestoes,
+            "codigoEscola": codigoEscola,
+            "ano": ano,
+            "grauSerie": grauSerie,
+            "turno": turno,
+            "turma": turma,
+            "presenca": 0 if aluno_faltou else 1
+        }
+    else:
+        dados = {
+            "matricula": matricula,
+            "vtbCodigo": vtbCodigo,
+            "vtbFracao": vtbFracao,
+            "faseGab": faseGab,
+            "prova": prova,
+            "nomeAluno": nomeAluno,
+            "qtdQuestoes": qtdQuestoes,
+            "presenca": 0 if aluno_faltou else 1
+        }
 
     return {
         "dados": dados,
         "respostas": respostas_formatadas
     }
+
+@app.get("/ping")
+def health_check():
+    return True

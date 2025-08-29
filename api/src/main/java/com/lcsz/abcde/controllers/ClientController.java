@@ -26,7 +26,7 @@ import java.util.UUID;
 
 @Tag(name = "Client Controller", description = "Contém todas as operações relacionadas aos recursos dos clientes do ABCDE")
 @RestController
-@RequestMapping("api/v1/clients")
+@RequestMapping("${api.basepath}clients")
 public class ClientController {
     private final ClientService service;
 

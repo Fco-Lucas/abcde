@@ -1,11 +1,8 @@
-package com.lcsz.abcde.dtos;
+package com.lcsz.abcde.dtos.imageInfoAbcde;
 
-import com.lcsz.abcde.dtos.lotImageQuestion.LotImageQuestionResponseDto;
-
-import java.util.List;
-
-public class ExportDataImagesDto {
-    private Integer matricula;
+public class ImageInfoAbcdeCreateDto {
+    private Long lotImageId;
+    private String originalName;
     private Integer codigoEscola;
     private Integer ano;
     private Integer grauSerie;
@@ -14,14 +11,13 @@ public class ExportDataImagesDto {
     private String etapa;
     private Integer prova;
     private String gabarito;
-    private Integer presenca;
-    private List<LotImageQuestionResponseDto> questions;
 
-    public ExportDataImagesDto() {
+    public ImageInfoAbcdeCreateDto() {
     }
 
-    public ExportDataImagesDto(Integer matricula, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito, Integer presenca, List<LotImageQuestionResponseDto> questions) {
-        this.matricula = matricula;
+    public ImageInfoAbcdeCreateDto(Long lotImageId, String originalName, Integer codigoEscola, Integer ano, Integer grauSerie, String turno, Integer turma, String etapa, Integer prova, String gabarito) {
+        this.lotImageId = lotImageId;
+        this.originalName = originalName;
         this.codigoEscola = codigoEscola;
         this.ano = ano;
         this.grauSerie = grauSerie;
@@ -30,16 +26,22 @@ public class ExportDataImagesDto {
         this.etapa = etapa;
         this.prova = prova;
         this.gabarito = gabarito;
-        this.presenca = presenca;
-        this.questions = questions;
     }
 
-    public Integer getMatricula() {
-        return matricula;
+    public Long getLotImageId() {
+        return lotImageId;
     }
 
-    public void setMatricula(Integer matricula) {
-        this.matricula = matricula;
+    public void setLotImageId(Long lotImageId) {
+        this.lotImageId = lotImageId;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
     }
 
     public Integer getCodigoEscola() {
@@ -106,26 +108,11 @@ public class ExportDataImagesDto {
         this.gabarito = gabarito;
     }
 
-    public Integer getPresenca() {
-        return presenca;
-    }
-
-    public void setPresenca(Integer presenca) {
-        this.presenca = presenca;
-    }
-
-    public List<LotImageQuestionResponseDto> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(List<LotImageQuestionResponseDto> questions) {
-        this.questions = questions;
-    }
-
     @Override
     public String toString() {
-        return "ExportDataImagesDto{" +
-                "matricula=" + matricula +
+        return "ImageInfoAbcdeCreateDto{" +
+                "lotImageId=" + lotImageId +
+                ", originalName='" + originalName + '\'' +
                 ", codigoEscola=" + codigoEscola +
                 ", ano=" + ano +
                 ", grauSerie=" + grauSerie +
@@ -133,9 +120,7 @@ public class ExportDataImagesDto {
                 ", turma=" + turma +
                 ", etapa='" + etapa + '\'' +
                 ", prova=" + prova +
-                ", gabarito=" + gabarito +
-                ", presenca=" + presenca +
-                ", questions=" + questions +
+                ", gabarito='" + gabarito + '\'' +
                 '}';
     }
 }
