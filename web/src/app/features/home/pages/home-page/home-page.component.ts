@@ -20,7 +20,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { LotService } from '../../services/lot.service';
-import { catchError, combineLatest, firstValueFrom, forkJoin, of, shareReplay, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, firstValueFrom, forkJoin, of, shareReplay, switchMap, tap } from 'rxjs';
 import { LotStateService } from '../../services/lot-state.service';
 import { Router } from '@angular/router';
 import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/ui-not-found.component';
@@ -33,7 +33,6 @@ import { ConfirmationDialogService } from '../../../../core/services/confirmatio
 import type { ConfirmationDialogData } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 interface HomeState {
-  tourScreenInfo: TourScreenInterface | null;
   permissions: PermissionInterface | null;
   lots: LotInterface[];
   totalElements: number;
@@ -74,7 +73,11 @@ export class HomePageComponent {
   private notification = inject(NotificationService);
   private loader = inject(LoadingService);
   private router = inject(Router);
-
+  private tourScreenInfoSubject = new BehaviorSubject<TourScreenInterface | null>(null);
+  private tourScreenInfo$ = this.tourScreenInfoSubject.asObservable().pipe(
+    // Garantimos que o stream só prossiga quando o valor não for nulo
+    filter((info): info is TourScreenInterface => info !== null)
+  );
   private query = signal<HomeLotsQuery>({
     filters: {},
     pagination: { pageIndex: 0, pageSize: 10, length: 0 },
@@ -82,7 +85,6 @@ export class HomePageComponent {
   });
 
   private state = signal<HomeState>({
-    tourScreenInfo: null,
     permissions: null,
     lots: [],
     totalElements: 0,
@@ -90,7 +92,7 @@ export class HomePageComponent {
     error: null,
   });
 
-  public readonly tourScreenInfo = computed(() => this.state().tourScreenInfo);
+  public readonly tourScreenInfo = toSignal(this.tourScreenInfo$)
   public readonly permissions = computed(() => this.state().permissions);
   public readonly lots = computed(() => this.state().lots);
   public readonly totalElements = computed(() => this.state().totalElements);
@@ -108,29 +110,36 @@ export class HomePageComponent {
   public readonly userRole = toSignal(this.authService.currentUserRole$);
 
   constructor() {
-    // Stream para dados iniciais (que não mudam com filtros)
-    const initialData$ = this.authService.currentUserId$.pipe(
+    // Stream APENAS para dados que não mudam
+    const permissions$ = this.authService.currentUserId$.pipe(
       switchMap(userId => {
         if (!userId) throw new Error("ID do usuário autenticado não encontrado.");
-        return forkJoin({
-          permissions: this.permissionsService.getUserPermission(userId),
-          tourScreenInfo: this.tourScreenService.getByAuthUserIdAndScreen(TourScreenEnum.LOT)
-        });
+        return this.permissionsService.getUserPermission(userId);
       }),
-      // shareReplay garante que este fluxo só executa UMA VEZ.
-      shareReplay({ bufferSize: 1, refCount: true }) 
+      shareReplay({ bufferSize: 1, refCount: true })
     );
+
+    // Ação ÚNICA para buscar o tourScreenInfo inicial e alimentar o Subject
+    this.authService.currentUserId$.pipe(
+      switchMap(userId => {
+        if (!userId) return of(null);
+        return this.tourScreenService.getByAuthUserIdAndScreen(TourScreenEnum.LOT);
+      })
+    ).subscribe(tourInfo => {
+      if (tourInfo) {
+        // 3. Colocamos o valor inicial vindo da API dentro do nosso BehaviorSubject
+        this.tourScreenInfoSubject.next(tourInfo); 
+      }
+    });
 
     // Stream para as queries dinâmicas
     const query$ = toObservable(this.query);
 
-    combineLatest([initialData$, query$]).pipe(
+    combineLatest([permissions$, this.tourScreenInfo$, query$]).pipe(
       tap(() => this.state.update(s => ({ ...s, loading: true, error: null }))),
-      switchMap(([initialData, currentQuery]) => {
-        const { permissions, tourScreenInfo } = initialData;
-
+      switchMap(([permissions, tourScreenInfo, currentQuery]) => {
         // Atualiza as permissões no estado
-        this.state.update(s => ({ ...s, permissions, tourScreenInfo }));
+        this.state.update(s => ({ ...s, permissions }));
 
         if (permissions.upload_files && !tourScreenInfo.completed) {
           this.startTour();
@@ -285,10 +294,13 @@ export class HomePageComponent {
           },
         ],
         onDestroyed: () => {
-          const tourScreenInfo = this.tourScreenInfo();
-          if(!tourScreenInfo) return;
+          const currentTourInfo = this.tourScreenInfoSubject.getValue();
 
-          const tourScreenId = tourScreenInfo.id;
+          console.log(currentTourInfo);
+
+          if(!currentTourInfo) return;
+
+          const tourScreenId = currentTourInfo.id;
           const tourScreenUpdate: TourScreenUpdateInterface = {
             completed: true
           };
@@ -296,10 +308,8 @@ export class HomePageComponent {
             next: (_) => {},
             error: (_) => {}
           });
-          this.state.update(s => ({
-            ...s,
-            tourScreenInfo: { ...tourScreenInfo, completed: true }
-          }));
+          const updatedTourInfo = { ...currentTourInfo, completed: true };
+          this.tourScreenInfoSubject.next(updatedTourInfo);
         }
       });
 
