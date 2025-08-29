@@ -20,7 +20,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UiErrorComponent } from '../../../../shared/components/ui-error/ui-error.component';
 import { LotService } from '../../services/lot.service';
-import { BehaviorSubject, catchError, combineLatest, filter, firstValueFrom, forkJoin, of, shareReplay, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, firstValueFrom, forkJoin, of, shareReplay, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { LotStateService } from '../../services/lot-state.service';
 import { Router } from '@angular/router';
 import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/ui-not-found.component';
@@ -78,6 +78,8 @@ export class HomePageComponent {
     // Garantimos que o stream só prossiga quando o valor não for nulo
     filter((info): info is TourScreenInterface => info !== null)
   );
+  private destroy$ = new Subject<void>();
+
   private query = signal<HomeLotsQuery>({
     filters: {},
     pagination: { pageIndex: 0, pageSize: 10, length: 0 },
@@ -122,9 +124,10 @@ export class HomePageComponent {
     // Ação ÚNICA para buscar o tourScreenInfo inicial e alimentar o Subject
     this.authService.currentUserId$.pipe(
       switchMap(userId => {
-        if (!userId) return of(null);
+        if (!userId) throw new Error("ID do usuário autenticado não encontrado.");
         return this.tourScreenService.getByAuthUserIdAndScreen(TourScreenEnum.LOT);
-      })
+      }),
+      takeUntil(this.destroy$)
     ).subscribe(tourInfo => {
       if (tourInfo) {
         // 3. Colocamos o valor inicial vindo da API dentro do nosso BehaviorSubject
@@ -165,7 +168,8 @@ export class HomePageComponent {
       catchError(err => {
         this.state.update(s => ({ ...s, loading: false, error: err.message }));
         return of(null);
-      })
+      }),
+      takeUntil(this.destroy$)
     ).subscribe(response => {
       if (response) {
         this.state.update(s => ({

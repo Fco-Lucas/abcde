@@ -36,6 +36,7 @@
             [totalElements]="this.totalElements()"
             [pageSize]="this.pagination().pageSize"
             [pageIndex]="this.pagination().pageIndex"
+            [userRole]="this.userRole()!"
             (pageChange)="this.onPageChange($event)"
             (onClickedLot)="onOpenLotDetails($event)"
           >

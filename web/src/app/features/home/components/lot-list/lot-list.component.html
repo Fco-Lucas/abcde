@@ -12,7 +12,10 @@
             <!-- Coluna da esquerda: Nome e Criado por -->
             <div class="flex flex-col">
               <p class="text-2xl">{{ lot.name }}</p>
-              <p class="text-1xl">Criado por: {{ lot.userName }}</p>
+              <p class="text-1xl">
+                Criado por: {{ lot.userName }}
+                @if(this.userRole === "COMPUTEX" && !lot.createdByClient) { | CLIENTE: {{ lot.clientName }} }
+              </p>
               <p class="text-1xl">Criado em: {{ lot.createdAt | date: "dd/MM/yyyy HH:mm" }}</p>
             </div>
 

@@ -8,6 +8,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { LotStatusBadgeComponent } from '../lot-status-badge/lot-status-badge.component';
 import { UiNotFoundComponent } from '../../../../shared/components/ui-not-found/ui-not-found.component';
 import { LotTypeBadgeComponent } from '../lot-type-badge/lot-type-badge.component';
+import type { AuthenticatedUserRole } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-lot-list',
@@ -29,6 +30,7 @@ export class LotListComponent {
   @Input() totalElements: number = 0;
   @Input() pageSize: number = 10;
   @Input() pageIndex: number = 0;
+  @Input() userRole!: AuthenticatedUserRole;
 
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() onClickedLot = new EventEmitter<LotInterface>();

@@ -20,12 +20,14 @@ export interface LotInterface {
   userId: string;
   userName: string;
   userCnpj: string;
+  clientName: string;
   name: string;
   type: LotTypeEnum;
   createdAt: string;
   numberImages: number;
   status: LotStatusEnum;
   createdByComputex: boolean;
+  createdByClient: boolean;
 }
 
 export interface PageableLotList {

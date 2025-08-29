@@ -1,4 +1,10 @@
-<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="grid grid-cols-2 md:grid-cols-4 items-center gap-3">
+<form 
+  [formGroup]="filterForm" 
+  (ngSubmit)="onSubmit()" 
+  [ngClass]="userRole === 'COMPUTEX' 
+    ? 'grid grid-cols-1 md:grid-cols-5 items-center gap-2' 
+    : 'grid grid-cols-1 md:grid-cols-4 items-center gap-2'"
+>
   <div class="col-span-1">
     <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
       <mat-label>Nome do lote</mat-label>
@@ -24,19 +30,17 @@
     </div>
   }
 
-  @if (this.userRole === "CLIENT") {
-    <div class="col-span-1">
-      <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Usuário</mat-label>
-        <input
-          matInput
-          type="text"
-          formControlName="clientUser"
-          placeholder="Nome/E-mail/CNPJ"
-        />
-      </mat-form-field>
-    </div>
-  }
+  <div class="col-span-1">
+    <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Usuário</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="clientUser"
+        placeholder="Nome/E-mail"
+      />
+    </mat-form-field>
+  </div>
 
   <div class="col-span-1">
     <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
