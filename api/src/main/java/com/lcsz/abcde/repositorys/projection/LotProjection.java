@@ -9,6 +9,7 @@ public interface LotProjection {
     Long getId();
     UUID getUserId();
     String getUserCnpj();
+    String getClientName();
     String getName();
     LotType getType();
     String getStatus();

@@ -11,27 +11,31 @@ public class LotResponseDto {
     private UUID userId;
     private String userName;
     private String userCnpj;
+    private String clientName;
     private String name;
     private LotType type;
     private LocalDateTime createdAt;
     private Integer numberImages;
     private LotStatus status;
     private Boolean createdByComputex = false;
+    private Boolean createdByClient = false;
 
     public LotResponseDto() {
     }
 
-    public LotResponseDto(Long id, UUID userId, String userName, String userCnpj, String name, LotType type, LocalDateTime createdAt, Integer numberImages, LotStatus status, Boolean createdByComputex) {
+    public LotResponseDto(Long id, UUID userId, String userName, String userCnpj, String clientName, String name, LotType type, LocalDateTime createdAt, Integer numberImages, LotStatus status, Boolean createdByComputex, Boolean createdByClient) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
         this.userCnpj = userCnpj;
+        this.clientName = clientName;
         this.name = name;
         this.type = type;
         this.createdAt = createdAt;
         this.numberImages = numberImages;
         this.status = status;
         this.createdByComputex = createdByComputex;
+        this.createdByClient = createdByClient;
     }
 
     public Long getId() {
@@ -48,6 +52,14 @@ public class LotResponseDto {
 
     public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 
     public String getUserName() {
@@ -114,6 +126,14 @@ public class LotResponseDto {
         this.createdByComputex = createdByComputex;
     }
 
+    public Boolean getCreatedByClient() {
+        return createdByClient;
+    }
+
+    public void setCreatedByClient(Boolean createdByClient) {
+        this.createdByClient = createdByClient;
+    }
+
     @Override
     public String toString() {
         return "LotResponseDto{" +
@@ -121,12 +141,14 @@ public class LotResponseDto {
                 ", userId=" + userId +
                 ", userName=" + userName +
                 ", userCnpj=" + userCnpj +
+                ", clientName=" + clientName +
                 ", name=" + name +
                 ", type=" + type +
                 ", createdAt=" + createdAt +
                 ", numberImages=" + numberImages +
                 ", status=" + status +
                 ", createdByComputex='" + createdByComputex + '\'' +
+                ", createdByClient='" + createdByClient + '\'' +
                 '}';
     }
 }

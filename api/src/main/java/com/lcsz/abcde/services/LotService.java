@@ -99,11 +99,13 @@ public class LotService {
 
         String userRole = this.provider.getAuthenticatedUserRole();
         Boolean createdByComputex = userRole != null && userRole.equals("COMPUTEX");
+        Boolean createdByClient = userRole != null && (userRole.equals("CLIENT") || userRole.equals("COMPUTEX"));
 
         LotResponseDto responseDto = LotMapper.toDto(saved);
         responseDto.setUserName(userName);
         responseDto.setNumberImages(0);
         responseDto.setCreatedByComputex(createdByComputex);
+        responseDto.setCreatedByClient(createdByClient);
 
         // Log
         String details = String.format(
@@ -122,7 +124,7 @@ public class LotService {
             String filterName,
             String filterClientUser,
             String filterClient,
-            LotStatus status
+            LotStatus filterStatus
     ) {
         // Verifica se o usuário possui permissão para visualizar lotes
         PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
@@ -137,16 +139,21 @@ public class LotService {
         // Inicia as variáveis necessárias
         Page<LotProjection> lots;
         String clientCnpj = authUserClient.getCnpj();
+        clientCnpj = "%" + clientCnpj + "%";
 
         // Parametros para filtragem
         String nameParam = (filterName == null || filterName.isBlank()) ? null : "%" + filterName + "%";
         String clientUserParam = (filterClientUser == null || filterClientUser.isBlank()) ? null : "%" + filterClientUser + "%";
         String clientParam = (filterClient == null || filterClient.isBlank()) ? null : "%" + filterClient + "%";
+        String statusParam = filterStatus == null ? null : filterStatus.toString();
 
-        if(authUserRole.equals("COMPUTEX")) lots = this.lotRepository.findAllPageableComputex(pageable, nameParam, clientParam, status);
-        else if(isClient) lots = this.lotRepository.findAllPageableClient(pageable, nameParam, clientCnpj, clientUserParam, status);
-        else if(isClientUser) lots = this.lotRepository.findAllPageableClientUser(pageable, nameParam, clientCnpj, authUserId, status);
-        else throw new RuntimeException("Cargo do usuário na qual está buscando os lotes não encontrado");
+        if(authUserRole.equals("COMPUTEX")) { // Filtra por tudo
+            lots = this.lotRepository.findAllPageable(pageable, nameParam, clientParam, clientUserParam, statusParam);
+        }else if(isClient) { // Filtra por nome, usuário do cliente e status
+            lots = this.lotRepository.findAllPageable(pageable, nameParam, clientCnpj, clientUserParam, statusParam);
+        } else if(isClientUser) { // Filtra por nome e status
+            lots = this.lotRepository.findAllPageable(pageable, nameParam, clientCnpj, clientUserParam, statusParam);
+        } else throw new RuntimeException("Cargo do usuário na qual está buscando os lotes não encontrado");
 
         return lots.map(lot -> {
             // Define o número de imagens do lote
@@ -155,10 +162,12 @@ public class LotService {
             // Define o nome e o cargo do usuário que criou o lote
             String userName = null;
             String userRole = null;
+            boolean createdByClient = false;
             Client client = this.clientService.getByIdOrNull(lot.getUserId());
             if(client != null) {
                 userName = client.getName();
                 userRole = this.provider.getAuthenticatedUserRole(client.getId());
+                createdByClient = true;
             } else {
                 ClientUser clientUser = this.clientUserService.getByIdOrNull(lot.getUserId());
                 if(clientUser != null) {
@@ -173,16 +182,13 @@ public class LotService {
             dto.setNumberImages(numberImagesLot);
             dto.setUserName(userName);
             dto.setCreatedByComputex(createdByComputex);
+            dto.setCreatedByClient(createdByClient);
             return dto;
         });
     }
 
     @Transactional(readOnly = true)
     public Lot getLotById(Long id) {
-        // Verifica se o usuário possui permissão para visualizar lotes
-        PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
-        if(!userPermission.getRead_files()) throw new RuntimeException("Usuário sem autorização para visualizar lotes");
-
         return this.lotRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Lote com id '%s' não encontrado", id))
         );
@@ -192,19 +198,30 @@ public class LotService {
     public LotResponseDto getLotByIdDto(Long id) {
         Lot lot = this.getLotById(id);
 
+        String userName = null;
+        String userRole = null;
+        boolean createdByClient = false;
         Client client = this.clientService.getByIdOrNull(lot.getUserId());
-        ClientUser clientUser = this.clientUserService.getByIdOrNull(lot.getUserId());
-        String userName = client != null ? client.getName() : clientUser.getName();
+        if(client != null) {
+            userName = client.getName();
+            userRole = this.provider.getAuthenticatedUserRole(client.getId());
+            createdByClient = true;
+        } else {
+            ClientUser clientUser = this.clientUserService.getByIdOrNull(lot.getUserId());
+            if(clientUser != null) {
+                userName = clientUser.getName();
+                userRole = this.provider.getAuthenticatedUserRole(clientUser.getClientId());
+            }
+        }
 
         Integer numberImages = this.lotImageService.getAllImagesLot(lot.getId()).size();
-
-        String userRole = this.provider.getAuthenticatedUserRole();
         Boolean createdByComputex = userRole != null && userRole.equals("COMPUTEX");
 
         LotResponseDto responseDto = LotMapper.toDto(lot);
         responseDto.setUserName(userName);
         responseDto.setNumberImages(numberImages);
         responseDto.setCreatedByComputex(createdByComputex);
+        responseDto.setCreatedByClient(createdByClient);
 
         return responseDto;
     }
