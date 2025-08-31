@@ -9,8 +9,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'dio_provider.g.dart';
 
-// const String androidLocalHost = "http://10.0.2.2:8181/api/v1";
-const String androidLocalHost = "http://192.168.0.12:8181/api/v1";
+const String androidLocalHost = "http://10.0.2.2:8181/api/v1";
+// const String androidLocalHost = "http://192.168.0.12:8181/api/v1";
 const String iosLocalHost = "http://localhost:8181/api/v1";
 
 @riverpod

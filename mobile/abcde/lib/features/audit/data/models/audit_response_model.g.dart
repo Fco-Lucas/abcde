@@ -33,18 +33,18 @@ Map<String, dynamic> _$AuditResponseModelToJson(_AuditResponseModel instance) =>
     };
 
 const _$AuditActionEnumEnumMap = {
-  AuditActionEnum.create: 'CREATE',
-  AuditActionEnum.update: 'UPDATE',
-  AuditActionEnum.delete: 'DELETE',
-  AuditActionEnum.login: 'LOGIN',
-  AuditActionEnum.processed: 'PROCESSED',
-  AuditActionEnum.downloadTxt: 'DOWNLOADTXT',
+  AuditActionEnum.CREATE: 'CREATE',
+  AuditActionEnum.UPDATE: 'UPDATE',
+  AuditActionEnum.DELETE: 'DELETE',
+  AuditActionEnum.LOGIN: 'LOGIN',
+  AuditActionEnum.PROCESSED: 'PROCESSED',
+  AuditActionEnum.DOWNLOADTXT: 'DOWNLOADTXT',
 };
 
 const _$AuditProgramEnumEnumMap = {
-  AuditProgramEnum.client: 'CLIENT',
-  AuditProgramEnum.clientUser: 'CLIENT_USER',
-  AuditProgramEnum.lot: 'LOT',
-  AuditProgramEnum.lotImage: 'LOT_IMAGE',
-  AuditProgramEnum.auth: 'AUTH',
+  AuditProgramEnum.CLIENT: 'CLIENT',
+  AuditProgramEnum.CLIENTUSER: 'CLIENTUSER',
+  AuditProgramEnum.LOT: 'LOT',
+  AuditProgramEnum.LOTIMAGE: 'LOTIMAGE',
+  AuditProgramEnum.AUTH: 'AUTH',
 };

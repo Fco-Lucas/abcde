@@ -37,7 +37,6 @@ class _AuditPageState extends ConsumerState<AuditPage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    ref.read(shellActionProvider.notifier).setAction(null);
     super.dispose();
   }
 

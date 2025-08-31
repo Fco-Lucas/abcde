@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuditFilterModel {
 
- String? get user; String? get details;
+ AuditActionEnum? get action; String? get client; String? get user; AuditProgramEnum? get program; String? get details; String? get startDate; String? get endDate;
 /// Create a copy of AuditFilterModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $AuditFilterModelCopyWith<AuditFilterModel> get copyWith => _$AuditFilterModelCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuditFilterModel&&(identical(other.user, user) || other.user == user)&&(identical(other.details, details) || other.details == details));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuditFilterModel&&(identical(other.action, action) || other.action == action)&&(identical(other.client, client) || other.client == client)&&(identical(other.user, user) || other.user == user)&&(identical(other.program, program) || other.program == program)&&(identical(other.details, details) || other.details == details)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,user,details);
+int get hashCode => Object.hash(runtimeType,action,client,user,program,details,startDate,endDate);
 
 @override
 String toString() {
-  return 'AuditFilterModel(user: $user, details: $details)';
+  return 'AuditFilterModel(action: $action, client: $client, user: $user, program: $program, details: $details, startDate: $startDate, endDate: $endDate)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $AuditFilterModelCopyWith<$Res>  {
   factory $AuditFilterModelCopyWith(AuditFilterModel value, $Res Function(AuditFilterModel) _then) = _$AuditFilterModelCopyWithImpl;
 @useResult
 $Res call({
- String? user, String? details
+ AuditActionEnum? action, String? client, String? user, AuditProgramEnum? program, String? details, String? startDate, String? endDate
 });
 
 
@@ -62,10 +62,15 @@ class _$AuditFilterModelCopyWithImpl<$Res>
 
 /// Create a copy of AuditFilterModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? user = freezed,Object? details = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? action = freezed,Object? client = freezed,Object? user = freezed,Object? program = freezed,Object? details = freezed,Object? startDate = freezed,Object? endDate = freezed,}) {
   return _then(_self.copyWith(
-user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as String?,details: freezed == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
+action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
+as AuditActionEnum?,client: freezed == client ? _self.client : client // ignore: cast_nullable_to_non_nullable
+as String?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as String?,program: freezed == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
+as AuditProgramEnum?,details: freezed == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
+as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as String?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -151,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? user,  String? details)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AuditActionEnum? action,  String? client,  String? user,  AuditProgramEnum? program,  String? details,  String? startDate,  String? endDate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuditFilterModel() when $default != null:
-return $default(_that.user,_that.details);case _:
+return $default(_that.action,_that.client,_that.user,_that.program,_that.details,_that.startDate,_that.endDate);case _:
   return orElse();
 
 }
@@ -172,10 +177,10 @@ return $default(_that.user,_that.details);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? user,  String? details)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AuditActionEnum? action,  String? client,  String? user,  AuditProgramEnum? program,  String? details,  String? startDate,  String? endDate)  $default,) {final _that = this;
 switch (_that) {
 case _AuditFilterModel():
-return $default(_that.user,_that.details);case _:
+return $default(_that.action,_that.client,_that.user,_that.program,_that.details,_that.startDate,_that.endDate);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -192,10 +197,10 @@ return $default(_that.user,_that.details);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? user,  String? details)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AuditActionEnum? action,  String? client,  String? user,  AuditProgramEnum? program,  String? details,  String? startDate,  String? endDate)?  $default,) {final _that = this;
 switch (_that) {
 case _AuditFilterModel() when $default != null:
-return $default(_that.user,_that.details);case _:
+return $default(_that.action,_that.client,_that.user,_that.program,_that.details,_that.startDate,_that.endDate);case _:
   return null;
 
 }
@@ -207,11 +212,16 @@ return $default(_that.user,_that.details);case _:
 
 
 class _AuditFilterModel implements AuditFilterModel {
-  const _AuditFilterModel({this.user, this.details});
+  const _AuditFilterModel({this.action, this.client, this.user, this.program, this.details, this.startDate, this.endDate});
   
 
+@override final  AuditActionEnum? action;
+@override final  String? client;
 @override final  String? user;
+@override final  AuditProgramEnum? program;
 @override final  String? details;
+@override final  String? startDate;
+@override final  String? endDate;
 
 /// Create a copy of AuditFilterModel
 /// with the given fields replaced by the non-null parameter values.
@@ -223,16 +233,16 @@ _$AuditFilterModelCopyWith<_AuditFilterModel> get copyWith => __$AuditFilterMode
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuditFilterModel&&(identical(other.user, user) || other.user == user)&&(identical(other.details, details) || other.details == details));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuditFilterModel&&(identical(other.action, action) || other.action == action)&&(identical(other.client, client) || other.client == client)&&(identical(other.user, user) || other.user == user)&&(identical(other.program, program) || other.program == program)&&(identical(other.details, details) || other.details == details)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,user,details);
+int get hashCode => Object.hash(runtimeType,action,client,user,program,details,startDate,endDate);
 
 @override
 String toString() {
-  return 'AuditFilterModel(user: $user, details: $details)';
+  return 'AuditFilterModel(action: $action, client: $client, user: $user, program: $program, details: $details, startDate: $startDate, endDate: $endDate)';
 }
 
 
@@ -243,7 +253,7 @@ abstract mixin class _$AuditFilterModelCopyWith<$Res> implements $AuditFilterMod
   factory _$AuditFilterModelCopyWith(_AuditFilterModel value, $Res Function(_AuditFilterModel) _then) = __$AuditFilterModelCopyWithImpl;
 @override @useResult
 $Res call({
- String? user, String? details
+ AuditActionEnum? action, String? client, String? user, AuditProgramEnum? program, String? details, String? startDate, String? endDate
 });
 
 
@@ -260,10 +270,15 @@ class __$AuditFilterModelCopyWithImpl<$Res>
 
 /// Create a copy of AuditFilterModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? user = freezed,Object? details = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? action = freezed,Object? client = freezed,Object? user = freezed,Object? program = freezed,Object? details = freezed,Object? startDate = freezed,Object? endDate = freezed,}) {
   return _then(_AuditFilterModel(
-user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as String?,details: freezed == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
+action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
+as AuditActionEnum?,client: freezed == client ? _self.client : client // ignore: cast_nullable_to_non_nullable
+as String?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as String?,program: freezed == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
+as AuditProgramEnum?,details: freezed == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
+as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as String?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

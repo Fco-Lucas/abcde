@@ -30,8 +30,13 @@ class AuditController extends _$AuditController {
       final response = await auditRepository.getAllPageable(
         page: 0,
         size: 20,
+        action: filters.action,
+        client: filters.client,
         user: filters.user,
+        program: filters.program,
         details: filters.details,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
       );
       state = AuditState.data(
         logs: response.content,

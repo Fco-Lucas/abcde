@@ -6,7 +6,7 @@ part of 'audit_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$auditControllerHash() => r'1210e22f86d30d2c4a86f87773aff586d1d50969';
+String _$auditControllerHash() => r'7a8deff25dfe31ccbd24b27ce4be0df1b87f0ac7';
 
 /// See also [AuditController].
 @ProviderFor(AuditController)
