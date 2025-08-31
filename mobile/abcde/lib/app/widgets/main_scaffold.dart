@@ -119,6 +119,14 @@ class MainScaffold extends ConsumerWidget {
           child: const Icon(Icons.filter_list),
         );
       }
+
+      if (location.startsWith('/clients') && isFabVisible && action != null) {
+        return FloatingActionButton(
+          onPressed: action, // <-- Simplesmente chama a ação do provider
+          child: const Icon(Icons.filter_list),
+        );
+      }
+
       return null; // Retorna nulo para todas as outras telas
     }
 

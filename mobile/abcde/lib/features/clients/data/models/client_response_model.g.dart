@@ -30,6 +30,6 @@ Map<String, dynamic> _$ClientResponseModelToJson(
 };
 
 const _$ClientStatusEnumMap = {
-  ClientStatus.active: 'ACTIVE',
-  ClientStatus.inactive: 'INACTIVE',
+  ClientStatus.ACTIVE: 'ACTIVE',
+  ClientStatus.INACTIVE: 'INACTIVE',
 };

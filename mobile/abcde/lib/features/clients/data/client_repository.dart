@@ -1,4 +1,6 @@
 import 'package:abcde/core/providers/dio_provider.dart';
+import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
+import 'package:abcde/features/clients/data/models/client_pageable_response_model.dart';
 import 'package:abcde/features/clients/data/models/client_response_model.dart';
 import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
 import 'package:abcde/features/clients/data/models/update_client_password_request_model.dart';
@@ -31,6 +33,32 @@ class ClientRepository {
 
       return dataResponse;
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ClientPageableResponseModel> getAllPageable({
+    required int page,
+    required int size,
+    String? cnpj,
+    ClientStatus? status,
+  }) async {
+    final queryParameters = {
+      'page': page,
+      'size': size,
+      'cnpj': cnpj,
+      'status': status,
+    };
+
+    try {
+      final response = await _dio.get(
+        "/clients",
+        queryParameters: queryParameters,
+      );
+
+      return ClientPageableResponseModel.fromJson(response.data);
+    } catch (e) {
+      // Fallback para outros tipos de erro.
       rethrow;
     }
   }
