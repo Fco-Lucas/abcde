@@ -123,7 +123,7 @@ class MainScaffold extends ConsumerWidget {
       if (location.startsWith('/clients') && isFabVisible && action != null) {
         return FloatingActionButton(
           onPressed: action, // <-- Simplesmente chama a ação do provider
-          child: const Icon(Icons.filter_list),
+          child: const Icon(Icons.add),
         );
       }
 

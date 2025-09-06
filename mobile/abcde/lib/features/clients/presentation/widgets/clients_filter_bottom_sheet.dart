@@ -19,6 +19,8 @@ class ClientsFilterBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _ClientsFilterBottomSheetState extends ConsumerState<ClientsFilterBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+
   // Controllers para os campos de texto
   final _cnpjController = TextEditingController();
 
@@ -36,7 +38,15 @@ class _ClientsFilterBottomSheetState extends ConsumerState<ClientsFilterBottomSh
     );
 
     // Popula os campos com os filtros salvos no controller
-    _cnpjController.text = currentFilters.cnpj ?? "";
+    if (currentFilters.cnpj != null && currentFilters.cnpj!.isNotEmpty) {
+      _cnpjMask.formatEditUpdate(
+        TextEditingValue.empty,
+        TextEditingValue(text: currentFilters.cnpj!),
+      );
+      _cnpjController.text = _cnpjMask.getMaskedText();
+    } else {
+      _cnpjController.text = '';
+    }
     _selectedStatus = currentFilters.status;
   }
 
@@ -48,12 +58,15 @@ class _ClientsFilterBottomSheetState extends ConsumerState<ClientsFilterBottomSh
 
   // Constrói o novo modelo de filtro e envia para a página
   void _handleApplyFilters() {
-    final newFilters = ClientFilterModel(
-      cnpj: _cnpjController.text.isNotEmpty ? _cnpjController.text : null,
-      status: _selectedStatus,
-    );
-    widget.onApplyFilters(newFilters);
-    Navigator.of(context).pop();
+    if (_formKey.currentState?.validate() ?? false) {
+      final correctCnpj = _cnpjMask.getUnmaskedText();
+      final newFilters = ClientFilterModel(
+        cnpj: correctCnpj.isNotEmpty ? correctCnpj : null,
+        status: _selectedStatus,
+      );
+      widget.onApplyFilters(newFilters);
+      Navigator.of(context).pop();
+    }
   }
 
   // Limpa todos os filtros e aplica
@@ -84,59 +97,68 @@ class _ClientsFilterBottomSheetState extends ConsumerState<ClientsFilterBottomSh
         left: 24, right: 24, top: 24,
       ),
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Filtrar Clientes', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Filtrar Clientes', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 24),
 
-            TextFormField(
-            controller: _cnpjController,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [_cnpjMask],
-            decoration: InputDecoration(
-              labelText: 'CNPJ do Cliente',
-              border: const OutlineInputBorder(),
-            )
+              
+              TextFormField(
+              controller: _cnpjController,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [_cnpjMask],
+              decoration: InputDecoration(
+                labelText: 'CNPJ do Cliente',
+                border: const OutlineInputBorder(),
+              ),
+              validator: (value) {
+                final digits = _cnpjMask.getUnmaskedText();
+                if (digits.isNotEmpty && digits.length != 14) return 'CNPJ deve conter 14 dígitos';
+                return null;
+              },
+            ),
+              const SizedBox(height: 16),
+
+              // Dropdown para Ação
+              DropdownButtonFormField<ClientStatus?>(
+                value: _selectedStatus,
+                decoration: const InputDecoration(labelText: 'Situação', border: OutlineInputBorder()),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('Todas as situações')),
+                  ...ClientStatus.values.map((status) => DropdownMenuItem(
+                    value: status,
+                    child: Text(_correctStatusText(status)),
+                  )),
+                ],
+                onChanged: (value) => setState(() => _selectedStatus = value),
+              ),
+              const SizedBox(height: 32),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _clearFilters,
+                      child: const Text('LIMPAR'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _handleApplyFilters,
+                      child: const Text('APLICAR FILTROS'),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+            ],
           ),
-            const SizedBox(height: 16),
-
-            // Dropdown para Ação
-            DropdownButtonFormField<ClientStatus?>(
-              value: _selectedStatus,
-              decoration: const InputDecoration(labelText: 'Situação', border: OutlineInputBorder()),
-              items: [
-                const DropdownMenuItem(value: null, child: Text('Todas as situações')),
-                ...ClientStatus.values.map((status) => DropdownMenuItem(
-                  value: status,
-                  child: Text(_correctStatusText(status)),
-                )),
-              ],
-              onChanged: (value) => setState(() => _selectedStatus = value),
-            ),
-            const SizedBox(height: 32),
-
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _clearFilters,
-                    child: const Text('LIMPAR'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _handleApplyFilters,
-                    child: const Text('APLICAR FILTROS'),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-          ],
         ),
       ),
     );

@@ -47,7 +47,7 @@ class ClientRepository {
       'page': page,
       'size': size,
       'cnpj': cnpj,
-      'status': status,
+      'status': status?.name,
     };
 
     try {
@@ -96,6 +96,16 @@ class ClientRepository {
       await _dio.patch(
         "/clients/$clientId",
         data: data.toJson()
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteClient(String clientId) async {
+    try {
+      await _dio.delete(
+        "/clients/$clientId"
       );
     } catch (e) {
       rethrow;

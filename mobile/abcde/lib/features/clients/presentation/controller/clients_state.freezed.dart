@@ -125,12 +125,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ClientResponseModel> clients,  bool hasMorePages,  ClientFilterModel filters,  bool isLoadingMore,  String? paginationError)?  data,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ClientResponseModel> clients,  bool hasMorePages,  ClientFilterModel filters,  ClientActionState actionState,  bool isLoadingMore,  String? paginationError)?  data,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Data() when data != null:
-return data(_that.clients,_that.hasMorePages,_that.filters,_that.isLoadingMore,_that.paginationError);case _Error() when error != null:
+return data(_that.clients,_that.hasMorePages,_that.filters,_that.actionState,_that.isLoadingMore,_that.paginationError);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -149,12 +149,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ClientResponseModel> clients,  bool hasMorePages,  ClientFilterModel filters,  bool isLoadingMore,  String? paginationError)  data,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ClientResponseModel> clients,  bool hasMorePages,  ClientFilterModel filters,  ClientActionState actionState,  bool isLoadingMore,  String? paginationError)  data,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Data():
-return data(_that.clients,_that.hasMorePages,_that.filters,_that.isLoadingMore,_that.paginationError);case _Error():
+return data(_that.clients,_that.hasMorePages,_that.filters,_that.actionState,_that.isLoadingMore,_that.paginationError);case _Error():
 return error(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -169,12 +169,12 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ClientResponseModel> clients,  bool hasMorePages,  ClientFilterModel filters,  bool isLoadingMore,  String? paginationError)?  data,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ClientResponseModel> clients,  bool hasMorePages,  ClientFilterModel filters,  ClientActionState actionState,  bool isLoadingMore,  String? paginationError)?  data,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Data() when data != null:
-return data(_that.clients,_that.hasMorePages,_that.filters,_that.isLoadingMore,_that.paginationError);case _Error() when error != null:
+return data(_that.clients,_that.hasMorePages,_that.filters,_that.actionState,_that.isLoadingMore,_that.paginationError);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -251,23 +251,19 @@ String toString() {
 
 
 class _Data implements ClientsState {
-  const _Data({required final  List<ClientResponseModel> clients, required this.hasMorePages, required this.filters, this.isLoadingMore = false, this.paginationError}): _clients = clients;
+  const _Data({required final  List<ClientResponseModel> clients, required this.hasMorePages, required this.filters, this.actionState = const ClientActionState.initial(), this.isLoadingMore = false, this.paginationError}): _clients = clients;
   
 
-// A lista de clientes que já foram carregados.
  final  List<ClientResponseModel> _clients;
-// A lista de clientes que já foram carregados.
  List<ClientResponseModel> get clients {
   if (_clients is EqualUnmodifiableListView) return _clients;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_clients);
 }
 
-// Flag para saber se ainda existem mais páginas para buscar no servidor.
  final  bool hasMorePages;
  final  ClientFilterModel filters;
-// Flag para controlar o CircularProgressIndicator no final da lista
-// ao buscar as páginas seguintes (ex: página 2, 3, ...).
+@JsonKey() final  ClientActionState actionState;
 @JsonKey() final  bool isLoadingMore;
 // Para armazenar um erro que possa ocorrer ao buscar as páginas seguintes,
 // sem perder os logs que já foram carregados.
@@ -283,16 +279,16 @@ _$DataCopyWith<_Data> get copyWith => __$DataCopyWithImpl<_Data>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Data&&const DeepCollectionEquality().equals(other._clients, _clients)&&(identical(other.hasMorePages, hasMorePages) || other.hasMorePages == hasMorePages)&&(identical(other.filters, filters) || other.filters == filters)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.paginationError, paginationError) || other.paginationError == paginationError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Data&&const DeepCollectionEquality().equals(other._clients, _clients)&&(identical(other.hasMorePages, hasMorePages) || other.hasMorePages == hasMorePages)&&(identical(other.filters, filters) || other.filters == filters)&&(identical(other.actionState, actionState) || other.actionState == actionState)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.paginationError, paginationError) || other.paginationError == paginationError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_clients),hasMorePages,filters,isLoadingMore,paginationError);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_clients),hasMorePages,filters,actionState,isLoadingMore,paginationError);
 
 @override
 String toString() {
-  return 'ClientsState.data(clients: $clients, hasMorePages: $hasMorePages, filters: $filters, isLoadingMore: $isLoadingMore, paginationError: $paginationError)';
+  return 'ClientsState.data(clients: $clients, hasMorePages: $hasMorePages, filters: $filters, actionState: $actionState, isLoadingMore: $isLoadingMore, paginationError: $paginationError)';
 }
 
 
@@ -303,11 +299,11 @@ abstract mixin class _$DataCopyWith<$Res> implements $ClientsStateCopyWith<$Res>
   factory _$DataCopyWith(_Data value, $Res Function(_Data) _then) = __$DataCopyWithImpl;
 @useResult
 $Res call({
- List<ClientResponseModel> clients, bool hasMorePages, ClientFilterModel filters, bool isLoadingMore, String? paginationError
+ List<ClientResponseModel> clients, bool hasMorePages, ClientFilterModel filters, ClientActionState actionState, bool isLoadingMore, String? paginationError
 });
 
 
-$ClientFilterModelCopyWith<$Res> get filters;
+$ClientFilterModelCopyWith<$Res> get filters;$ClientActionStateCopyWith<$Res> get actionState;
 
 }
 /// @nodoc
@@ -320,12 +316,13 @@ class __$DataCopyWithImpl<$Res>
 
 /// Create a copy of ClientsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? clients = null,Object? hasMorePages = null,Object? filters = null,Object? isLoadingMore = null,Object? paginationError = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? clients = null,Object? hasMorePages = null,Object? filters = null,Object? actionState = null,Object? isLoadingMore = null,Object? paginationError = freezed,}) {
   return _then(_Data(
 clients: null == clients ? _self._clients : clients // ignore: cast_nullable_to_non_nullable
 as List<ClientResponseModel>,hasMorePages: null == hasMorePages ? _self.hasMorePages : hasMorePages // ignore: cast_nullable_to_non_nullable
 as bool,filters: null == filters ? _self.filters : filters // ignore: cast_nullable_to_non_nullable
-as ClientFilterModel,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as ClientFilterModel,actionState: null == actionState ? _self.actionState : actionState // ignore: cast_nullable_to_non_nullable
+as ClientActionState,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
 as bool,paginationError: freezed == paginationError ? _self.paginationError : paginationError // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -339,6 +336,15 @@ $ClientFilterModelCopyWith<$Res> get filters {
   
   return $ClientFilterModelCopyWith<$Res>(_self.filters, (value) {
     return _then(_self.copyWith(filters: value));
+  });
+}/// Create a copy of ClientsState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ClientActionStateCopyWith<$Res> get actionState {
+  
+  return $ClientActionStateCopyWith<$Res>(_self.actionState, (value) {
+    return _then(_self.copyWith(actionState: value));
   });
 }
 }

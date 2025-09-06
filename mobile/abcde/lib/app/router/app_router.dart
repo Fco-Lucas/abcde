@@ -1,4 +1,5 @@
 import 'package:abcde/app/widgets/main_scaffold.dart';
+import 'package:abcde/core/providers/navigator_key_provider.dart';
 import 'package:abcde/features/audit/presentation/view/audit_page.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_controller.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_state.dart';
@@ -18,9 +19,11 @@ part 'app_router.g.dart';
 
 @riverpod
 GoRouter router(Ref ref) {
+  final navigatorKey = ref.watch(navigatorKeyProvider);
   final authState = ref.watch(authControllerProvider);
 
   return GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: '/splash',
     redirect: (BuildContext context, GoRouterState state) {
       final status = authState.when(

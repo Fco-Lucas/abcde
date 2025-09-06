@@ -1,26 +1,28 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'clients_controller.dart';
+part of 'navigator_key_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$clientsControllerHash() => r'd0cc6eac0c34dcdceec9bef36d900f205a2bddee';
+String _$navigatorKeyHash() => r'8b4dbfb31d887f8bbb1a13b7214b897e71dac1f7';
 
-/// See also [ClientsController].
-@ProviderFor(ClientsController)
-final clientsControllerProvider =
-    AutoDisposeNotifierProvider<ClientsController, ClientsState>.internal(
-      ClientsController.new,
-      name: r'clientsControllerProvider',
+/// See also [navigatorKey].
+@ProviderFor(navigatorKey)
+final navigatorKeyProvider =
+    AutoDisposeProvider<GlobalKey<NavigatorState>>.internal(
+      navigatorKey,
+      name: r'navigatorKeyProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$clientsControllerHash,
+          : _$navigatorKeyHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$ClientsController = AutoDisposeNotifier<ClientsState>;
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NavigatorKeyRef = AutoDisposeProviderRef<GlobalKey<NavigatorState>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

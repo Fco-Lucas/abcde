@@ -1,6 +1,11 @@
 import 'package:abcde/core/errors/api_exception.dart';
 import 'package:abcde/features/clients/data/client_repository.dart';
+import 'package:abcde/features/clients/data/enums/client_page_actions_enum.dart';
+import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
 import 'package:abcde/features/clients/data/models/client_filter_model.dart';
+import 'package:abcde/features/clients/data/models/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
+import 'package:abcde/features/clients/presentation/controller/clients_action_state.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,8 +19,35 @@ class ClientsController extends _$ClientsController {
   @override
   ClientsState build() {
     // Ao iniciar o controller, busca a primeira página de logs.
-    fetchInitialClients(filters: const ClientFilterModel());
-    return const ClientsState.initial();
+    fetchInitialClients(filters: const ClientFilterModel(cnpj: "", status: ClientStatus.ACTIVE));
+    return const ClientsState.loading();
+  }
+
+  Future<void> createClient(CreateClientRequestModel data) async {
+    state.maybeMap(
+      data: (currentState) async {
+        // Informa a UI que a ação de criação está ocorrendo
+        state = currentState.copyWith(actionState: const ClientActionState.loading(ClientPageActions.create));
+
+        try {
+          final clientRepository = ref.read(clientRepositoryProvider);
+          
+          final ClientResponseModel newClient = await clientRepository.createClient(data);
+
+          final updatedClients = [newClient, ...currentState.clients];
+
+          state = currentState.copyWith(
+            clients: updatedClients,
+            actionState: const ClientActionState.success('Cliente cadastrado com sucesso!'),
+          );
+        } on ApiException catch (e) {
+          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+        } catch (e) {
+          state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
+        }
+      },
+      orElse: () {}
+    );
   }
 
   // Busca a primeira página de clientes. Usado para a carga inicial ou ao aplicar novos filtros.
@@ -23,8 +55,13 @@ class ClientsController extends _$ClientsController {
     required ClientFilterModel filters
   }) async {
     state = const ClientsState.loading();
-    _currentPage = 0;
+    // dá chance da UI mostrar o loader antes de segurar 2s
+    await Future.delayed(const Duration(milliseconds: 50));
 
+    // simula tempo de rede
+    await Future.delayed(const Duration(seconds: 2));
+
+    _currentPage = 0;
     try {
       final clientRepository = ref.read(clientRepositoryProvider);
       final response = await clientRepository.getAllPageable(
@@ -88,6 +125,48 @@ class ClientsController extends _$ClientsController {
       },
       // O 'orElse' é obrigatório e será executado para todos os outros estados
       // (initial, loading, error), nos quais não queremos fazer nada.
+      orElse: () {},
+    );
+  }
+
+  Future<void> deleteClient(String clientId) async {
+    state.maybeMap(
+      data: (currentState) async {
+        // Informa a UI que a ação de 'delete' está em andamento
+        state = currentState.copyWith(actionState: const ClientActionState.loading(ClientPageActions.delete));
+
+        try {
+          final clientRepository = ref.read(clientRepositoryProvider);
+          await clientRepository.deleteClient(clientId);
+
+          // Recarrega os dados da primeira página com os filtros atuais
+          await fetchInitialClients(filters: currentState.filters);
+
+          // 3. Informa a UI que a ação foi um sucesso
+          state.maybeMap(
+            data: (updatedState) {
+              state = updatedState.copyWith(
+                actionState: const ClientActionState.success('Cliente excluído com sucesso!'),
+              );
+            },
+            orElse: () {},
+          );
+        } on ApiException catch (e) {
+          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+        } catch (e) {
+          state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
+        }
+      },
+      orElse: () {},
+    );
+  }
+
+  // É útil ter um método para resetar o estado da ação
+  void resetActionState() {
+    state.maybeMap(
+      data: (currentState) {
+        state = currentState.copyWith(actionState: const ClientActionState.initial());
+      },
       orElse: () {},
     );
   }
