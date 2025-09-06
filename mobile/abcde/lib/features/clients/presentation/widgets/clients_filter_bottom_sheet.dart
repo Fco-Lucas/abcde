@@ -112,7 +112,7 @@ class _ClientsFilterBottomSheetState extends ConsumerState<ClientsFilterBottomSh
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [_cnpjMask],
               decoration: InputDecoration(
-                labelText: 'CNPJ do Cliente',
+                labelText: 'CNPJ',
                 border: const OutlineInputBorder(),
               ),
               validator: (value) {

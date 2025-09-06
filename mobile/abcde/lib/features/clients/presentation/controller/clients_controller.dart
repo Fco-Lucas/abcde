@@ -5,6 +5,7 @@ import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
 import 'package:abcde/features/clients/data/models/client_filter_model.dart';
 import 'package:abcde/features/clients/data/models/client_response_model.dart';
 import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/update_client_request_model.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_action_state.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,7 +21,7 @@ class ClientsController extends _$ClientsController {
   ClientsState build() {
     // Ao iniciar o controller, busca a primeira página de logs.
     fetchInitialClients(filters: const ClientFilterModel(cnpj: "", status: ClientStatus.ACTIVE));
-    return const ClientsState.loading();
+    return const ClientsState.initial();
   }
 
   Future<void> createClient(CreateClientRequestModel data) async {
@@ -55,11 +56,6 @@ class ClientsController extends _$ClientsController {
     required ClientFilterModel filters
   }) async {
     state = const ClientsState.loading();
-    // dá chance da UI mostrar o loader antes de segurar 2s
-    await Future.delayed(const Duration(milliseconds: 50));
-
-    // simula tempo de rede
-    await Future.delayed(const Duration(seconds: 2));
 
     _currentPage = 0;
     try {
@@ -129,6 +125,39 @@ class ClientsController extends _$ClientsController {
     );
   }
 
+  Future<void> updateClient(String clientId, UpdateClientRequestModel data) async {
+    state.maybeMap(
+      data: (currentState) async {
+        // Informa a UI que a ação de 'update' está em andamento
+        state = currentState.copyWith(actionState: const ClientActionState.loading(ClientPageActions.update));
+
+        try {
+          final clientRepository = ref.read(clientRepositoryProvider);
+          
+          await clientRepository.updateClient(clientId, data);
+
+          // Recarrega os dados da primeira página com os filtros atuais
+          await fetchInitialClients(filters: currentState.filters);
+
+          // Informa a UI que a ação de atualizar foi um sucesso
+          state.maybeMap(
+            data: (updatedState) {
+              state = updatedState.copyWith(
+                actionState: const ClientActionState.success('Cliente atualizado com sucesso!'),
+              );
+            },
+            orElse: () {},
+          );
+        } on ApiException catch (e) {
+          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+        } catch (e) {
+          state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
+        }
+      },
+      orElse: () {}
+    );
+  }
+
   Future<void> deleteClient(String clientId) async {
     state.maybeMap(
       data: (currentState) async {
@@ -142,7 +171,7 @@ class ClientsController extends _$ClientsController {
           // Recarrega os dados da primeira página com os filtros atuais
           await fetchInitialClients(filters: currentState.filters);
 
-          // 3. Informa a UI que a ação foi um sucesso
+          // Informa a UI que a ação de atualizar foi um sucesso
           state.maybeMap(
             data: (updatedState) {
               state = updatedState.copyWith(
@@ -158,6 +187,29 @@ class ClientsController extends _$ClientsController {
         }
       },
       orElse: () {},
+    );
+  }
+
+  Future<void> restorePassword(String clientId) async {
+    state.maybeMap(
+      data: (currentState) async {
+        state = currentState.copyWith(actionState: const ClientActionState.loading(ClientPageActions.restorePassword));
+
+        try {
+          final clientRepository = ref.read(clientRepositoryProvider);
+          
+          await clientRepository.restoreClientPassword(clientId);
+
+          state = currentState.copyWith(
+            actionState: const ClientActionState.success('Senha do cliente restaurada com sucesso!'),
+          );
+        } on ApiException catch (e) {
+          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+        } catch (e) {
+          state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
+        }
+      },
+      orElse: () {}
     );
   }
 

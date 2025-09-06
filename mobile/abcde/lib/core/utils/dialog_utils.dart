@@ -19,7 +19,7 @@ class DialogUtils {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return PopScope( // Impede o botão de voltar do Android de fechar
-          canPop: true,
+          canPop: false,
           child: Dialog(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -57,6 +57,7 @@ class DialogUtils {
   }) {
     return showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         final theme = Theme.of(context);
         return AlertDialog(

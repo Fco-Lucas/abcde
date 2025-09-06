@@ -2,21 +2,24 @@ import 'package:abcde/features/clients/data/models/client_response_model.dart';
 import 'package:abcde/features/clients/presentation/widgets/clients_status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
-enum ClientAction { edit, delete }
+enum ClientAction { edit, delete, restorePassword }
 
 class ClientsCard extends ConsumerWidget {
-  const ClientsCard({
+  ClientsCard({
     super.key, 
     required this.client,
     required this.onUpdate,
     required this.onDelete,
+    required this.onRestorePassword,
     required this.onShowUsers
   });
 
   final ClientResponseModel client;
   final VoidCallback onUpdate;
   final VoidCallback onDelete;
+  final VoidCallback onRestorePassword;
   final VoidCallback onShowUsers;
 
   void _handleMenuAction(ClientAction action) {
@@ -27,7 +30,24 @@ class ClientsCard extends ConsumerWidget {
       case ClientAction.delete:
         onDelete();
         break;
+      case ClientAction.restorePassword:
+        onRestorePassword();
+        break;
     }
+  }
+
+  final _cnpjMask = MaskTextInputFormatter(
+    mask: '##.###.###/####-##',
+    filter: {"#": RegExp(r'[0-9]')},
+  );
+
+  String _formatCnpj(String cnpj) {
+    _cnpjMask.formatEditUpdate(
+      TextEditingValue.empty,
+      TextEditingValue(text: cnpj),
+    );
+
+    return _cnpjMask.getMaskedText();
   }
 
   @override
@@ -55,11 +75,11 @@ class ClientsCard extends ConsumerWidget {
           client.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: Row(
-          spacing: 10,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              client.cnpj,
+              _formatCnpj(client.cnpj),
               style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             ),
             ClientsStatusBadge(status: client.status),
@@ -75,7 +95,7 @@ class ClientsCard extends ConsumerWidget {
               value: ClientAction.edit,
               child: ListTile(
                 leading: Icon(Icons.edit_outlined),
-                title: Text('Editar'),
+                title: Text('Atualizar'),
               ),
             ),
             PopupMenuItem<ClientAction>(
@@ -83,6 +103,13 @@ class ClientsCard extends ConsumerWidget {
               child: ListTile(
                 leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
                 title: Text('Desativar', style: TextStyle(color: theme.colorScheme.error)),
+              ),
+            ),
+            const PopupMenuItem<ClientAction>(
+              value: ClientAction.restorePassword,
+              child: ListTile(
+                leading: Icon(Icons.restore),
+                title: Text('Restaurar senha'),
               ),
             ),
           ],

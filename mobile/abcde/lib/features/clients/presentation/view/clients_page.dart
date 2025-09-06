@@ -8,12 +8,14 @@ import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
 import 'package:abcde/features/clients/data/models/client_filter_model.dart';
 import 'package:abcde/features/clients/data/models/client_response_model.dart';
 import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/update_client_request_model.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_action_state.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_controller.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_state.dart';
 import 'package:abcde/features/clients/presentation/widgets/clients_card.dart';
 import 'package:abcde/features/clients/presentation/widgets/clients_create_bottom_sheet.dart';
 import 'package:abcde/features/clients/presentation/widgets/clients_filter_bottom_sheet.dart';
+import 'package:abcde/features/clients/presentation/widgets/clients_update_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,7 +73,7 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
     });
   }
 
-  _onCreateClient(CreateClientRequestModel data) {
+  void _onCreateClient(CreateClientRequestModel data) {
     ref.read(clientsControllerProvider.notifier).createClient(data);
   }
 
@@ -106,8 +108,32 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
   }
 
   // Lógica de atualizar as informações de um cliente
-  void _onUpdateClient(String clienteId) {
+  void _onUpdateClient(String clientId, UpdateClientRequestModel data) {
+    ref.read(clientsControllerProvider.notifier).updateClient(clientId, data);
+  }
 
+  void _onShowUpdateSheet(ClientResponseModel client) {
+    ref.read(fabVisibilityProvider.notifier).setVisibility(false);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => ClientsUpdateBottomSheet(client: client, onUpdateClient: _onUpdateClient)
+    ).whenComplete(() {
+      ref.read(fabVisibilityProvider.notifier).setVisibility(true);
+    });
+  }
+
+  void _onRestoreClientPassword(BuildContext context, ClientResponseModel client) async {
+    final confirmed = await DialogUtils.showConfirmationDialog(
+      context: context, 
+      title: "Tem certeza?", 
+      content: 'Você realmente deseja restaurar a senha do cliente "${client.name}"'
+    );
+    if(confirmed == false) return;
+    ref.read(clientsControllerProvider.notifier).restorePassword(client.id);
   }
 
   // Lógica de visualizar os usuários do cliente
@@ -177,8 +203,8 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
     );
 
     return clientsState.when(
-      initial: () => const SizedBox.shrink(),
-      loading: () => const SizedBox.shrink(),
+      initial: () => const Center(child: CircularProgressIndicator(),),
+      loading: () => const Center(child: CircularProgressIndicator(),),
       data: (clients, hasMorePages, filters, actionState, isLoadingMore, paginationError) {
         return Column(
           children: [
@@ -225,14 +251,15 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
                       final client = clients[index];
                       return ClientsCard(
                         client: client, 
-                        onUpdate: () => _onUpdateClient(client.id),
+                        onUpdate: () => _onShowUpdateSheet(client),
                         onDelete: () => _onDeleteClient(context, client), 
+                        onRestorePassword: () => _onRestoreClientPassword(context, client),
                         onShowUsers: () => _onShowUsers(client.id)
                       );
                     },
                   ),
                 ),
-              )
+            )
           ],
         );
       }, 

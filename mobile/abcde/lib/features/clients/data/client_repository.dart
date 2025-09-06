@@ -122,4 +122,12 @@ class ClientRepository {
       rethrow;
     }
   }
+
+  Future<void> restoreClientPassword(String clientId) async {
+    try {
+      await _dio.post("/clients/restorePassword/$clientId");
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
