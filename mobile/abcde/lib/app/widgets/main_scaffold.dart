@@ -1,7 +1,7 @@
-import 'package:abcde/app/widgets/theme_toogle.dart';
 import 'package:abcde/app/providers/fab_visibility_provider.dart';
 import 'package:abcde/app/providers/jwt_data_provider.dart';
 import 'package:abcde/app/providers/shell_action_provider.dart';
+import 'package:abcde/app/widgets/theme_toogle.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +28,7 @@ class MainScaffold extends ConsumerWidget {
       final String location = GoRouterState.of(context).matchedLocation;
       if (location.startsWith('/home')) return 'Início';
       if (location.startsWith('/clients')) return "Clientes";
-      if (location.startsWith('/clientUsers')) return 'Usuários do cliente';
+      if (location.startsWith('/clientUsers/')) return 'Usuários do cliente';
       if (location.startsWith('/audit')) return 'Auditoria';
       if (location.startsWith('/profile')) return 'Perfil';
       return 'Início';
@@ -44,7 +44,7 @@ class MainScaffold extends ConsumerWidget {
         if (location.startsWith('/audit')) return 2;
         if (location.startsWith('/profile')) return 3;
       } else if (role == 'CLIENT') {
-        if (location.startsWith('/clientUsers')) return 1;
+        if (location.startsWith('/clientUsers/')) return 1;
         if (location.startsWith('/profile')) return 2;
       } else if (role == 'CLIENT_USER') {
         if (location.startsWith('/profile')) return 1;

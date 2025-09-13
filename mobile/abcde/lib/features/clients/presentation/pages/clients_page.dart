@@ -19,6 +19,7 @@ import 'package:abcde/features/clients/presentation/widgets/clients_filter_botto
 import 'package:abcde/features/clients/presentation/widgets/clients_update_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ClientsPage extends ConsumerStatefulWidget {
   const ClientsPage({super.key});
@@ -138,8 +139,8 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
   }
 
   // Lógica de visualizar os usuários do cliente
-  void _onShowUsers(String clienteId) {
-
+  void _onShowUsers(String clientId) {
+    context.go("/clientUsers/$clientId");
   }
 
   // Função auxiliar para obter o texto correto para o loader de ação

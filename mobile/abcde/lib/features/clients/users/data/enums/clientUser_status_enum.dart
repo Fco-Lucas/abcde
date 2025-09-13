@@ -1,0 +1,4 @@
+enum ClientUserStatus {
+  ACTIVE,
+  INACTIVE
+}
