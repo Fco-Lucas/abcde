@@ -1,5 +1,5 @@
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
-import 'package:abcde/features/clients/data/models/update_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';

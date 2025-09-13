@@ -1,5 +1,5 @@
 import 'package:abcde/features/clients/data/client_repository.dart';
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

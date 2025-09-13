@@ -1,7 +1,7 @@
 import 'package:abcde/core/providers/jwt_data_provider.dart';
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
-import 'package:abcde/features/clients/data/models/update_client_password_request_model.dart';
-import 'package:abcde/features/clients/data/models/update_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_password_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
 import 'package:abcde/features/clients/providers/client_data_provider.dart';
 import 'package:abcde/features/profile/presentation/controller/profile_action_enum.dart';
 import 'package:abcde/features/profile/presentation/controller/profile_controller.dart';

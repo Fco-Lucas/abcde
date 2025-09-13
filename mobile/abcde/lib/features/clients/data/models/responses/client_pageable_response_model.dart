@@ -1,4 +1,4 @@
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'client_pageable_response_model.freezed.dart';

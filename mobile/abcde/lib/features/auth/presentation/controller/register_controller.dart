@@ -1,7 +1,7 @@
 import 'package:abcde/core/errors/api_exception.dart';
 import 'package:abcde/features/auth/presentation/controller/register_state.dart';
 import 'package:abcde/features/clients/data/client_repository.dart';
-import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'register_controller.g.dart';

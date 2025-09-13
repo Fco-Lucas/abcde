@@ -2,7 +2,7 @@ import 'package:abcde/features/auth/presentation/controller/register_controller.
 import 'package:abcde/features/auth/presentation/controller/register_state.dart';
 import 'package:abcde/features/auth/presentation/widgets/register_form.dart';
 import 'package:abcde/features/auth/presentation/widgets/register_header.dart';
-import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

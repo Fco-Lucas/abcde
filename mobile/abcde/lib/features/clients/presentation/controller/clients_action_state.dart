@@ -1,4 +1,4 @@
-import 'package:abcde/features/clients/data/enums/client_page_actions_enum.dart';
+import 'package:abcde/features/clients/data/models/enums/client_page_actions_enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'clients_action_state.freezed.dart';

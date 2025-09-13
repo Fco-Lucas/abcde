@@ -1,10 +1,10 @@
 import 'package:abcde/core/providers/dio_provider.dart';
-import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
-import 'package:abcde/features/clients/data/models/client_pageable_response_model.dart';
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
-import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
-import 'package:abcde/features/clients/data/models/update_client_password_request_model.dart';
-import 'package:abcde/features/clients/data/models/update_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/enums/client_status_enum.dart';
+import 'package:abcde/features/clients/data/models/responses/client_pageable_response_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_password_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

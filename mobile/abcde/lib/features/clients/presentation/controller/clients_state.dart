@@ -1,5 +1,5 @@
-import 'package:abcde/features/clients/data/models/client_filter_model.dart';
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_filter_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_action_state.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 

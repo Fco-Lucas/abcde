@@ -1,4 +1,4 @@
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
 import 'package:abcde/features/clients/presentation/widgets/clients_status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

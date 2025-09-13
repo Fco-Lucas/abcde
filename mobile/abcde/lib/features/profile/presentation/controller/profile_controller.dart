@@ -1,7 +1,7 @@
 import 'package:abcde/core/errors/api_exception.dart';
 import 'package:abcde/features/clients/data/client_repository.dart';
-import 'package:abcde/features/clients/data/models/update_client_password_request_model.dart';
-import 'package:abcde/features/clients/data/models/update_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_password_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
 import 'package:abcde/features/profile/presentation/controller/profile_action_enum.dart';
 import 'package:abcde/features/profile/presentation/controller/profile_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

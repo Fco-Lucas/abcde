@@ -5,7 +5,7 @@ import 'package:abcde/features/auth/presentation/controller/auth_controller.dart
 import 'package:abcde/features/auth/presentation/controller/auth_state.dart';
 import 'package:abcde/features/auth/presentation/view/login_page.dart';
 import 'package:abcde/features/auth/presentation/view/register_page.dart';
-import 'package:abcde/features/clients/presentation/view/clients_page.dart';
+import 'package:abcde/features/clients/presentation/pages/clients_page.dart';
 import 'package:abcde/features/clients/users/presentation/view/client_users_page.dart';
 import 'package:abcde/features/home/presentation/view/home_page.dart';
 import 'package:abcde/features/profile/presentation/view/profile_page.dart';

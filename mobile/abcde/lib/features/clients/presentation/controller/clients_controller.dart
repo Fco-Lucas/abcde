@@ -1,11 +1,11 @@
 import 'package:abcde/core/errors/api_exception.dart';
 import 'package:abcde/features/clients/data/client_repository.dart';
-import 'package:abcde/features/clients/data/enums/client_page_actions_enum.dart';
-import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
-import 'package:abcde/features/clients/data/models/client_filter_model.dart';
-import 'package:abcde/features/clients/data/models/client_response_model.dart';
-import 'package:abcde/features/clients/data/models/create_client_request_model.dart';
-import 'package:abcde/features/clients/data/models/update_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/enums/client_page_actions_enum.dart';
+import 'package:abcde/features/clients/data/models/enums/client_status_enum.dart';
+import 'package:abcde/features/clients/data/models/responses/client_filter_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
+import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_action_state.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
