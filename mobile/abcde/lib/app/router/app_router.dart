@@ -1,5 +1,5 @@
 import 'package:abcde/app/widgets/main_scaffold.dart';
-import 'package:abcde/core/providers/navigator_key_provider.dart';
+import 'package:abcde/app/providers/navigator_key_provider.dart';
 import 'package:abcde/features/audit/presentation/view/audit_page.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_controller.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_state.dart';

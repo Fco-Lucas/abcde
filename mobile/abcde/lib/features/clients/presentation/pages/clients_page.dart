@@ -1,10 +1,11 @@
+import 'package:abcde/app/providers/fab_visibility_provider.dart';
+import 'package:abcde/app/providers/jwt_data_provider.dart';
+import 'package:abcde/app/providers/shell_action_provider.dart';
+import 'package:abcde/app/utils/dialog_utils.dart';
 import 'package:abcde/app/widgets/empty_state_widget.dart';
 import 'package:abcde/app/widgets/error_state_widget.dart';
-import 'package:abcde/core/providers/fab_visibility_provider.dart';
-import 'package:abcde/core/providers/shell_action_provider.dart';
-import 'package:abcde/core/utils/dialog_utils.dart';
-import 'package:abcde/features/clients/data/models/enums/client_page_actions_enum.dart';
-import 'package:abcde/features/clients/data/models/enums/client_status_enum.dart';
+import 'package:abcde/features/clients/data/enums/client_page_actions_enum.dart';
+import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
 import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';
 import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
 import 'package:abcde/features/clients/data/models/responses/client_filter_model.dart';
@@ -195,78 +196,93 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
     });
     
     final clientsState = ref.watch(clientsControllerProvider);
+    final userDataAsync = ref.watch(jwtDataProvider);
 
-    // Pega os filtros atuais do estado para usar no onRefresh.
-    final currentFilters = clientsState.maybeWhen(
-      data: (_, __, filters, ___, ____, _____) => filters,
-      orElse: () => const ClientFilterModel(cnpj: "", status: ClientStatus.ACTIVE), // Usa filtros como padrão
-    );
+    return userDataAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => const ErrorStateWidget(message: "Erro ao obter informações do usuário autenticado"),
+      data: (userData) {
+        if (userData == null) return ErrorStateWidget(message: 'Sua sessão é inválida. Por favor, faça login novamente.');
+        
+        final String authUserId = userData.id;
 
-    return clientsState.when(
-      initial: () => const Center(child: CircularProgressIndicator(),),
-      loading: () => const Center(child: CircularProgressIndicator(),),
-      data: (clients, hasMorePages, filters, actionState, isLoadingMore, paginationError) {
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16,8,16,8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _showFilterSheet,
-                    icon: const Icon(Icons.filter_list, size: 20),
-                    label: const Text('Filtrar'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      textStyle: const TextStyle(fontSize: 14)
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            clients.isEmpty 
-            ? const EmptyStateWidget(
-                message: 'Nenhum cliente encontrado para os filtros aplicados.',
-                icon: Icons.business_center_sharp,
-              )
-            : Expanded(
-                child: RefreshIndicator(
-                  // Usa os filtros atuais ao puxar para atualizar.
-                  onRefresh: () => ref.read(clientsControllerProvider.notifier).fetchInitialClients(filters: filters),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: clients.length + (isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      // Exibe um loader se chegar no fim
-                      if (index == clients.length) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-                      final client = clients[index];
-                      return ClientsCard(
-                        client: client, 
-                        onUpdate: () => _onShowUpdateSheet(client),
-                        onDelete: () => _onDeleteClient(context, client), 
-                        onRestorePassword: () => _onRestoreClientPassword(context, client),
-                        onShowUsers: () => _onShowUsers(client.id)
-                      );
-                    },
+        // Pega os filtros atuais do estado para usar no onRefresh.
+        final currentFilters = clientsState.maybeWhen(
+          data: (_, __, filters, ___, ____, _____) => filters,
+          orElse: () => const ClientFilterModel(cnpj: "", status: ClientStatus.ACTIVE), // Usa filtros como padrão
+        );
+
+        return clientsState.when(
+          initial: () => const Center(child: CircularProgressIndicator(),),
+          loading: () => const Center(child: CircularProgressIndicator(),),
+          data: (clients, hasMorePages, filters, actionState, isLoadingMore, paginationError) {
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16,8,16,8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _showFilterSheet,
+                        icon: const Icon(Icons.filter_list, size: 20),
+                        label: const Text('Filtrar'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          textStyle: const TextStyle(fontSize: 14)
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-            )
-          ],
+                clients.isEmpty 
+                ? const EmptyStateWidget(
+                    message: 'Nenhum cliente encontrado para os filtros aplicados.',
+                    icon: Icons.business_center_sharp,
+                  )
+                : Expanded(
+                    child: RefreshIndicator(
+                      // Usa os filtros atuais ao puxar para atualizar.
+                      onRefresh: () => ref.read(clientsControllerProvider.notifier).fetchInitialClients(filters: filters),
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(8.0),
+                        itemCount: clients.length + (isLoadingMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          // Exibe um loader se chegar no fim
+                          if (index == clients.length) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          
+                          final client = clients[index];
+                          final bool isAuthClient = client.id == authUserId;
+
+                          return ClientsCard(
+                            isAuthClient: isAuthClient,
+                            client: client, 
+                            onUpdate: () => _onShowUpdateSheet(client),
+                            onDelete: () => _onDeleteClient(context, client), 
+                            onRestorePassword: () => _onRestoreClientPassword(context, client),
+                            onShowUsers: () => _onShowUsers(client.id)
+                          );
+                        },
+                      ),
+                    ),
+                )
+              ],
+            );
+          }, 
+          error: (message) => ErrorStateWidget(
+            message: message,
+            onRetry: () => ref.read(clientsControllerProvider.notifier).fetchInitialClients(filters: currentFilters),
+          ),
         );
       }, 
-      error: (message) => ErrorStateWidget(
-        message: message,
-        onRetry: () => ref.read(clientsControllerProvider.notifier).fetchInitialClients(filters: currentFilters),
-      ),
     );
   }
 }

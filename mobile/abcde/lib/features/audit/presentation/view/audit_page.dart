@@ -1,5 +1,5 @@
-import 'package:abcde/core/providers/fab_visibility_provider.dart';
-import 'package:abcde/core/providers/shell_action_provider.dart';
+import 'package:abcde/app/providers/fab_visibility_provider.dart';
+import 'package:abcde/app/providers/shell_action_provider.dart';
 import 'package:abcde/features/audit/data/models/audit_filter_model.dart';
 import 'package:abcde/features/audit/presentation/controller/audit_controller.dart';
 import 'package:abcde/features/audit/presentation/controller/audit_state.dart';

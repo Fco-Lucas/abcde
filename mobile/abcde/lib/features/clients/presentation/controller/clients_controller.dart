@@ -1,11 +1,11 @@
-import 'package:abcde/core/errors/api_exception.dart';
-import 'package:abcde/features/clients/data/client_repository.dart';
-import 'package:abcde/features/clients/data/models/enums/client_page_actions_enum.dart';
-import 'package:abcde/features/clients/data/models/enums/client_status_enum.dart';
-import 'package:abcde/features/clients/data/models/responses/client_filter_model.dart';
-import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
+import 'package:abcde/app/errors/api_exception.dart';
+import 'package:abcde/features/clients/data/repositories/client_repository.dart';
+import 'package:abcde/features/clients/data/enums/client_page_actions_enum.dart';
+import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
 import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';
 import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_filter_model.dart';
+import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_action_state.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -42,7 +42,7 @@ class ClientsController extends _$ClientsController {
             actionState: const ClientActionState.success('Cliente cadastrado com sucesso!'),
           );
         } on ApiException catch (e) {
-          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+          state = currentState.copyWith(actionState: ClientActionState.error(e.message));
         } catch (e) {
           state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
         }
@@ -72,7 +72,7 @@ class ClientsController extends _$ClientsController {
         filters: filters, // Salva os filtros no estado
       );
     } on ApiException catch (e) {
-      state = ClientsState.error(e.errorMessage);
+      state = ClientsState.error(e.message);
     } catch (e) {
       state = const ClientsState.error('Ocorreu um erro inesperado.');
     }
@@ -110,7 +110,7 @@ class ClientsController extends _$ClientsController {
         } on ApiException catch (e) {
           state = currentState.copyWith(
             isLoadingMore: false,
-            paginationError: e.errorMessage,
+            paginationError: e.message,
           );
         } catch (e) {
           state = currentState.copyWith(
@@ -149,7 +149,7 @@ class ClientsController extends _$ClientsController {
             orElse: () {},
           );
         } on ApiException catch (e) {
-          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+          state = currentState.copyWith(actionState: ClientActionState.error(e.message));
         } catch (e) {
           state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
         }
@@ -181,7 +181,7 @@ class ClientsController extends _$ClientsController {
             orElse: () {},
           );
         } on ApiException catch (e) {
-          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+          state = currentState.copyWith(actionState: ClientActionState.error(e.message));
         } catch (e) {
           state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
         }
@@ -204,7 +204,7 @@ class ClientsController extends _$ClientsController {
             actionState: const ClientActionState.success('Senha do cliente restaurada com sucesso!'),
           );
         } on ApiException catch (e) {
-          state = currentState.copyWith(actionState: ClientActionState.error(e.errorMessage));
+          state = currentState.copyWith(actionState: ClientActionState.error(e.message));
         } catch (e) {
           state = currentState.copyWith(actionState: const ClientActionState.error('Ocorreu um erro inesperado.'));
         }

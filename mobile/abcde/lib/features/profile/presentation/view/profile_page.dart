@@ -1,4 +1,4 @@
-import 'package:abcde/core/providers/jwt_data_provider.dart';
+import 'package:abcde/app/providers/jwt_data_provider.dart';
 import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
 import 'package:abcde/features/clients/data/models/requests/update_client_password_request_model.dart';
 import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';

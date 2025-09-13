@@ -1,4 +1,4 @@
-import 'package:abcde/features/clients/data/models/enums/client_status_enum.dart';
+import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
 import 'package:abcde/features/clients/data/models/responses/client_filter_model.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_controller.dart';
 import 'package:abcde/features/clients/presentation/controller/clients_state.dart';

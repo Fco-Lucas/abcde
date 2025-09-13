@@ -1,4 +1,4 @@
-import 'package:abcde/core/errors/api_exception.dart';
+import 'package:abcde/app/errors/api_exception.dart';
 import 'package:abcde/features/auth/data/auth_repository.dart';
 import 'package:abcde/features/auth/data/models/login_request_model.dart';
 import 'package:abcde/features/auth/presentation/controller/auth_controller.dart';
@@ -27,7 +27,7 @@ class LoginController extends _$LoginController {
       state = const LoginState.success();
     } on ApiException catch (e) {
       // Agora podemos capturar nossa exceção personalizada!
-      state = LoginState.error(e.errorMessage);
+      state = LoginState.error(e.message);
     } catch (e) {
       // Um fallback para outros tipos de erro
       state = const LoginState.error('Oops, algo inesperado aconteceu.');

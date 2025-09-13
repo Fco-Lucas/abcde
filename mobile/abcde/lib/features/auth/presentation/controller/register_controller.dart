@@ -1,6 +1,6 @@
-import 'package:abcde/core/errors/api_exception.dart';
+import 'package:abcde/app/errors/api_exception.dart';
 import 'package:abcde/features/auth/presentation/controller/register_state.dart';
-import 'package:abcde/features/clients/data/client_repository.dart';
+import 'package:abcde/features/clients/data/repositories/client_repository.dart';
 import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -27,7 +27,7 @@ class RegisterController extends _$RegisterController {
       state = const RegisterState.success();
     } on ApiException catch (e) {
       // Agora podemos capturar nossa exceção personalizada!
-      state = RegisterState.error(e.errorMessage);
+      state = RegisterState.error(e.message);
     } catch (e) {
       // Um fallback para outros tipos de erro
       state = const RegisterState.error('Oops, algo inesperado aconteceu.');

@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:abcde/core/interceptors/api_interceptor.dart';
-import 'package:abcde/core/interceptors/auth_interceptor.dart';
-import 'package:abcde/core/services/secure_storage_service.dart';
+import 'package:abcde/app/interceptors/auth_interceptor.dart';
+import 'package:abcde/app/interceptors/custom_interceptor.dart';
+import 'package:abcde/app/services/secure_storage_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -19,17 +19,18 @@ Dio dio(Ref ref) {
 
   final options = BaseOptions(
     baseUrl: baseUrl,
-    connectTimeout: const Duration(seconds: 5),
-    receiveTimeout: const Duration(seconds: 3),
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 10),
   );
 
   final dio = Dio(options);
 
-  final storageService = ref.watch(secureStorageServiceProvider);
+  final storageService = ref.read(secureStorageServiceProvider);
 
+  // Adiciona os interceptors à instância do Dio.
   dio.interceptors.addAll([
+    AuthInterceptor(storageService),
     CustomInterceptor(),
-    AuthInterceptor(storageService)
   ]);
 
   return dio;

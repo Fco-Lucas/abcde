@@ -1,5 +1,5 @@
-import 'package:abcde/core/providers/dio_provider.dart';
-import 'package:abcde/core/services/secure_storage_service.dart';
+import 'package:abcde/app/providers/dio_provider.dart';
+import 'package:abcde/app/services/secure_storage_service.dart';
 import 'package:abcde/features/auth/data/models/login_request_model.dart';
 import 'package:abcde/features/auth/data/models/login_response_model.dart';
 import 'package:dio/dio.dart';

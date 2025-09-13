@@ -1,5 +1,5 @@
-import 'package:abcde/core/errors/api_exception.dart';
-import 'package:abcde/features/clients/data/client_repository.dart';
+import 'package:abcde/app/errors/api_exception.dart';
+import 'package:abcde/features/clients/data/repositories/client_repository.dart';
 import 'package:abcde/features/clients/data/models/requests/update_client_password_request_model.dart';
 import 'package:abcde/features/clients/data/models/requests/update_client_request_model.dart';
 import 'package:abcde/features/profile/presentation/controller/profile_action_enum.dart';
@@ -24,7 +24,7 @@ class ProfileController extends _$ProfileController {
       
       state = const ProfileState.success("Informações atualizadas com sucesso!", ProfileAction.updateClient);
     } on ApiException catch (e) {
-      state = ProfileState.error(e.errorMessage);
+      state = ProfileState.error(e.message);
     } catch (e) {
       state = const ProfileState.error('Oops, algo inesperado aconteceu.');
     }
@@ -39,7 +39,7 @@ class ProfileController extends _$ProfileController {
       
       state = const ProfileState.success("Senha atualizada com sucesso!", ProfileAction.updatePassword);
     } on ApiException catch (e) {
-      state = ProfileState.error(e.errorMessage);
+      state = ProfileState.error(e.message);
     } catch (e) {
       state = const ProfileState.error('Oops, algo inesperado aconteceu.');
     }

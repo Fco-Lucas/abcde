@@ -1,4 +1,4 @@
-import 'package:abcde/core/providers/dio_provider.dart';
+import 'package:abcde/app/providers/dio_provider.dart';
 import 'package:abcde/features/audit/data/enums/audit_action_enum.dart';
 import 'package:abcde/features/audit/data/enums/audit_program_enum.dart';
 import 'package:abcde/features/audit/data/models/audit_pageable_response_model.dart';

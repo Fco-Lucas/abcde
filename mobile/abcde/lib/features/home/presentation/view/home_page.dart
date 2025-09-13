@@ -1,4 +1,4 @@
-import 'package:abcde/core/providers/jwt_data_provider.dart';
+import 'package:abcde/app/providers/jwt_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

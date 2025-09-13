@@ -9,6 +9,7 @@ enum ClientAction { edit, delete, restorePassword }
 class ClientsCard extends ConsumerWidget {
   ClientsCard({
     super.key, 
+    required this.isAuthClient,
     required this.client,
     required this.onUpdate,
     required this.onDelete,
@@ -16,6 +17,7 @@ class ClientsCard extends ConsumerWidget {
     required this.onShowUsers
   });
 
+  final bool isAuthClient;
   final ClientResponseModel client;
   final VoidCallback onUpdate;
   final VoidCallback onDelete;
@@ -59,7 +61,6 @@ class ClientsCard extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        // Ícone ou Avatar à esquerda
         leading: CircleAvatar(
           backgroundColor: theme.colorScheme.primaryContainer,
           child: Text(
@@ -70,7 +71,6 @@ class ClientsCard extends ConsumerWidget {
             ),
           ),
         ),
-        // Título principal
         title: Text(
           client.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -85,10 +85,8 @@ class ClientsCard extends ConsumerWidget {
             ClientsStatusBadge(status: client.status),
           ],
         ),
-        // AÇÃO PRIMÁRIA: Toque no corpo do card
         onTap: onShowUsers,
-        // AÇÕES SECUNDÁRIAS: Ícone de três pontos à direita
-        trailing: PopupMenuButton<ClientAction>(
+        trailing: !isAuthClient ? PopupMenuButton<ClientAction>(
           onSelected: (action) => _handleMenuAction(action),
           itemBuilder: (context) => [
             const PopupMenuItem<ClientAction>(
@@ -113,7 +111,7 @@ class ClientsCard extends ConsumerWidget {
               ),
             ),
           ],
-        ),
+        ) : null,
       ),
     );
   }

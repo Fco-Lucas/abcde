@@ -1,5 +1,5 @@
-import 'package:abcde/core/providers/dio_provider.dart';
-import 'package:abcde/features/clients/data/models/enums/client_status_enum.dart';
+import 'package:abcde/app/providers/dio_provider.dart';
+import 'package:abcde/features/clients/data/enums/client_status_enum.dart';
 import 'package:abcde/features/clients/data/models/responses/client_pageable_response_model.dart';
 import 'package:abcde/features/clients/data/models/responses/client_response_model.dart';
 import 'package:abcde/features/clients/data/models/requests/create_client_request_model.dart';

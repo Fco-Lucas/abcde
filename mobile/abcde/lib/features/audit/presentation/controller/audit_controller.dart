@@ -1,4 +1,4 @@
-import 'package:abcde/core/errors/api_exception.dart';
+import 'package:abcde/app/errors/api_exception.dart';
 import 'package:abcde/features/audit/data/audit_repository.dart';
 import 'package:abcde/features/audit/data/models/audit_filter_model.dart';
 import 'package:abcde/features/audit/presentation/controller/audit_state.dart';
@@ -44,7 +44,7 @@ class AuditController extends _$AuditController {
         filters: filters, // Salva os filtros no estado
       );
     } on ApiException catch (e) {
-      state = AuditState.error(e.errorMessage);
+      state = AuditState.error(e.message);
     } catch (e) {
       state = const AuditState.error('Ocorreu um erro inesperado.');
     }
@@ -82,7 +82,7 @@ class AuditController extends _$AuditController {
         } on ApiException catch (e) {
           state = currentState.copyWith(
             isLoadingMore: false,
-            paginationError: e.errorMessage,
+            paginationError: e.message,
           );
         } catch (e) {
           state = currentState.copyWith(

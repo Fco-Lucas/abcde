@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:abcde/core/models/jwt_data_model.dart';
-import 'package:abcde/core/services/jwt_service.dart';
+import 'package:abcde/app/models/jwt_data_model.dart';
+import 'package:abcde/app/services/jwt_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -10,7 +10,7 @@ part 'secure_storage_service.g.dart';
 
 @riverpod
 SecureStorageService secureStorageService(Ref ref) {
-  final jwtService = ref.watch(jwtServiceProvider);
+  final jwtService = ref.read(jwtServiceProvider);
   return SecureStorageService(jwtService);
 }
 

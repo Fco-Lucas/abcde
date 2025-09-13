@@ -1,8 +1,9 @@
-import 'package:abcde/core/services/secure_storage_service.dart';
+import 'package:abcde/app/services/secure_storage_service.dart';
 import 'package:dio/dio.dart';
 
 class AuthInterceptor extends Interceptor {
   final SecureStorageService _storageService;
+
   AuthInterceptor(this._storageService);
 
   @override
@@ -12,10 +13,8 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final token = await _storageService.getAuthToken();
 
-    if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
-    }
+    if (token != null) options.headers['Authorization'] = 'Bearer $token';
 
-    super.onRequest(options, handler);
+    return handler.next(options);
   }
 }
