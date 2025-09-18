@@ -85,7 +85,7 @@ def processar_imagem(req: ImagemRequest):
     if lot_type == "ABCDE":    
         dados = {
             "matricula": matricula,
-            "nomeAluno": nomeAluno,
+            "nomeAluno": nomeAluno.strip(),
             "etapa": etapa,
             "prova": prova,
             "gabarito": gabarito,
@@ -104,7 +104,7 @@ def processar_imagem(req: ImagemRequest):
             "vtbFracao": vtbFracao,
             "faseGab": faseGab,
             "prova": prova,
-            "nomeAluno": nomeAluno,
+            "nomeAluno": nomeAluno.strip(),
             "qtdQuestoes": qtdQuestoes,
             "presenca": 0 if aluno_faltou else 1
         }
