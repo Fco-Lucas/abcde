@@ -135,7 +135,7 @@ public class ClientUserService {
     }
 
     @Transactional(readOnly = false)
-    public void update(UUID id, ClientUserUpdateDto dto) {
+    public ClientUserResponseDto update(UUID id, ClientUserUpdateDto dto) {
         ClientUser clientUser = this.getById(id);
 
         if(dto.getClientId() != null) clientUser.setClientId(dto.getClientId());
@@ -157,6 +157,8 @@ public class ClientUserService {
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.CLIENT_USER, details);
         this.auditLogService.create(logDto);
+
+        return ClientUserMapper.toDto(updated);
     }
 
     @Transactional(readOnly = false)

@@ -62,12 +62,12 @@ public class ClientUserController {
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT') or #id == principal.id")
-    public ResponseEntity<Void> updateClientUser(
+    public ResponseEntity<ClientUserResponseDto> updateClientUser(
             @PathVariable UUID id,
             @RequestBody @Valid ClientUserUpdateDto dto
     ) {
-        service.update(id, dto);
-        return ResponseEntity.noContent().build();
+        ClientUserResponseDto responseDto = service.update(id, dto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @DeleteMapping("/{id}")

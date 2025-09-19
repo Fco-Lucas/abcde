@@ -119,9 +119,9 @@ public class ClientController {
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasAuthority('COMPUTEX') or #id == principal.id")
-    public ResponseEntity<Void> updateClient(@PathVariable UUID id, @RequestBody @Valid ClientUpdateDto dto) {
-        this.service.updateClient(id, dto);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ClientResponseDto> updateClient(@PathVariable UUID id, @RequestBody @Valid ClientUpdateDto dto) {
+        ClientResponseDto responseDto = this.service.updateClient(id, dto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @DeleteMapping("/{id}")

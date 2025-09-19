@@ -71,9 +71,10 @@ public class LotController {
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteLot(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @RequestParam(required = true) String lotNameInformed
     ) {
-        this.lotService.delete(id);
+        this.lotService.delete(id, lotNameInformed);
         return ResponseEntity.noContent().build();
     }
 

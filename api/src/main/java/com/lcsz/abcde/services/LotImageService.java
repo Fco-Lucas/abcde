@@ -29,6 +29,7 @@ import com.lcsz.abcde.models.LotImageQuestion;
 import com.lcsz.abcde.repositorys.LotImageRepository;
 import com.lcsz.abcde.repositorys.projection.LotImageProjection;
 import com.lcsz.abcde.security.AuthenticatedUserProvider;
+import com.lcsz.abcde.utils.DirectoryUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -115,14 +116,14 @@ public class LotImageService {
         return responseDto;
     }
 
-    private void excludeFile(String imagePath) {
-        try {
-            Path path = Paths.get(imagePath);
-            if (Files.exists(path)) Files.delete(path);
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao excluir imagem: " + e.getMessage());
-        }
-    }
+//    private void excludeFile(String imagePath) {
+//        try {
+//            Path path = Paths.get(imagePath);
+//            if (Files.exists(path)) Files.delete(path);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Erro ao excluir imagem: " + e.getMessage());
+//        }
+//    }
 
     @Transactional(readOnly = true)
     public Page<LotImagePageableResponseDto> getAllPageable(
@@ -154,7 +155,7 @@ public class LotImageService {
                 // Se o cargo for diferente de COMPUTEX exclui
                 if (!userRole.equals("COMPUTEX")) {
                     long daysSinceCreation = ChronoUnit.DAYS.between(createdAt, LocalDateTime.now());
-                    if (daysSinceCreation >= imageActiveDays) this.excludeFile(pathImage);
+                    if (daysSinceCreation >= imageActiveDays) DirectoryUtils.excludeFile(pathImage);
                 }
             }
 
@@ -212,6 +213,10 @@ public class LotImageService {
         if(!permission.getUpload_files()) throw new RuntimeException("Você não tem permissão para excluir gabaritos");
 
         LotImage lotImage = this.getById(id);
+
+        String pathImage = this.getAbsoluteImagePath(lotImage.getLotId(), lotImage.getKey());
+        DirectoryUtils.excludeFile(pathImage);
+
         lotImage.setStatus(LotImageStatus.INACTIVE);
         LotImage updated = this.lotImageRepository.save(lotImage);
 

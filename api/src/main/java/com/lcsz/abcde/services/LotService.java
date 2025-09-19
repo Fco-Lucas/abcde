@@ -30,16 +30,20 @@ import com.lcsz.abcde.models.LotImage;
 import com.lcsz.abcde.repositorys.LotRepository;
 import com.lcsz.abcde.repositorys.projection.LotProjection;
 import com.lcsz.abcde.security.AuthenticatedUserProvider;
+import com.lcsz.abcde.utils.DirectoryUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +51,8 @@ import java.util.UUID;
 
 @Service
 public class LotService {
+    private final Path raiz = Paths.get("uploads/gabaritos/");
+
     private final LotRepository lotRepository;
     private final LotImageService lotImageService;
     private final ClientService clientService;
@@ -257,14 +263,27 @@ public class LotService {
     }
 
     @Transactional(readOnly = false)
-    public void delete(Long lotId) {
+    public void delete(Long lotId, String lotNameInformed) {
         // Verifica se o usuário possui permissão para excluir lote
         PermissionResponseDto userPermission = this.provider.getAuthenticatedUserPermissions();
         if(!userPermission.getUpload_files()) throw new RuntimeException("Usuário sem autorização para excluir lotes");
 
         Lot lot = this.getLotById(lotId);
+
+        // Verifica se o nome do lote informado, condiz com o nome do lote ral
+        if(!lotNameInformed.equals(lot.getName())) throw new RuntimeException("O nome do lote informado não condiz com o nome real do lote");
+
+        // Atualiza o status do lote
         lot.setStatus(LotStatus.DELETED);
         Lot updated = this.lotRepository.save(lot);
+
+        // Exclui a pasta do lote
+        try {
+            String directoryPath = raiz + "/" + lotId.toString();
+            DirectoryUtils.deleteDirectory(directoryPath);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
 
         String details = String.format(
             "Lote com ID: %s teve o status alterado para EXCLUÍDO (exclusão lógica).", updated.getId()

@@ -117,7 +117,7 @@ public class ClientService {
     }
 
     @Transactional(readOnly = false)
-    public void updateClient(
+    public ClientResponseDto updateClient(
             UUID id,
             ClientUpdateDto dto
     ) {
@@ -146,6 +146,8 @@ public class ClientService {
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.CLIENT, details);
         this.auditLogService.create(logDto);
+
+        return ClientMapper.toDto(updated);
     }
 
     @Transactional(readOnly = false)
