@@ -42,8 +42,11 @@ export class LotService {
     return this.http.patch<void>(`${this.apiUrl}lots/${id}`, data);
   }
 
-  deleteLot(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}lots/${id}`);
+  deleteLot(id: number, lotNameInformed: string): Observable<void> {
+    const params = new HttpParams()
+      .set("lotNameInformed", lotNameInformed);
+
+    return this.http.delete<void>(`${this.apiUrl}lots/${id}`, { params });
   }
 
   downloadTxt(id: number): Observable<Blob> {

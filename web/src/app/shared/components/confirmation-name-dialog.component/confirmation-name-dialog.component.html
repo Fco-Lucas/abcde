@@ -1,0 +1,29 @@
+
+<form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
+  <h2 mat-dialog-title class="text-center">{{ data.title }}</h2>
+  
+  <mat-dialog-content>
+    <div class="text-center">
+      <p class="text-sm mb-5">{{ data.message }}</p>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Digite "{{ data.expectedName }}" para confirmar</mat-label>
+        <input matInput formControlName="name" autocomplete="off" />
+        @if (filterForm.hasError('required') && nameControl?.touched) {
+          <mat-error>Campo obrigatório</mat-error>
+        }
+        @if (filterForm.hasError('nameMismatch')) {
+          <mat-error>O nome digitado não corresponde</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="center">
+    <button mat-button [mat-dialog-close]="false">
+      {{ data.cancelButtonText || 'Cancelar' }}
+    </button>
+    <button type="submit" mat-raised-button color="warn" [disabled]="isSubmitButtonDisabled()">
+      {{ data.confirmButtonText || 'Confirmar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

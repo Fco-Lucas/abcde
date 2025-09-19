@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
@@ -46,6 +46,8 @@ import type { Client } from '../../../clients/models/client.model';
 import { TourScreenEnum, type TourScreenInterface, type TourScreenUpdateInterface } from '../../../tourScreen/models/tour-screen.models';
 import { TourScreenService } from '../../../tourScreen/services/tour-screen.service';
 import { driver } from 'driver.js';
+import { ConfirmationNameDialogService } from '../../../../core/services/confirmation-name-dialog.service';
+import type { ConfirmationNameDialogData } from '../../../../shared/components/confirmation-name-dialog.component/confirmation-name-dialog.component';
 
 interface LotDetailsState {
   tourScreenInfo: TourScreenInterface | null;
@@ -87,6 +89,7 @@ export class LotDetailsPageComponent {
   private lotStateService = inject(LotStateService);
   private lotImageService = inject(LotImageService);
   private tourScreenService = inject(TourScreenService);
+  private confirmationNameDialogService = inject(ConfirmationNameDialogService);
   private confirmationDialogService = inject(ConfirmationDialogService);
   private notification = inject(NotificationService);
   private http = inject(HttpClient);
@@ -235,6 +238,45 @@ export class LotDetailsPageComponent {
         this.state.update(s => ({ ...s, answersForm: this.fb.group({ answers: this.fb.array([]) }), initialAnswers: [] }));
       }
     });
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    if (this.isLoadingImages()) return; // evita ação enquanto carrega
+
+    const images = this.lotImages();
+    const selectedId = this.selectedImageId();
+    const currentIndex = images.findIndex(img => img.id === selectedId);
+
+    switch (event.key) {
+      case 'ArrowUp': {
+        if (currentIndex > 0) {
+          this.onImageSelected(images[currentIndex - 1].id);
+        }
+        break;
+      }
+      case 'ArrowDown': {
+        if (currentIndex < images.length - 1) {
+          this.onImageSelected(images[currentIndex + 1].id);
+        }
+        break;
+      }
+      case 'ArrowLeft': {
+        const page = this.pagination();
+        if (page.pageIndex > 0) {
+          this.onPageChange({ ...page, pageIndex: page.pageIndex - 1 } as PageEvent);
+        }
+        break;
+      }
+      case 'ArrowRight': {
+        const page = this.pagination();
+        const totalPages = Math.ceil(this.totalImages() / page.pageSize);
+        if (page.pageIndex < totalPages - 1) {
+          this.onPageChange({ ...page, pageIndex: page.pageIndex + 1 } as PageEvent);
+        }
+        break;
+      }
+    }
   }
 
   private startTour() {
@@ -677,20 +719,21 @@ export class LotDetailsPageComponent {
   }
 
   deleteLot(): void {
-    const dialogData = {
+    const dialogData: ConfirmationNameDialogData = {
       title: "Tem certeza?",
       message: `Você realmente deseja excluir o lote com nome ${this.lot().name}? Esta ação não poderá ser desfeita.`,
+      expectedName: this.lot().name,
       confirmButtonText: 'Excluir'
     };
 
-    this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
+    this.confirmationNameDialogService.open(dialogData).subscribe(confirmed => {
       if(!confirmed) return;
       this.proceedWithLotDeletion();
     });
   }
 
   proceedWithLotDeletion(): void {
-    this.lotService.deleteLot(this.lot().id).subscribe({
+    this.lotService.deleteLot(this.lot().id, this.lot().name).subscribe({
       next: (_) => {
         this.notification.showSuccess(`Lote excluído com sucesso`);
         this.router.navigate(["/app/home"]);
