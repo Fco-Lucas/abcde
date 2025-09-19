@@ -6,7 +6,7 @@
     <div class="text-center">
       <p class="text-sm mb-5">{{ data.message }}</p>
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Digite "{{ data.expectedName }}" para confirmar</mat-label>
+        <mat-label>Digite o nome do lote para confirmar</mat-label>
         <input matInput formControlName="name" autocomplete="off" />
         @if (filterForm.hasError('required') && nameControl?.touched) {
           <mat-error>Campo obrigatório</mat-error>
