@@ -20,7 +20,7 @@
           <mat-card-subtitle>{{ image.nomeAluno }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          @if(!this.createdByComputex) {
+          @if(!this.createdByComputex && image.url) {
             <p class="text-1xl mb-3">Imagem disponível até: {{ image.expirationImageDate| date: 'dd/MM/yyyy' }}</p>
           } 
           @if(image.haveModification && this.isActive(image.id)) {

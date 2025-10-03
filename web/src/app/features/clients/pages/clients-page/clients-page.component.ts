@@ -21,6 +21,7 @@ import { catchError, finalize, map, of, switchMap, tap } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ClientUsersService } from '../../services/client-users.service';
+import { DialogUpdateComputexPostUrlComponent, type DialogUpdateComputexPostUrlData } from '../../components/dialog-update-computex-post-url/dialog-update-computex-post-url.component';
 
 interface ClientsPageState {
   clients: Client[];
@@ -185,6 +186,26 @@ export class ClientsPageComponent {
 
   openUpdateClientDialog(data: DialogUpdateClientData) {
     const dialogRef = this.dialog.open(DialogUpdateClientComponent, {
+      width: '500px',
+      data: data
+    });
+
+    // Evento de escuta ao fechar a modal
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.forceReload();
+    });
+  }
+
+  onUpdateComputexPostUrlDialog(client: Client) {
+    const data: DialogUpdateComputexPostUrlData = {
+      clientId: client.id,
+      urlToPost: client.urlToPost,
+    };
+    this.openUpdateComputexPostUrlDialog(data);
+  }
+
+  openUpdateComputexPostUrlDialog(data: DialogUpdateComputexPostUrlData) {
+    const dialogRef = this.dialog.open(DialogUpdateComputexPostUrlComponent, {
       width: '500px',
       data: data
     });

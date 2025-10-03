@@ -47,6 +47,7 @@ export class ClientListComponent implements OnChanges {
 
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() updateClient = new EventEmitter<Client>();
+  @Output() updateComputexPostUrl = new EventEmitter<Client>();
   @Output() deleteClient = new EventEmitter<Client>();
   @Output() restorePassword = new EventEmitter<Client>();
 

@@ -35,6 +35,7 @@ export interface LotImagePageableInterface {
   presenca: number;
   haveModification: boolean;
   status: LotImageStatusEnum;
+  url: string;
   expirationImageDate: string;
   createdAt: string;
 }
