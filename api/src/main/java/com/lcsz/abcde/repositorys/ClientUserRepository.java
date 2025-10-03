@@ -15,6 +15,7 @@ import java.util.UUID;
 
 public interface ClientUserRepository extends JpaRepository<ClientUser, UUID> {
     Optional<ClientUser> findByEmailAndStatus(String email, ClientUserStatus status);
+    Optional<ClientUser> findByEmail(String email);
 
     @Query("""
         SELECT u FROM ClientUser u

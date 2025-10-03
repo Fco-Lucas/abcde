@@ -14,6 +14,7 @@ import java.util.UUID;
 
 public interface ClientRepository extends JpaRepository<Client, UUID> {
     Optional<Client> findByCnpjAndStatus(String cnpj, ClientStatus status);
+    Optional<Client> findByCnpj(String cnpj);
 
     @Query("""
         SELECT c FROM Client c

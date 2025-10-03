@@ -159,7 +159,13 @@ public class LotImageService {
                 }
             }
 
+            // Verifica se a imagem existe no diretório, se não existir seta null na URL
+            String imageUrl = this.getImageUrl(lotImage.getLotId(), lotImage.getKey());
+            String imageAbsolutePath = this.getAbsoluteImagePath(lotImage.getLotId(), lotImage.getKey());
+            String url = Files.exists(Paths.get(imageAbsolutePath)) ? imageUrl : null;
+
             responseDto.setExpirationImageDate(expirationDate);
+            responseDto.setUrl(url);
 
             return responseDto;
         });

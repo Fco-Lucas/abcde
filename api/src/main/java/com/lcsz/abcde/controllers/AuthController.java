@@ -22,9 +22,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,30 +75,57 @@ public class AuthController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> auth(@RequestBody @Valid AuthLoginDto dto, HttpServletRequest request) {
         // log.info("Processo de authenticação pelo login {}", dto.getLogin());
-
         try {
+            // Verifica se o usuário existe ANTES
+            try {
+                detailsService.loadUserByUsername(dto.getLogin());
+            } catch (UsernameNotFoundException e) {
+                // log.error("Tentativa de login com usuário inexistente ou desativado: {}", dto.getLogin(), e);
+                return ResponseEntity
+                        .badRequest()
+                        .body(new ExceptionMessage(
+                                request,
+                                HttpStatus.BAD_REQUEST,
+                                e.getMessage()
+                        ));
+            }
+
+            // Cria o token de autenticação
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(dto.getLogin(), dto.getPassword());
 
+            // Agora valida a senha
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
-            // Obtem o ID do usuário autenticado
+            // Usuário autenticado
             JwtUserDetails userDetails = (JwtUserDetails) authentication.getPrincipal();
-            UUID userId = userDetails.getId();
-
             JwtToken token = detailsService.getTokenAuthenticated(dto.getLogin());
 
-            // Log
+            // Log de auditoria
+            UUID userId = userDetails.getId();
             String details = "Login efetuado com sucesso";
             AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.LOGIN, userId, AuditProgram.AUTH, details);
             this.auditLogService.create(logDto);
 
             return ResponseEntity.ok(token);
-        } catch (AuthenticationException ex) {
-            // log.error("Bad Credentials from login {}", dto.getLogin());
+        } catch (BadCredentialsException e) {
+            // log.error("Senha inválida para login {}", dto.getLogin(), e);
             return ResponseEntity
                     .badRequest()
-                    .body(new ExceptionMessage(request, HttpStatus.BAD_REQUEST, "Credênciais inválidas, certifique-se de possuir uma conta registrada com o CNPJ/Email e senha informada"));
+                    .body(new ExceptionMessage(
+                            request,
+                            HttpStatus.BAD_REQUEST,
+                            "Credênciais inválidas, certifique-se de possuir uma conta registrada com o CNPJ/Email e senha informada"
+                    ));
+        } catch (AuthenticationException e) {
+            log.error("Erro inesperado de autenticação para login {}", dto.getLogin(), e);
+            return ResponseEntity
+                    .badRequest()
+                    .body(new ExceptionMessage(
+                            request,
+                            HttpStatus.BAD_REQUEST,
+                            "Falha de autenticação. Tente novamente."
+                    ));
         }
     }
 }

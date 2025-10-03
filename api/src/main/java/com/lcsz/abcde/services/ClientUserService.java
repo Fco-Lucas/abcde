@@ -177,6 +177,15 @@ public class ClientUserService {
         this.auditLogService.create(logDto);
     }
 
+    @Transactional
+    public void deleteAllUsersByClientId (UUID clientId) {
+        List<ClientUserResponseDto> users = getUsersByClientId(clientId);
+
+        for (ClientUserResponseDto user : users) {
+            this.delete(user.getId());
+        }
+    }
+
     @Transactional(readOnly = false)
     public void updatePassword(UUID id, ClientUserUpdatePasswordDto dto) {
         String currentPassword = dto.getCurrentPassword();
@@ -221,9 +230,14 @@ public class ClientUserService {
     }
 
     @Transactional(readOnly = true)
-    public ClientUser getByEmail(String email, ClientUserStatus status) {
-        return this.findClientUserIfExists(email, status).orElse(null);
+    public ClientUser getByEmail(String email) {
+        return this.repository.findByEmail(email).orElse(null);
     }
+
+//    @Transactional(readOnly = true)
+//    public ClientUser getByEmail(String email, ClientUserStatus status) {
+//        return this.findClientUserIfExists(email, status).orElse(null);
+//    }
 
     @Transactional(readOnly = true)
     public List<ClientUserResponseDto> getUsersByClientId(UUID clientId) {

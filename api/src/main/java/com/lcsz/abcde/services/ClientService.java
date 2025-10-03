@@ -152,6 +152,7 @@ public class ClientService {
 
     @Transactional(readOnly = false)
     public void deleteClient(UUID id) {
+        // Inativa o cliente
         Client client = this.getClientById(id);
         client.setStatus(ClientStatus.INACTIVE);
         Client updated = this.repository.save(client);
@@ -159,11 +160,13 @@ public class ClientService {
         String details = String.format(
             "Cliente com ID: %s teve o status alterado para INATIVO (exclusão lógica).", updated.getId()
         );
-
         AuditLogCreateDto logDto = new AuditLogCreateDto(
                 AuditAction.DELETE, AuditProgram.CLIENT, details
         );
         this.auditLogService.create(logDto);
+
+        // Inativa todos os usuários deste cliente
+        this.clientUserService.deleteAllUsersByClientId(id);
     }
 
     @Transactional(readOnly = false)
@@ -210,6 +213,11 @@ public class ClientService {
             AuditAction.UPDATE, AuditProgram.CLIENT, details
         );
         this.auditLogService.create(logDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Client getByCnpj(String cnpj) {
+        return this.repository.findByCnpj(cnpj).orElse(null);
     }
 
     @Transactional(readOnly = true)

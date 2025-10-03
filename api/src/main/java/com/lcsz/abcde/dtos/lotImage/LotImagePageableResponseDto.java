@@ -12,13 +12,14 @@ public class LotImagePageableResponseDto {
     private Integer presenca;
     private Boolean haveModification;
     private LotImageStatus status;
+    private String url;
     private LocalDateTime expirationImageDate;
     private LocalDateTime createdAt;
 
     public LotImagePageableResponseDto() {
     }
 
-    public LotImagePageableResponseDto(Long id, Long lotId, Integer matricula, String nomeAluno, Integer presenca, Boolean haveModification, LotImageStatus status, LocalDateTime expirationImageDate, LocalDateTime createdAt) {
+    public LotImagePageableResponseDto(Long id, Long lotId, Integer matricula, String nomeAluno, Integer presenca, Boolean haveModification, LotImageStatus status, String url, LocalDateTime expirationImageDate, LocalDateTime createdAt) {
         this.id = id;
         this.lotId = lotId;
         this.matricula = matricula;
@@ -26,6 +27,7 @@ public class LotImagePageableResponseDto {
         this.presenca = presenca;
         this.haveModification = haveModification;
         this.status = status;
+        this.url = url;
         this.expirationImageDate = expirationImageDate;
         this.createdAt = createdAt;
     }
@@ -86,6 +88,14 @@ public class LotImagePageableResponseDto {
         this.status = status;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public LocalDateTime getExpirationImageDate() {
         return expirationImageDate;
     }
@@ -112,6 +122,7 @@ public class LotImagePageableResponseDto {
                 ", presenca=" + presenca +
                 ", haveModification=" + haveModification +
                 ", status=" + status +
+                ", url=" + url +
                 ", expirationImageDate=" + expirationImageDate +
                 ", createdAt=" + createdAt +
                 '}';

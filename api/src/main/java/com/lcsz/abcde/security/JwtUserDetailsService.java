@@ -29,15 +29,17 @@ public class JwtUserDetailsService implements UserDetailsService {
         String numericLogin = login.replaceAll("[^\\d]", "");
         String cnpjComputex = "12302493000101";
         if (numericLogin.length() == 14) {
-            Client client = clientService.getByCnpj(login, ClientStatus.ACTIVE);
-            if (client == null) throw new UsernameNotFoundException("Client não encontrado com CNPJ: " + login);
+            Client client = clientService.getByCnpj(login);
+            if (client == null) throw new UsernameNotFoundException("Credênciais inválidas, certifique-se de possuir uma conta registrada com o cnpj e senha informados");
+            if(client.getStatus().equals(ClientStatus.INACTIVE)) throw new UsernameNotFoundException("Conta desativada, entre em contato com o suporte");
             String role = numericLogin.equals(cnpjComputex) ? "COMPUTEX" : "CLIENT";
             return new JwtUserDetails(client, role);
         }
 
         // Senão, assume que é um e-mail
-        ClientUser clientUser = clientUserService.getByEmail(login, ClientUserStatus.ACTIVE);
-        if (clientUser == null) throw new UsernameNotFoundException("ClientUser não encontrado com e-mail: " + login);
+        ClientUser clientUser = clientUserService.getByEmail(login);
+        if (clientUser == null) throw new UsernameNotFoundException("Credênciais inválidas, certifique-se de possuir uma conta registrada com o e-mail e senha informados");
+        if(clientUser.getStatus().equals(ClientUserStatus.INACTIVE)) throw new UsernameNotFoundException("Conta desativada, entre em contato com o suporte");
 
         // Checa se é um usuário da COMPUTEX
         UUID userClientId = clientUser.getClientId();
