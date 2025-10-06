@@ -296,7 +296,7 @@ public class LotService {
     @Transactional(readOnly = true)
     public Integer getImageActiveDaysFromLotId(Long lotId) {
         Lot lot = this.getLotById(lotId);
-        Client client = this.clientService.getByCnpj(lot.getUserCnpj(), ClientStatus.ACTIVE);
+        Client client = this.clientService.getByCnpj(lot.getUserCnpj());
         return client.getImageActiveDays();
     }
 
@@ -377,7 +377,7 @@ public class LotService {
         if(lot.getStatus() != LotStatus.COMPLETED) throw new RuntimeException("Para enviar as informações a URL informada, o lote deve está concluído");
 
         // Verifica se o cliente possui URL informada
-        Client client = this.clientService.getByCnpj(lot.getUserCnpj(), ClientStatus.ACTIVE);
+        Client client = this.clientService.getByCnpj(lot.getUserCnpj());
         String urlToPost = client.getUrlToPost();
         if(urlToPost == null || urlToPost.isBlank()) throw new RuntimeException("O cliente na qual pertence este lote não possui URL informada");
 

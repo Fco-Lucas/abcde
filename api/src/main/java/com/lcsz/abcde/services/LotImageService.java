@@ -1,6 +1,7 @@
 package com.lcsz.abcde.services;
 
 import com.lcsz.abcde.AppProperties;
+import com.lcsz.abcde.ImageCompressor;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.auditLogQuestion.AuditLogQuestionCreateDto;
 import com.lcsz.abcde.dtos.imageInfoAbcde.ImageInfoAbcdeCreateDto;
@@ -68,6 +69,7 @@ public class LotImageService {
     private final AuditLogService auditLogService;
     private final AuditLogQuestionService auditLogQuestionService;
     private final AppProperties appProperties;
+    private final ImageCompressor imageCompressor;
 
     LotImageService(
         LotImageRepository lotImageRepository,
@@ -78,7 +80,8 @@ public class LotImageService {
         AuthenticatedUserProvider authenticatedUserProvider,
         AuditLogService auditLogService,
         AuditLogQuestionService auditLogQuestionService,
-        AppProperties appProperties
+        AppProperties appProperties,
+        ImageCompressor imageCompressor
     ) {
         this.lotImageRepository = lotImageRepository;
         this.lotService = lotService;
@@ -89,6 +92,7 @@ public class LotImageService {
         this.auditLogService = auditLogService;
         this.auditLogQuestionService = auditLogQuestionService;
         this.appProperties = appProperties;
+        this.imageCompressor = imageCompressor;
     }
 
     private String getImageUrl(Long lotId, String key) {
@@ -423,6 +427,9 @@ public class LotImageService {
 
             responseDto = this.getByIdDto(lotImage.getId());
         }
+
+        // Comprime a imagem que o python processou
+        this.imageCompressor.comprimirImagem(path_destiny.toFile());
 
         // Log
         String details = String.format(
