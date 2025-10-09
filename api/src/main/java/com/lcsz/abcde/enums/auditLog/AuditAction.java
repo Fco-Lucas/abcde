@@ -4,6 +4,7 @@ public enum AuditAction {
     CREATE,
     UPDATE,
     DELETE,
+    RESTORE,
     LOGIN,
     PROCESSED,
     DOWNLOADTXT

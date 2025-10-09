@@ -54,14 +54,14 @@ public class ClientUserService {
     }
 
     @Transactional(readOnly = true)
-    private Optional<ClientUser> findClientUserIfExists(String email, ClientUserStatus status) {
-        return this.repository.findByEmailAndStatus(email, status);
+    private Optional<ClientUser> findClientUserIfExists(String email) {
+        return this.repository.findByEmail(email);
     }
 
     @Transactional(readOnly = false)
     public ClientUserResponseDto create(ClientUserCreateDto dto) {
         // Verifica se já existe um usuário do cliente com email informado
-        if(this.findClientUserIfExists(dto.getEmail(), ClientUserStatus.ACTIVE).isPresent())
+        if(this.findClientUserIfExists(dto.getEmail()).isPresent())
             throw new EntityExistsException(String.format("Usuário com email '%s' já cadastrado no sistema", dto.getEmail()));
 
         // Verifica se existe o clientId informado, se não existir lança exceção
@@ -141,7 +141,7 @@ public class ClientUserService {
         if(dto.getClientId() != null) clientUser.setClientId(dto.getClientId());
         if(dto.getName() != null) clientUser.setName(dto.getName());
         if(dto.getEmail() != null) {
-            Optional<ClientUser> clientUserExits = this.findClientUserIfExists(dto.getEmail(), ClientUserStatus.ACTIVE);
+            Optional<ClientUser> clientUserExits = this.findClientUserIfExists(dto.getEmail());
             if(clientUserExits.isPresent() && clientUserExits.get().getId() != clientUser.getId())
                 throw new EntityExistsException(String.format("Usuário com e-mail '%s' já existente", dto.getEmail()));
 
@@ -227,6 +227,33 @@ public class ClientUserService {
                 AuditAction.UPDATE, AuditProgram.CLIENT_USER, details
         );
         this.auditLogService.create(logDto);
+    }
+
+    @Transactional
+    public ClientUserResponseDto restore(UUID id) {
+        ClientUser clientUser = this.getById(id);
+        clientUser.setStatus(ClientUserStatus.ACTIVE);
+        ClientUser updated = this.repository.save(clientUser);
+
+        String details = String.format(
+                "Usuário com ID: %s teve o status alterado para ATIVO.", updated.getId()
+        );
+
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.RESTORE, AuditProgram.CLIENT_USER, details
+        );
+        this.auditLogService.create(logDto);
+
+        return ClientUserMapper.toDto(updated);
+    }
+
+    @Transactional
+    public void restoreAllUsersByClientId (UUID clientId) {
+        List<ClientUserResponseDto> users = getUsersByClientId(clientId);
+
+        for (ClientUserResponseDto user : users) {
+            this.restore(user.getId());
+        }
     }
 
     @Transactional(readOnly = true)

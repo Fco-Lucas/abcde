@@ -32,6 +32,8 @@ export class AuditLogListComponent {
         return "Atualização";
       case "DELETE":
         return "Exclusão";
+      case "RESTORE":
+        return "Restaurar";
       case "LOGIN":
         return "Login";
       case "PROCESSED":

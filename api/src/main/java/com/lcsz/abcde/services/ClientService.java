@@ -48,14 +48,14 @@ public class ClientService {
     }
 
     @Transactional(readOnly = true)
-    private Optional<Client> findClientIfExists(String cnpj, ClientStatus status) {
-        return repository.findByCnpjAndStatus(cnpj, status);
+    private Optional<Client> findClientIfExists(String cnpj) {
+        return repository.findByCnpj(cnpj);
     }
 
     @Transactional(readOnly = false)
     public ClientResponseDto create(ClientCreateDto dto) {
         // Verifica se já existe um cliente com o CNPJ informado
-        if (findClientIfExists(dto.getCnpj(), ClientStatus.ACTIVE).isPresent())
+        if (findClientIfExists(dto.getCnpj()).isPresent())
             throw new EntityExistsException(String.format("Cliente com cnpj '%s' já cadastrado no sistema", dto.getCnpj()));
 
         // Converte o dto recebido para entidade
@@ -126,7 +126,7 @@ public class ClientService {
         if(dto.getName() != null) client.setName(dto.getName());
         if(dto.getCnpj() != null) {
             // Verifica se há outro cliente com o mesmo CNPJ
-            Optional<Client> clientExists = findClientIfExists(dto.getCnpj(), ClientStatus.ACTIVE);
+            Optional<Client> clientExists = findClientIfExists(dto.getCnpj());
             if (clientExists.isPresent() && clientExists.get().getId() != client.getId())
                 throw new EntityExistsException(String.format("Cliente com cnpj '%s' já cadastrado no sistema", dto.getCnpj()));
 
@@ -213,6 +213,27 @@ public class ClientService {
             AuditAction.UPDATE, AuditProgram.CLIENT, details
         );
         this.auditLogService.create(logDto);
+    }
+
+    @Transactional(readOnly = false)
+    public ClientResponseDto restore(UUID id) {
+        // Inativa o cliente
+        Client client = this.getClientById(id);
+        client.setStatus(ClientStatus.ACTIVE);
+        Client updated = this.repository.save(client);
+
+        String details = String.format(
+                "Cliente com ID: %s teve o status alterado para ATIVO.", updated.getId()
+        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.RESTORE, AuditProgram.CLIENT, details
+        );
+        this.auditLogService.create(logDto);
+
+        // Ativa todos os usuários deste cliente
+        this.clientUserService.restoreAllUsersByClientId(id);
+
+        return ClientMapper.toDto(updated);
     }
 
     @Transactional(readOnly = true)

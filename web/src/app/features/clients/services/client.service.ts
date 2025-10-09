@@ -41,6 +41,10 @@ export class ClientService {
     return this.http.delete<void>(`${this.apiUrl}clients/${clientId}`);
   }
 
+  restoreClient(clientId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}clients/${clientId}/restore`, {});
+  }
+
   updatePasswordClient(clientId: string, data: UpdateClientPasswordInterface): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}clients/updatePassword/${clientId}`, data);
   }

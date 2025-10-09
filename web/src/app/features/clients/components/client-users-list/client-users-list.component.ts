@@ -32,6 +32,7 @@ export class ClientUsersListComponent {
   @Output() pageChange = new EventEmitter<PageEvent>();
   @Output() updateClientUser = new EventEmitter<ClientUserInterface>();
   @Output() deleteClientUser = new EventEmitter<ClientUserInterface>();
+  @Output() restoreClientUser = new EventEmitter<ClientUserInterface>();
   @Output() restorePassword = new EventEmitter<ClientUserInterface>();
 
   public displayedColumns: string[] = ['name', 'email', 'permission', 'status', ' '];

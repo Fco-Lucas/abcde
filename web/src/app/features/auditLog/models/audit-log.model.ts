@@ -2,6 +2,7 @@ export enum AuditLogAction {
   CREATE = "CREATE",
   UPDATE = "UPDATE",
   DELETE = "DELETE",
+  RESTORE = "RESTORE",
   LOGIN = "LOGIN",
   PROCESSED = "PROCESSED",
   DOWNLOADTXT = "DOWNLOADTXT"

@@ -203,7 +203,7 @@ export class ClientUsersPageComponent {
   deleteClientUser(clientUser: ClientUserInterface): void {
     const dialogData = {
       title: 'Tem certeza?',
-      message: `Você realmente deseja desativar o usuário "${clientUser.name}"? Esta ação não pode ser desfeita.`,
+      message: `Você realmente deseja desativar o usuário "${clientUser.name}"?`,
       confirmButtonText: 'Excluir'
     };
     this.confirmationDialog.open(dialogData).subscribe(confirmed => {
@@ -213,6 +213,28 @@ export class ClientUsersPageComponent {
 
   proceedWithDeletion(clientId: string, clientUserId: string): void {
     this.clientUsersService.deleteClientUser(clientId, clientUserId).pipe(
+      finalize(() => {
+        this.forceReload();
+      })
+    ).subscribe({
+      next: (_) => this.notification.showSuccess("Usuário excluído com sucesso!"),
+      error: (err) => this.notification.showError(err.message),
+    });
+  }
+
+  restoreClientUser(clientUser: ClientUserInterface): void {
+    const dialogData = {
+      title: 'Tem certeza?',
+      message: `Você realmente deseja restaurar o usuário "${clientUser.name}"?`,
+      confirmButtonText: 'Excluir'
+    };
+    this.confirmationDialog.open(dialogData).subscribe(confirmed => {
+      if(confirmed) this.proceedWithRestore(clientUser.clientId, clientUser.id);
+    });
+  }
+
+  proceedWithRestore(clientId: string, clientUserId: string): void {
+    this.clientUsersService.restoreClientUser(clientId, clientUserId).pipe(
       finalize(() => {
         this.forceReload();
       })

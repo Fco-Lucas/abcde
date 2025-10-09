@@ -49,6 +49,7 @@ export class ClientListComponent implements OnChanges {
   @Output() updateClient = new EventEmitter<Client>();
   @Output() updateComputexPostUrl = new EventEmitter<Client>();
   @Output() deleteClient = new EventEmitter<Client>();
+  @Output() restoreClient = new EventEmitter<Client>();
   @Output() restorePassword = new EventEmitter<Client>();
 
   public displayedColumns: string[] = ['name', 'cnpj', 'status', ' '];

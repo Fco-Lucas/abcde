@@ -219,7 +219,7 @@ export class ClientsPageComponent {
   onDeleteClient(client: Client): void {
     const dialogData = {
       title: 'Tem certeza?',
-      message: `Você realmente deseja desativar o cliente "${client.name}"? Esta ação não pode ser desfeita.`,
+      message: `Você realmente deseja desativar o cliente "${client.name}"?`,
       confirmButtonText: 'Excluir'
     };
 
@@ -238,6 +238,31 @@ export class ClientsPageComponent {
     ).subscribe({
       next: (_) => this.notification.showSuccess("Cliente desativado com sucesso!"),
       error: (_) => this.notification.showError("Ocorreu um erro ao desativar o cliente tente novamente mais tarde")
+    });
+  }
+
+  onRestoreClient(client: Client): void {
+    const dialogData = {
+      title: 'Tem certeza?',
+      message: `Você realmente deseja restaurar o cliente "${client.name}"?`,
+      confirmButtonText: 'Confirmar'
+    };
+
+    this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
+      if (confirmed) {
+        this.proceedWithRestore(client.id);
+      }
+    });
+  }
+
+  proceedWithRestore(clientId: string): void {
+    this.clientService.restoreClient(clientId).pipe(
+      finalize(() => {
+        this.forceReload();
+      })
+    ).subscribe({
+      next: (_) => this.notification.showSuccess("Cliente restaurado com sucesso!"),
+      error: (_) => this.notification.showError("Ocorreu um erro ao restaurar o cliente tente novamente mais tarde")
     });
   }
 

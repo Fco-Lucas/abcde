@@ -77,6 +77,13 @@ public class ClientUserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/restore")
+    @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT')")
+    public ResponseEntity<ClientUserResponseDto> restoreClientUser(@PathVariable UUID id) {
+        ClientUserResponseDto responseDto = service.restore(id);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+
     @PostMapping("/updatePassword/{id}")
     @PreAuthorize("hasAuthority('COMPUTEX') or #id == principal.id")
     public ResponseEntity<Void> updatePasswordClientUser(
