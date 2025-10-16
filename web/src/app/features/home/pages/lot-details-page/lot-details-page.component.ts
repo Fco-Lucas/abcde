@@ -96,6 +96,7 @@ export class LotDetailsPageComponent {
   private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
   private formDirty = signal(false);
+  public allUrlsInvalid = signal<boolean>(false);
   private loader = inject(LoadingService);
 
   private imagesQuery = signal<ImagesQuery>({
@@ -209,6 +210,10 @@ export class LotDetailsPageComponent {
         
         const images = response.content;
         const currentSelectedId = this.selectedImageId();
+
+        const allUrlsInvalid = images.every(img => !img.url || img.url.trim() === "");
+        this.allUrlsInvalid.set(allUrlsInvalid);
+
         if (currentSelectedId === null && images.length > 0) {
           this.selectedImageId.set(images[0].id);
         } else if (currentSelectedId !== null && !images.find(img => img.id === currentSelectedId)) {

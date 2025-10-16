@@ -59,10 +59,12 @@
               Excluir lote
             </button>
           }
-          <button mat-menu-item aria-label="Baixar todas as imagens do lote" (click)="onDownloadLot()">
-            <mat-icon>download</mat-icon>
-            Baixar todas as imagens do lote
-          </button>
+          @if (!this.allUrlsInvalid()) {
+            <button mat-menu-item aria-label="Baixar todas as imagens do lote" (click)="onDownloadLot()">
+              <mat-icon>download</mat-icon>
+              Baixar todas as imagens do lote
+            </button>
+          }
           @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {
             <button mat-menu-item aria-label="Finalizar lote" (click)="finalizeLot()">
               <mat-icon>check</mat-icon>
@@ -141,10 +143,12 @@
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
                 <mat-menu #afterMenuImage="matMenu" xPosition="after">
-                  <button mat-menu-item aria-label="Baixar imagem do gabarito" (click)="onDownloadImage()">
-                    <mat-icon>download</mat-icon>
-                    Baixar imagem do gabarito
-                  </button>
+                  @if (details.url && details.url.trim() !== "") {
+                    <button mat-menu-item aria-label="Baixar imagem do gabarito" (click)="onDownloadImage()">
+                      <mat-icon>download</mat-icon>
+                      Baixar imagem do gabarito
+                    </button>
+                  }
                   @if(this.lot().status === "INCOMPLETED" && userPermissions.upload_files) {
                     <button mat-menu-item aria-label="Excluir gabarito" (click)="deleteSelectedImage()">
                       <mat-icon>delete</mat-icon>
