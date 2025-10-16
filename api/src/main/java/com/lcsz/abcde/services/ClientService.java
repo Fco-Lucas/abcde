@@ -145,6 +145,7 @@ public class ClientService {
 
         JwtToken onDefinePasswordToken = JwtUtils.createToken(
                 client.getId(),
+                client.getId(),
                 client.getCnpj(),
                 role,
                 Duration.ofMinutes(10)
@@ -323,6 +324,7 @@ public class ClientService {
         String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT";
 
         JwtToken onDefinePasswordToken = JwtUtils.createToken(
+                client.getId(),
                 client.getId(),
                 client.getCnpj(),
                 role,
