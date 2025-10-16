@@ -7,5 +7,6 @@ public enum AuditAction {
     RESTORE,
     LOGIN,
     PROCESSED,
+    PROCESSEDEMAIL,
     DOWNLOADTXT
 }

@@ -121,7 +121,7 @@ public class EmailService {
                 "Email processado/enviado ao seu destino | Dados do email processado/enviado: %s",
                 this.formatEmailForLog(email)
         );
-        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.PROCESSED, email.getIdClient(), AuditProgram.EMAIL, details);
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.PROCESSEDEMAIL, email.getIdClient(), AuditProgram.EMAIL, details);
         this.auditLogService.create(logDto);
     }
 
