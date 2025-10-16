@@ -11,6 +11,8 @@ public class ClientResponseDto {
     private String name;
     private String cnpj;
     private String email;
+    private Boolean customerComputex;
+    private Integer numberContract;
     private String urlToPost;
     private Integer imageActiveDays;
     private ClientStatus status;
@@ -19,11 +21,13 @@ public class ClientResponseDto {
     public ClientResponseDto() {
     }
 
-    public ClientResponseDto(UUID id, String name, String cnpj, String email, String urlToPost, Integer imageActiveDays, ClientStatus status, List<ClientUserResponseDto> users) {
+    public ClientResponseDto(UUID id, String name, String cnpj, String email, Boolean customerComputex, Integer numberContract, String urlToPost, Integer imageActiveDays, ClientStatus status, List<ClientUserResponseDto> users) {
         this.id = id;
         this.name = name;
         this.cnpj = cnpj;
         this.email = email;
+        this.customerComputex = customerComputex;
+        this.numberContract = numberContract;
         this.urlToPost = urlToPost;
         this.imageActiveDays = imageActiveDays;
         this.status = status;
@@ -60,6 +64,22 @@ public class ClientResponseDto {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getCustomerComputex() {
+        return customerComputex;
+    }
+
+    public void setCustomerComputex(Boolean customerComputex) {
+        this.customerComputex = customerComputex;
+    }
+
+    public Integer getNumberContract() {
+        return numberContract;
+    }
+
+    public void setNumberContract(Integer numberContract) {
+        this.numberContract = numberContract;
     }
 
     public String getUrlToPost() {
@@ -101,6 +121,8 @@ public class ClientResponseDto {
                 ", name='" + name + '\'' +
                 ", cnpj='" + cnpj + '\'' +
                 ", email='" + email + '\'' +
+                ", customerComputex='" + customerComputex + '\'' +
+                ", numberContract='" + numberContract + '\'' +
                 ", urlToPost='" + urlToPost + '\'' +
                 ", imageActiveDays='" + imageActiveDays + '\'' +
                 ", status='" + status + '\'' +

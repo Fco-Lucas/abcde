@@ -172,7 +172,6 @@ public class EmailService {
                 Response response = sg.api(request);
                 email.setStatusCode(response.getStatusCode());
                 email.setUpdatedAt(LocalDateTime.now());
-                log.info("Sucesso: {}", email.toString());
                 emailRepository.save(email);
 
                 if (response.getStatusCode() == 202) {
@@ -188,7 +187,6 @@ public class EmailService {
                 log.error("Erro ao enviar email ID {}: {}", email.getId(), ex.getMessage());
                 email.setStatusCode(500);
                 email.setUpdatedAt(LocalDateTime.now());
-                log.info("Erro: {}", email.toString());
                 emailRepository.save(email);
                 failedIds.add(email.getId());
                 auditSendEmail(email);

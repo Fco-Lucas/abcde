@@ -60,13 +60,18 @@ public class ClientService {
     }
 
     public String formatClientForLog(ClientResponseDto dto) {
-        return String.format("{id='%s', nome='%s', cnpj='%s'}",
-                dto.getId().toString(), dto.getName(), dto.getCnpj());
+        return String.format("{id='%s', nome='%s', cnpj='%s', email='%s', cliente_computex='%s', numero_do_contrato='%s', url_do_post='%s', quantidade_de_dias_que_a_imagem_ficará_salva='%s'}",
+                dto.getId().toString(), dto.getName(), dto.getCnpj(), dto.getEmail(), dto.getCustomerComputex(), dto.getNumberContract(), dto.getUrlToPost(), dto.getImageActiveDays());
     }
 
     @Transactional(readOnly = true)
     private Optional<Client> findClientIfExists(String cnpj) {
         return repository.findByCnpj(cnpj);
+    }
+
+    @Transactional(readOnly = true)
+    private Client findClientIfExistsByNumberContract(Integer numberContract) {
+        return repository.findByNumberContract(numberContract).orElse(null);
     }
 
     public ClientResponseDto create(ClientCreateDto dto) {
@@ -75,11 +80,20 @@ public class ClientService {
             throw new EntityExistsException(String.format("Cliente com cnpj '%s' já cadastrado no sistema", dto.getCnpj()));
         }
 
+        // Verifica se já existe um cliente com o número do contrato informado
+        if(dto.getCustomerComputex() == true) {
+            if(dto.getNumberContract() == null) throw new RuntimeException("O campo 'numberContract' deve ser informado, pois se trata de um cliente COMPUTEX");
+            Client existsByNumberContract = findClientIfExistsByNumberContract(dto.getNumberContract());
+            if(existsByNumberContract != null) throw new EntityExistsException(String.format("Cliente com número do contrato '%s' já cadastrado no sistema", dto.getNumberContract()));
+        }
+
         // Converte o DTO recebido para entidade
         Client client = new Client();
         client.setName(dto.getName());
         client.setCnpj(dto.getCnpj());
         client.setEmail(dto.getEmail());
+        client.setCustomerComputex(dto.getCustomerComputex());
+        client.setNumberContract(dto.getNumberContract());
         String encryptedPassword = dto.getPassword() != null ? passwordEncoder.encode(dto.getPassword()) : null;
         client.setPassword(encryptedPassword);
         client.setUrlToPost(dto.getUrlToPost());
@@ -212,6 +226,17 @@ public class ClientService {
             client.setCnpj(dto.getCnpj());
         }
         if(dto.getEmail() != null && !dto.getEmail().equals(client.getEmail())) client.setEmail(dto.getEmail());
+        if(dto.getCustomerComputex() != null && !dto.getCustomerComputex().equals(client.getCustomerComputex())) {
+            client.setCustomerComputex(dto.getCustomerComputex());
+
+            // Se atualizou para false, atualiza o numero do contrato para null
+            if(!dto.getCustomerComputex()) client.setNumberContract(null);
+
+            // Se atualizou para true, obriga o cliente a informar um número do contrato
+            if(dto.getCustomerComputex() && dto.getNumberContract() == null) throw new RuntimeException("O campo 'numberContract' deve ser informado, pois se trata de um cliente COMPUTEX");
+        }
+        // Só altera se o campo customerComputex for true
+        if(client.getCustomerComputex() && dto.getNumberContract() != null && !dto.getNumberContract().equals(client.getNumberContract())) client.setNumberContract(dto.getNumberContract());
         if(dto.getUrlToPost() != null) client.setUrlToPost(dto.getUrlToPost());
         if(dto.getImageActiveDays() != null) {
             String authUserRole = this.provider.getAuthenticatedUserRole();
@@ -221,8 +246,8 @@ public class ClientService {
         Client updated = this.repository.save(client);
 
         String details = String.format(
-            "Cliente atualizado com ID: %s | Novos dados -> Nome: %s | CNPJ: %s",
-            updated.getId(), updated.getName(), updated.getCnpj()
+            "Cliente atualizado com ID: %s | Novos dados -> Nome: %s | CNPJ: %s | E-mail: %s | Cliente COMPUTEX: %s | Número do contrato: %s | URL do POST: %s | Quantidade de dias que a imagem ficará salva: %s",
+            updated.getId(), updated.getName(), updated.getCnpj(), updated.getEmail(), updated.getCustomerComputex(), updated.getNumberContract(), updated.getUrlToPost(), updated.getImageActiveDays()
         );
         AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.CLIENT, details);
         this.auditLogService.create(logDto);

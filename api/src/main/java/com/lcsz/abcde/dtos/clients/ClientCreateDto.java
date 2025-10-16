@@ -17,6 +17,9 @@ public class ClientCreateDto {
             message = "A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial"
     )
     private String password;
+    @NotNull(message = "O campo 'customerComputex' é obrigatório")
+    private Boolean customerComputex;
+    private Integer numberContract;
     @NotNull(message = "O campo 'urlToPost' deve está presente podendo ser vazio e não NULO")
     private String urlToPost;
     @NotNull(message = "O campo 'imageActiveDays' é obrigatório")
@@ -25,11 +28,13 @@ public class ClientCreateDto {
     public ClientCreateDto() {
     }
 
-    public ClientCreateDto(String name, String cnpj, String email, String password, String urlToPost, Integer imageActiveDays) {
+    public ClientCreateDto(String name, String cnpj, String email, String password, Boolean customerComputex, Integer numberContract, String urlToPost, Integer imageActiveDays) {
         this.name = name;
         this.cnpj = cnpj;
         this.email = email;
         this.password = password;
+        this.customerComputex = customerComputex;
+        this.numberContract = numberContract;
         this.urlToPost = urlToPost;
         this.imageActiveDays = imageActiveDays;
     }
@@ -66,6 +71,22 @@ public class ClientCreateDto {
         this.password = password;
     }
 
+    public Boolean getCustomerComputex() {
+        return customerComputex;
+    }
+
+    public void setCustomerComputex(Boolean customerComputex) {
+        this.customerComputex = customerComputex;
+    }
+
+    public Integer getNumberContract() {
+        return numberContract;
+    }
+
+    public void setNumberContract(Integer numberContract) {
+        this.numberContract = numberContract;
+    }
+
     public String getUrlToPost() {
         return urlToPost;
     }
@@ -89,6 +110,8 @@ public class ClientCreateDto {
                 ", cnpj='" + cnpj + '\'' +
                 ", email='" + email + '\'' +
                 ", password=" + password +
+                ", customerComputex='" + customerComputex + '\'' +
+                ", numberContract='" + numberContract + '\'' +
                 ", urlToPost='" + urlToPost + '\'' +
                 ", imageActiveDays='" + imageActiveDays + '\'' +
                 '}';

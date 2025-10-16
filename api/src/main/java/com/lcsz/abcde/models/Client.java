@@ -26,6 +26,10 @@ public class Client implements Serializable {
     private String email;
     @Column(nullable = false)
     private String password;
+    @Column(name = "customer_computex", nullable = false)
+    private Boolean customerComputex;
+    @Column(name = "number_contract", unique = true)
+    private Integer numberContract;
     @Column(nullable = true, name = "url_to_post")
     private String urlToPost;
     @Column(nullable = false, name = "image_active_days")
@@ -40,12 +44,14 @@ public class Client implements Serializable {
     public Client() {
     }
 
-    public Client(UUID id, String name, String cnpj, String email, String password, String urlToPost, Integer imageActiveDays, ClientStatus status, LocalDateTime createdAt) {
+    public Client(UUID id, String name, String cnpj, String email, String password, Boolean customerComputex, Integer numberContract, String urlToPost, Integer imageActiveDays, ClientStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.cnpj = cnpj;
         this.email = email;
         this.password = password;
+        this.customerComputex = customerComputex;
+        this.numberContract = numberContract;
         this.urlToPost = urlToPost;
         this.imageActiveDays = imageActiveDays;
         this.status = status;
@@ -90,6 +96,22 @@ public class Client implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getCustomerComputex() {
+        return customerComputex;
+    }
+
+    public void setCustomerComputex(Boolean customerComputex) {
+        this.customerComputex = customerComputex;
+    }
+
+    public Integer getNumberContract() {
+        return numberContract;
+    }
+
+    public void setNumberContract(Integer numberContract) {
+        this.numberContract = numberContract;
     }
 
     public String getUrlToPost() {
@@ -144,6 +166,8 @@ public class Client implements Serializable {
                 ", cnpj='" + cnpj + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", customerComputex='" + customerComputex + '\'' +
+                ", numberContract='" + numberContract + '\'' +
                 ", urlToPost='" + urlToPost + '\'' +
                 ", imageActiveDays='" + imageActiveDays + '\'' +
                 ", status='" + status + '\'' +
