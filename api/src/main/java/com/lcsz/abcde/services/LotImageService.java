@@ -283,9 +283,11 @@ public class LotImageService {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 return response.getBody();
             } else {
+                DirectoryUtils.excludeFile(pathImage);
                 throw new RuntimeException("Erro ao scanear imagem com Python: status " + response.getStatusCode());
             }
         } catch (Exception e) {
+            DirectoryUtils.excludeFile(pathImage);
             throw new RuntimeException("Falha ao chamar API Python: " + e.getMessage());
         }
     }
