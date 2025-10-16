@@ -6,6 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode'; // Usado para toda a lógica de token
 import { environment } from '../../../environments/environment';
 import type { AuthPayload, AuthResponse } from '../models/auth.model';
+import { NotificationService } from './notification.service';
 
 const AUTH_TOKEN_COOKIE_NAME = 'jwt_auth_token';
 
@@ -28,6 +29,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private cookieService = inject(CookieService);
+  private notification = inject(NotificationService);
 
   // Behavior para autenticação (usuário logado ou não)
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(!this.isTokenExpired());
@@ -131,7 +133,8 @@ export class AuthService {
     );
   }
 
-  logout(): void {
+  logout(showMessage = false): void {
+    if (showMessage) this.notification.showWarning('Sua sessão expirou. Faça login novamente.');
     this.router.navigate(['/auth/login']);
     this.removeToken();
   }

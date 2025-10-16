@@ -1,13 +1,21 @@
 import { HttpInterceptorFn, type HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
 export const errorHandlingInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       let errorMessage = 'Ocorreu um erro desconhecido.';
-
+      
+      if (error.status === 401) {
+        console.warn('Sessão expirada ou token inválido. Fazendo logout...');
+        authService.logout(true);
+        errorMessage = 'Sua sessão expirou. Faça login novamente.';
+      } else if (error.error instanceof ErrorEvent) {
       // 1. Erro do lado do cliente (problema de rede, Angular, etc.)
-      if (error.error instanceof ErrorEvent) {
         errorMessage = `Erro de conexão: ${error.error.message}`;
       } else {
         // 2. Erro do lado do servidor (a API respondeu com status 4xx ou 5xx)
