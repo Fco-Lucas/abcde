@@ -2,6 +2,37 @@
 
 <form [formGroup]="updateForm" (ngSubmit)="onSubmit()" class="space-y-1">
   <mat-dialog-content>
+    <!-- Cliente COMPUTEX -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Cliente computex</mat-label>
+      <mat-select formControlName="customerComputex" required (selectionChange)="onCustomerComputexChange($event.value)">
+        <mat-option value="S" selected>Sim</mat-option>
+        <mat-option value="N">Não</mat-option>
+      </mat-select>
+      @if (customerComputexControl?.hasError('required')) {
+        <mat-error>A confirmação se é um cliente computex é obrigatória.</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Contrato -->
+    @if (showContractField) {
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Número do contrato</mat-label>
+        <input 
+          matInput
+          type="number"
+          formControlName="numberContract"
+          autocomplete="off"
+          required
+          mask="999"
+          (blur)="onContractBlur()"
+        />
+        @if (numberContractControl?.hasError('required')) {
+          <mat-error>O número do contrato é obrigatório.</mat-error>
+        }
+      </mat-form-field>
+    }
+
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>Nome</mat-label>
       <input 
@@ -13,6 +44,26 @@
       <mat-error *ngIf="nameControl?.hasError('required') && nameControl?.touched">
         Nome é obrigatório.
       </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>E-mail</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="email"
+        required
+        autocomplete="off"
+      />
+      @if(emailControl?.invalid && emailControl?.touched) {
+        <mat-error>
+          @if (emailControl?.hasError('required')) {
+            E-mail é obrigatório.
+          } @else if (emailControl?.hasError('email')) {
+            E-mail inválido.
+          }
+        </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="w-full">

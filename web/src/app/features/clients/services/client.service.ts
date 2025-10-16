@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { Client, ClientStatus, CreateClient, type PageableClientList, type UpdateClientInterface, type UpdateClientPasswordInterface } from '../models/client.model';
+import { Client, ClientStatus, CreateClientInterface, type PageableClientList, type UpdateClientInterface, type UpdateClientPasswordInterface } from '../models/client.model';
 import { Observable, tap } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
@@ -11,7 +11,7 @@ export class ClientService {
   private apiUrl = environment.apiUrl;
   private http = inject(HttpClient);
 
-  createClient(data: CreateClient): Observable<Client> {
+  createClient(data: CreateClientInterface): Observable<Client> {
     return this.http.post<Client>(`${this.apiUrl}clients`, data);
   }
 

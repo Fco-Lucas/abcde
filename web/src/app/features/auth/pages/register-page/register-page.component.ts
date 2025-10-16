@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { RegisterFormComponent } from '../../components/register-form/register-form.component';
 import { RegisterFormValues } from '../../models/register.model';
 import { Router } from '@angular/router';
-import type { CreateClient } from '../../../clients/models/client.model';
+import type { CreateClientInterface } from '../../../clients/models/client.model';
 import { ClientService } from '../../../clients/services/client.service';
 import { finalize } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -21,25 +21,25 @@ export class RegisterPageComponent {
   handleRegisterSubmit(formValues: RegisterFormValues): void {
     this.isLoading.set(true);
 
-    const data: CreateClient = {
-      name: formValues.name || "",
-      cnpj: formValues.cnpj || "",
-      password: formValues.password || "",
-      urlToPost: "",
-      imageActiveDays: 30
-    }
+    // const data: CreateClientInterface = {
+    //   name: formValues.name || "",
+    //   cnpj: formValues.cnpj || "",
+    //   password: formValues.password || "",
+    //   urlToPost: "",
+    //   imageActiveDays: 30
+    // }
 
-    this.clientService.createClient(data).pipe(
-      finalize(() => this.isLoading.set(false))
-    ).subscribe({
-      next: (_) => {
-        this.notification.showSuccess("Cliente cadastrado com sucesso, realize o login com as credenciais informadas");
-        this.router.navigateByUrl("/auth/login");
-      },
-      error: (err: Error) => {
-        this.notification.showError(err.message);
-        console.error('Erro no login:', err.message);
-      },
-    });
+    // this.clientService.createClient(data).pipe(
+    //   finalize(() => this.isLoading.set(false))
+    // ).subscribe({
+    //   next: (_) => {
+    //     this.notification.showSuccess("Cliente cadastrado com sucesso, realize o login com as credenciais informadas");
+    //     this.router.navigateByUrl("/auth/login");
+    //   },
+    //   error: (err: Error) => {
+    //     this.notification.showError(err.message);
+    //     console.error('Erro no login:', err.message);
+    //   },
+    // });
   }
 }

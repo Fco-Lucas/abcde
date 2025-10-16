@@ -8,6 +8,7 @@ import { publicGuard } from './core/guards/public.guard';
 import { LotDetailsPageComponent } from './features/home/pages/lot-details-page/lot-details-page.component';
 import { roleGuard } from './core/guards/role.guard';
 import { AuditLogPageComponent } from './features/auditLog/pages/audit-log-page/audit-log-page.component';
+import { DefinePasswordPageComponent } from './features/definePassword/pages/define-password-page/define-password-page.component';
 
 export const routes: Routes = [
   {
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'clients', loadChildren: () => import('./features/clients/clients.routes') }
     ]
   },
+  { path: 'definePassword', component: DefinePasswordPageComponent }, 
   { path: '', redirectTo: 'auth', pathMatch: 'full' }, 
   { path: "**", component: NotFoundPageComponent },
 ];

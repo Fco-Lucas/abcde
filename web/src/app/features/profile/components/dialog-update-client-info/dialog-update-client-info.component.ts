@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface DialogUpdateClientInfoFormValues {
   name: string;
+  email: string;
   cnpj: string;
   urlToPost: string;
 }
@@ -59,6 +60,7 @@ export class DialogUpdateClientInfoComponent {
 
     this.updateForm = this.fb.group({
       name: [this.client.name, [Validators.required]],
+      email: [this.client.email, [Validators.required, Validators.email]],
       cnpj: [this.client.cnpj, [Validators.required, Validators.minLength(18), Validators.maxLength(18)]],
       urlToPost: [this.client.urlToPost]
     });
@@ -82,6 +84,7 @@ export class DialogUpdateClientInfoComponent {
   }
 
   get nameControl() { return this.updateForm.get("name"); }
+  get emailControl() { return this.updateForm.get("email"); }
   get cnpjControl() { return this.updateForm.get("cnpj"); }
   get urlToPostControl() { return this.updateForm.get("urlToPost"); }
 
@@ -98,6 +101,7 @@ export class DialogUpdateClientInfoComponent {
     const formValues = this.updateForm.getRawValue() as DialogUpdateClientInfoFormValues;
     const data: UpdateClientInterface = {
       name: formValues.name,
+      email: formValues.email,
       cnpj: formValues.cnpj,
       urlToPost: formValues.urlToPost
     };

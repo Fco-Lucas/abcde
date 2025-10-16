@@ -15,6 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/services/auth.service';
+import { BadgeStatusClientComponent } from '../badge-status-client/badge-status-client.component';
 
 @Component({
   selector: 'app-client-list',
@@ -27,7 +28,8 @@ import { AuthService } from '../../../../core/services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    RouterLink
+    RouterLink,
+    BadgeStatusClientComponent
   ],
   templateUrl: './client-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

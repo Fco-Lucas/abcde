@@ -74,7 +74,6 @@ export class DialogUpdateUserPasswordComponent {
     const formValues = this.updateForm.getRawValue() as UpdateClientUserPasswordFormValues;
 
     const data: UpdateClientUserPasswordInterface = {
-      currentPassword: formValues.currentPassword,
       newPassword: formValues.newPassword,
       confirmNewPassword: formValues.confirmNewPassword,
     };

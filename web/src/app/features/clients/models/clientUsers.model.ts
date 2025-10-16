@@ -4,7 +4,7 @@ export interface CreateClientUserInterface {
   clientId: string;
   name: string;
   email: string;
-  password: string;
+  password?: string|null;
   permission: number;
 }
 
@@ -41,7 +41,6 @@ export interface UpdateClientUserInterface {
 }
 
 export interface UpdateClientUserPasswordInterface {
-  currentPassword: string;
   newPassword: string;
   confirmNewPassword: string;
 }

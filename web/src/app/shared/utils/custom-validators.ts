@@ -45,3 +45,37 @@ export function cnpjValidator(): ValidatorFn {
     return null; // CNPJ válido
   };
 }
+
+export function strongPasswordValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (!value) {
+      return null; // Não valida se o campo estiver vazio (o 'required' já faz isso)
+    }
+
+    const hasUpperCase = /[A-Z]+/.test(value);
+    const hasLowerCase = /[a-z]+/.test(value);
+    const hasNumeric = /[0-9]+/.test(value);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]+/.test(value);
+
+    const passwordValid = hasUpperCase && hasLowerCase && hasNumeric && hasSpecial;
+
+    // Retorna um objeto de erro se a senha não for válida, ou null se for válida
+    return !passwordValid ? { strong: true } : null;
+  };
+}
+
+export function passwordsMatchValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const newPassword = control.get('newPassword')?.value;
+    const confirmNewPassword = control.get('confirmNewPassword')?.value;
+
+    // Se as senhas não coincidirem, define um erro no campo de confirmação
+    if (newPassword && confirmNewPassword && newPassword !== confirmNewPassword) {
+      control.get('confirmNewPassword')?.setErrors({ passwordsNotMatching: true });
+      return { passwordsNotMatching: true };
+    }
+
+    return null;
+  };
+}

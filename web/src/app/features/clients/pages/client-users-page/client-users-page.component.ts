@@ -226,7 +226,7 @@ export class ClientUsersPageComponent {
     const dialogData = {
       title: 'Tem certeza?',
       message: `Você realmente deseja restaurar o usuário "${clientUser.name}"?`,
-      confirmButtonText: 'Excluir'
+      confirmButtonText: 'Confirmar'
     };
     this.confirmationDialog.open(dialogData).subscribe(confirmed => {
       if(confirmed) this.proceedWithRestore(clientUser.clientId, clientUser.id);
@@ -239,7 +239,7 @@ export class ClientUsersPageComponent {
         this.forceReload();
       })
     ).subscribe({
-      next: (_) => this.notification.showSuccess("Usuário excluído com sucesso!"),
+      next: (_) => this.notification.showSuccess("Usuário restaurado com sucesso!"),
       error: (err) => this.notification.showError(err.message),
     });
   }
@@ -247,7 +247,7 @@ export class ClientUsersPageComponent {
   restorePassword(clientUser: ClientUserInterface): void {
     const dialogData = {
       title: 'Tem certeza?',
-      message: `Você realmente deseja restaurar a senha do usuário "${clientUser.name}" para "abcdefgh"? Esta ação não pode ser desfeita.`,
+      message: `Você realmente deseja restaurar a senha do usuário "${clientUser.name}"? Será enviado um e-mail para o cliente definir a nova senha.`,
       confirmButtonText: 'Restaurar'
     };
     this.confirmationDialog.open(dialogData).subscribe(confirmed => {
@@ -257,7 +257,7 @@ export class ClientUsersPageComponent {
 
   proceedWithRestorePassword(clientId: string, clientUserId: string): void {
     this.clientUsersService.restorePasswordClientUser(clientId, clientUserId).subscribe({
-      next: (_) => this.notification.showSuccess("Senha do usuário restaurada para 'abcdefgh' com sucesso!"),
+      next: (_) => this.notification.showSuccess("E-mail enviado com sucesso!"),
       error: (err) => this.notification.showError(err.message)
     });
   }

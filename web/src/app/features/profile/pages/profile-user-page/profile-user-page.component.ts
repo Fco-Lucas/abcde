@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { switchMap, tap, catchError, of, combineLatest } from 'rxjs';
+import { switchMap, tap, catchError, of, combineLatest, finalize } from 'rxjs';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { ClientUsersService } from '../../../clients/services/client-users.service';
@@ -17,6 +17,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ConfirmationDialogService } from '../../../../core/services/confirmation-dialog.service';
+import { LoadingService } from '../../../../core/services/loading.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 
 interface ProfileUserState {
@@ -47,6 +50,9 @@ export class ProfileUserPageComponent {
   private authService = inject(AuthService);
   private clientUserService = inject(ClientUsersService);
   private dialog = inject(MatDialog);
+  private confirmationDialogService = inject(ConfirmationDialogService);
+  private loader = inject(LoadingService);
+  private notification = inject(NotificationService);
 
   private query = signal<ProfileUserQuery>({ reload: 0 });
 
@@ -115,10 +121,29 @@ export class ProfileUserPageComponent {
     const currentUser = this.clientUser();
     if (!currentUser) return;
 
-    const dialogData: DataDialogUpdateClientUserPasswordInterface = {
-      clientUserId: currentUser.id,
-      clientId: currentUser.clientId,
+    const dialogData = {
+      title: 'Tem certeza?',
+      message: `Você realmente deseja restaurar sua senha de acesso? Será enviado um e-mail para definir a nova senha.`,
+      confirmButtonText: 'Confirmar'
     };
-    this.dialog.open(DialogUpdateUserPasswordComponent, { width: '500px', data: dialogData });
+    this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
+      if(confirmed) this.proceedWithRestorePassword(currentUser.clientId, currentUser.id);
+    });
+
+    // const dialogData: DataDialogUpdateClientUserPasswordInterface = {
+    //   clientUserId: currentUser.id,
+    //   clientId: currentUser.clientId,
+    // };
+    // this.dialog.open(DialogUpdateUserPasswordComponent, { width: '500px', data: dialogData });
+  }
+
+  proceedWithRestorePassword(clientId: string, clientUserId: string): void {
+    this.loader.showLoad("Enviando e-mail...");
+    this.clientUserService.restorePasswordClientUser(clientId, clientUserId).pipe(
+      finalize(() => { this.loader.hideLoad() })
+    ).subscribe({
+      next: (_) => this.notification.showSuccess("E-mail enviado com sucesso!"),
+      error: (err) => this.notification.showError(err.message)
+    });
   }
 }

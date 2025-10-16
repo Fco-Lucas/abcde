@@ -22,11 +22,17 @@
               </div>
               <button matButton="filled" (click)="openDialogUpdateClientInfo()">Atualizar informações</button>
             </div>
-            <form class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <form class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
               <div class="w-full">
                 <mat-form-field class="w-full" appearance="outline">
                   <mat-label>Nome</mat-label>
                   <input matInput disabled [value]="client.name" />
+                </mat-form-field>
+              </div>
+              <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput disabled [value]="client.email" />
                 </mat-form-field>
               </div>
               <div class="w-full">

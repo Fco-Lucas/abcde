@@ -11,11 +11,12 @@ const AUTH_TOKEN_COOKIE_NAME = 'jwt_auth_token';
 
 export type AuthenticatedUserRole = 'COMPUTEX' | 'CLIENT' | 'CLIENT_USER' | null;
 
-interface TokenPayload {
+export interface TokenPayload {
   sub: string;
   iat: number;
   exp: number;
   id: string;
+  idClient: string;
   role: AuthenticatedUserRole,
 }
 

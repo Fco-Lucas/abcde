@@ -38,6 +38,8 @@ export class AuditLogListComponent {
         return "Login";
       case "PROCESSED":
         return "Upload de imagens";
+      case "PROCESSEDEMAIL":
+        return "Envio de e-mails"
       case "DOWNLOADTXT":
         return "Baixar .txt"
       default:
@@ -57,6 +59,8 @@ export class AuditLogListComponent {
         return "Gabaritos";
       case "AUTH":
         return "Autenticação";
+      case "EMAIL":
+        return "E-mails";
       default:
         return '-';
     }

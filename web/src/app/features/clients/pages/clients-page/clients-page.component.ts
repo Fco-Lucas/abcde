@@ -22,6 +22,7 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ClientUsersService } from '../../services/client-users.service';
 import { DialogUpdateComputexPostUrlComponent, type DialogUpdateComputexPostUrlData } from '../../components/dialog-update-computex-post-url/dialog-update-computex-post-url.component';
+import { LoadingService } from '../../../../core/services/loading.service';
 
 interface ClientsPageState {
   clients: Client[];
@@ -57,6 +58,7 @@ export class ClientsPageComponent {
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
+  private loader = inject(LoadingService);
 
   private query = signal<ClientQuery>({
     filters: {},
@@ -173,8 +175,11 @@ export class ClientsPageComponent {
   onUpdateClient(client: Client) {
     const initialData: UpdateClientFormValues = {
       name: client.name,
+      email: client.email,
       cnpj: client.cnpj,
       urlToPost: client.urlToPost,
+      customerComputex: client.customerComputex ? "S" : "N",
+      numberContract: client.numberContract,
       imageActiveDays: client.imageActiveDays
     };
     const data: DialogUpdateClientData = {
@@ -269,7 +274,7 @@ export class ClientsPageComponent {
   onRestorePassword(client: Client): void {
     const dialogData = {
       title: 'Tem certeza?',
-      message: `Você realmente deseja restaurar a senha do cliente "${client.name}" para "abcdefgh"? Esta ação não pode ser desfeita.`,
+      message: `Você realmente deseja restaurar a senha do cliente "${client.name}"? Será enviado um e-mail para o cliente definir a nova senha.`,
       confirmButtonText: 'Restaurar'
     };
     this.confirmationDialogService.open(dialogData).subscribe(confirmed => {
@@ -278,8 +283,11 @@ export class ClientsPageComponent {
   }
   
   proceedWithRestorePassword(clientId: string): void {
-    this.clientService.restorePasswordClient(clientId).subscribe({
-      next: (_) => this.notification.showSuccess("Senha do cliente restaurada para 'abcdefgh' com sucesso!"),
+    this.loader.showLoad("Enviando e-mail...");
+    this.clientService.restorePasswordClient(clientId).pipe(
+      finalize(() => { this.loader.hideLoad() })
+    ).subscribe({
+      next: (_) => this.notification.showSuccess("E-mail enviado com sucesso!"),
       error: (err) => this.notification.showError(err.message)
     });
   }

@@ -5,6 +5,7 @@ export enum AuditLogAction {
   RESTORE = "RESTORE",
   LOGIN = "LOGIN",
   PROCESSED = "PROCESSED",
+  PROCESSEDEMAIL = "PROCESSEDEMAIL",
   DOWNLOADTXT = "DOWNLOADTXT"
 }
 
@@ -13,7 +14,8 @@ export enum AuditLogProgram {
   CLIENT_USER = "CLIENT_USER",
   LOT = "LOT",
   LOT_IMAGE = "LOT_IMAGE",
-  AUTH = "AUTH"
+  AUTH = "AUTH",
+  EMAIL = "EMAIL",
 }
 
 export interface AuditLogInterface {

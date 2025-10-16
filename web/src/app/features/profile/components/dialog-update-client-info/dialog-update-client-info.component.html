@@ -16,6 +16,23 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="w-full">
+      <mat-label>E-mail</mat-label>
+      <input 
+        matInput
+        type="email"
+        formControlName="email"
+        required
+      />
+      <mat-error *ngIf="emailControl?.invalid && emailControl?.touched">
+        @if (emailControl?.hasError('required')) {
+          E-mail é obrigatório.
+        } @else if (emailControl?.hasError('email')) {
+          E-mail inválido
+        }
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>CNPJ</mat-label>
       <input
         matInput

@@ -7,6 +7,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ClientUserInterface } from '../../models/clientUsers.model';
+import { BadgeStatusClientUserComponent } from '../badge-status-client-user/badge-status-client-user.component';
 
 @Component({
   selector: 'app-client-users-list',
@@ -17,7 +18,8 @@ import { ClientUserInterface } from '../../models/clientUsers.model';
     MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    BadgeStatusClientUserComponent
   ],
   templateUrl: './client-users-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush

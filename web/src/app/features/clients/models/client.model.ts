@@ -1,9 +1,12 @@
 import { ClientUserInterface } from "./clientUsers.model";
 
-export interface CreateClient {
+export interface CreateClientInterface {
   name: string;
+  email: string;
   cnpj: string;
-  password: string;
+  password?: string|null;
+  customerComputex: boolean;
+  numberContract?: number|null;
   urlToPost: string;
   imageActiveDays: number;
 }
@@ -16,8 +19,10 @@ export enum ClientStatus {
 export interface Client {
   id: string;
   name: string;
+  email: string;
   cnpj: string;
-  password: string;
+  customerComputex: boolean;
+  numberContract: number|null;
   urlToPost: string;
   imageActiveDays: number;
   status: ClientStatus;
@@ -37,13 +42,15 @@ export interface PageableClientList {
 
 export interface UpdateClientInterface {
   name?: string,
+  email?: string;
   cnpj?: string,
   urlToPost?: string;
+  customerComputex?: boolean;
+  numberContract?: number|null;
   imageActiveDays?: number;
 }
 
 export interface UpdateClientPasswordInterface {
-  currentPassword: string;
   newPassword: string;
   confirmNewPassword: string;
 }

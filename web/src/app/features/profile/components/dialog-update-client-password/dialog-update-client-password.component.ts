@@ -71,7 +71,6 @@ export class DialogUpdateClientPasswordComponent implements OnInit {
     const formValues = this.updateForm.getRawValue() as UpdateClientPasswordFormValues;
 
     const data: UpdateClientPasswordInterface = {
-      currentPassword: formValues.currentPassword,
       newPassword: formValues.newPassword,
       confirmNewPassword: formValues.confirmNewPassword,
     };

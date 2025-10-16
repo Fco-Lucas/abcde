@@ -18,7 +18,7 @@ export interface ClientUsersCreateFormValues {
   clientId: string,
   name: string,
   email: string,
-  password: string,
+  // password: string,
   permission: string,
 }
 
@@ -68,7 +68,7 @@ export class DialogCreateClientUserComponent implements OnInit {
       clientId: [{ value: this.clientId, disabled: true }, [Validators.required, Validators.minLength(36), Validators.maxLength(36)]],
       name: ["", [Validators.required]],
       email: ["", [Validators.required, Validators.email]],
-      password: ["", [Validators.required, Validators.minLength(6)]],
+      // password: ["", [Validators.required, Validators.minLength(6)]],
       permission: [this.permissions[0].id, [Validators.required]],
     });
   }
@@ -76,7 +76,7 @@ export class DialogCreateClientUserComponent implements OnInit {
   get clientIdControl() { return this.createForm.get("clientId"); }
   get nameControl() { return this.createForm.get("name"); }
   get emailControl() { return this.createForm.get('email'); }
-  get passwordControl() { return this.createForm.get('password'); }
+  // get passwordControl() { return this.createForm.get('password'); }
   get permissionControl() { return this.createForm.get('permission'); }
   
   hidePassword = signal(true);
@@ -99,7 +99,7 @@ export class DialogCreateClientUserComponent implements OnInit {
       clientId: formValues.clientId,
       name: formValues.name,
       email: formValues.email,
-      password: formValues.password,
+      // password: formValues.password,
       permission: Number(formValues.permission),
     }
 

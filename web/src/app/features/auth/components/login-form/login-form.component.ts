@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output, signal, type OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,7 +19,6 @@ import { cnpjValidator } from '../../../../shared/utils/custom-validators';
     CommonModule,
     ReactiveFormsModule,
     NgxMaskDirective,
-    RouterModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
