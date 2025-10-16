@@ -44,6 +44,7 @@ public class SpringSecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, apiBasePath + "emails").permitAll()
                         .requestMatchers(HttpMethod.POST, apiBasePath + "clients").permitAll()
                         .requestMatchers(HttpMethod.POST, apiBasePath + "auth").permitAll()
                         .requestMatchers(HttpMethod.GET, "/gabaritos/**").permitAll()

@@ -3,15 +3,17 @@ package com.lcsz.abcde.dtos.clients;
 public class ClientUpdateDto {
     private String name;
     private String cnpj;
+    private String email;
     private String urlToPost;
     private Integer imageActiveDays;
 
     public ClientUpdateDto() {
     }
 
-    public ClientUpdateDto(String name, String cnpj, String urlToPost, Integer imageActiveDays) {
+    public ClientUpdateDto(String name, String cnpj, String email, String urlToPost, Integer imageActiveDays) {
         this.name = name;
         this.cnpj = cnpj;
+        this.email = email;
         this.urlToPost = urlToPost;
         this.imageActiveDays = imageActiveDays;
     }
@@ -30,6 +32,14 @@ public class ClientUpdateDto {
 
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getUrlToPost() {
@@ -53,6 +63,7 @@ public class ClientUpdateDto {
         return "ClientUpdateDto{" +
                 "name=" + name +
                 ", cnpj='" + cnpj + '\'' +
+                ", email='" + email + '\'' +
                 ", urlToPost='" + urlToPost + '\'' +
                 ", imageActiveDays='" + imageActiveDays +
                 '}';

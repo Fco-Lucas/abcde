@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -61,6 +62,6 @@ public class JwtUserDetailsService implements UserDetailsService {
             throw new RuntimeException("Erro ao gerar token: tipo de usuário inválido.");
         }
 
-        return JwtUtils.createToken(id, login, role);
+        return JwtUtils.createToken(id, login, role, Duration.ofDays(7));
     }
 }

@@ -13,10 +13,11 @@ public class JwtUserDetails extends User {
     private final ClientUser clientUser;
     private final String role;
 
+    // A senha pode vir null ao cadastrar os clientes e enviar e-mails pois gera um JWT
     public JwtUserDetails(Client client, String role) {
         super(
                 client.getCnpj(),
-                client.getPassword(),
+                client.getPassword() == null ? "" : client.getPassword(),
                 List.of(new SimpleGrantedAuthority(role))
         );
         this.client = client;
@@ -24,10 +25,11 @@ public class JwtUserDetails extends User {
         this.role = role;
     }
 
+    // A senha pode vir null ao cadastrar os usuários dos clientes e enviar e-mails pois gera um JWT
     public JwtUserDetails(ClientUser clientUser, String role) {
         super(
                 clientUser.getEmail(),
-                clientUser.getPassword(),
+                clientUser.getPassword() == null ? "" : clientUser.getPassword(),
                 List.of(new SimpleGrantedAuthority(role))
         );
         this.client = null;

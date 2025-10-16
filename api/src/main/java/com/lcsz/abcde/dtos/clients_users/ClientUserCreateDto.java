@@ -2,19 +2,21 @@ package com.lcsz.abcde.dtos.clients_users;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
 public class ClientUserCreateDto {
-    @NotNull(message = "O campo 'clientId' é obrigatório")
-    private UUID clientId;
     @NotBlank(message = "O campo 'name' é obrigatório")
     private String name;
     @NotBlank(message = "O campo 'email' é obrigatório")
     private String email;
-    @NotBlank(message = "O campo 'password' é obrigatório")
     @Size(min = 6, message = "O campo 'password' deve conter ao menos 6 caracteres")
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).+$",
+            message = "A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial"
+    )
     private String password;
     @NotNull(message = "O campo 'permission' é obrigatório")
     private Long permission;
@@ -22,20 +24,11 @@ public class ClientUserCreateDto {
     public ClientUserCreateDto() {
     }
 
-    public ClientUserCreateDto(UUID clientId, String name, String email, String password, Long permission) {
-        this.clientId = clientId;
+    public ClientUserCreateDto(String name, String email, String password, Long permission) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.permission = permission;
-    }
-
-    public UUID getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(UUID clientId) {
-        this.clientId = clientId;
     }
 
     public String getName() {
@@ -73,8 +66,7 @@ public class ClientUserCreateDto {
     @Override
     public String toString() {
         return "ClientUserCreateDto{" +
-                "clientId=" + clientId +
-                ", name='" + name + '\'' +
+                "name=" + name +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", permission=" + permission +

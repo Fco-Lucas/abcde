@@ -23,6 +23,8 @@ public class Client implements Serializable {
     @Column(nullable = false, length = 14)
     private String cnpj;
     @Column(nullable = false)
+    private String email;
+    @Column(nullable = false)
     private String password;
     @Column(nullable = true, name = "url_to_post")
     private String urlToPost;
@@ -38,10 +40,11 @@ public class Client implements Serializable {
     public Client() {
     }
 
-    public Client(UUID id, String name, String cnpj, String password, String urlToPost, Integer imageActiveDays, ClientStatus status, LocalDateTime createdAt) {
+    public Client(UUID id, String name, String cnpj, String email, String password, String urlToPost, Integer imageActiveDays, ClientStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.cnpj = cnpj;
+        this.email = email;
         this.password = password;
         this.urlToPost = urlToPost;
         this.imageActiveDays = imageActiveDays;
@@ -71,6 +74,14 @@ public class Client implements Serializable {
 
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -131,6 +142,7 @@ public class Client implements Serializable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", cnpj='" + cnpj + '\'' +
+                ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", urlToPost='" + urlToPost + '\'' +
                 ", imageActiveDays='" + imageActiveDays + '\'' +

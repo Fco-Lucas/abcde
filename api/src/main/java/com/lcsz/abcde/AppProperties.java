@@ -6,10 +6,12 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
-
     private String baseImagesUrl;
     private String baseImagesPath;
     private String apiPythonUrl;
+    private String sendGridApiKey;
+    private String senderEmail;
+    private String webUrl;
 
     // getters e setters
     public String getBaseImagesUrl() {
@@ -31,6 +33,30 @@ public class AppProperties {
     }
     public void setApiPythonUrl(String apiPythonUrl) {
         this.apiPythonUrl = apiPythonUrl;
+    }
+
+    public String getSendGridApiKey() {
+        return sendGridApiKey;
+    }
+
+    public void setSendGridApiKey(String sendGridApiKey) {
+        this.sendGridApiKey = sendGridApiKey;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
+    }
+
+    public String getWebUrl() {
+        return webUrl;
+    }
+
+    public void setWebUrl(String webUrl) {
+        this.webUrl = webUrl;
     }
 }
 

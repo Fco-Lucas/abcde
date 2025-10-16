@@ -5,5 +5,6 @@ public enum AuditProgram {
     CLIENT_USER,
     LOT,
     LOT_IMAGE,
-    AUTH
+    AUTH,
+    EMAIL
 }

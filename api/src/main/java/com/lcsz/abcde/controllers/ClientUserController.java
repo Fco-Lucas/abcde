@@ -36,8 +36,7 @@ public class ClientUserController {
             @PathVariable UUID clientId,
             @RequestBody @Valid ClientUserCreateDto dto
     ) {
-        dto.setClientId(clientId);
-        ClientUserResponseDto created = service.create(dto);
+        ClientUserResponseDto created = service.create(clientId, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -94,10 +93,13 @@ public class ClientUserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/restorePassword/{id}")
+    @PostMapping("/restorePassword/{idClientUser}")
     @PreAuthorize("hasAnyAuthority('COMPUTEX', 'CLIENT')")
-    public ResponseEntity<Void> restorePasswordClientUser(@PathVariable UUID id) {
-        service.restorePassword(id);
+    public ResponseEntity<Void> restorePasswordClientUser(
+            @PathVariable UUID clientId,
+            @PathVariable UUID idClientUser
+    ) {
+        service.restorePassword(clientId, idClientUser);
         return ResponseEntity.noContent().build();
     }
 }

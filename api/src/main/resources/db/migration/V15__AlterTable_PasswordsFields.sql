@@ -1,0 +1,2 @@
+ALTER TABLE clients ALTER COLUMN password DROP NOT NULL;
+ALTER TABLE clients_users ALTER COLUMN password DROP NOT NULL;

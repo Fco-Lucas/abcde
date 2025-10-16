@@ -1,14 +1,17 @@
 package com.lcsz.abcde.services;
 
+import com.lcsz.abcde.AppProperties;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
 import com.lcsz.abcde.dtos.clients.ClientCreateDto;
 import com.lcsz.abcde.dtos.clients.ClientResponseDto;
 import com.lcsz.abcde.dtos.clients.ClientUpdateDto;
 import com.lcsz.abcde.dtos.clients.ClientUpdatePasswordDto;
 import com.lcsz.abcde.dtos.clients_users.ClientUserResponseDto;
+import com.lcsz.abcde.dtos.email.EmailCreateDto;
 import com.lcsz.abcde.enums.auditLog.AuditAction;
 import com.lcsz.abcde.enums.auditLog.AuditProgram;
 import com.lcsz.abcde.enums.client.ClientStatus;
+import com.lcsz.abcde.enums.email.EmailType;
 import com.lcsz.abcde.exceptions.customExceptions.EntityExistsException;
 import com.lcsz.abcde.exceptions.customExceptions.EntityNotFoundException;
 import com.lcsz.abcde.mappers.ClientMapper;
@@ -16,13 +19,23 @@ import com.lcsz.abcde.models.Client;
 import com.lcsz.abcde.repositorys.ClientRepository;
 import com.lcsz.abcde.repositorys.projection.ClientProjection;
 import com.lcsz.abcde.security.AuthenticatedUserProvider;
+import com.lcsz.abcde.security.JwtToken;
+import com.lcsz.abcde.security.JwtUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,13 +46,17 @@ public class ClientService {
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
     private final AuthenticatedUserProvider provider;
+    private final AppProperties appProperties;
+    private final EmailService emailService;
 
-    ClientService(ClientRepository repository, ClientUserService clientUserService, PasswordEncoder passwordEncoder, AuditLogService auditLogService, AuthenticatedUserProvider provider) {
+    ClientService(ClientRepository repository, ClientUserService clientUserService, PasswordEncoder passwordEncoder, AuditLogService auditLogService, AuthenticatedUserProvider provider, AppProperties appProperties, EmailService emailService) {
         this.repository = repository;
         this.clientUserService = clientUserService;
         this.passwordEncoder = passwordEncoder;
         this.auditLogService = auditLogService;
         this.provider = provider;
+        this.appProperties = appProperties;
+        this.emailService = emailService;
     }
 
     public String formatClientForLog(ClientResponseDto dto) {
@@ -52,39 +69,96 @@ public class ClientService {
         return repository.findByCnpj(cnpj);
     }
 
-    @Transactional(readOnly = false)
     public ClientResponseDto create(ClientCreateDto dto) {
         // Verifica se já existe um cliente com o CNPJ informado
-        if (findClientIfExists(dto.getCnpj()).isPresent())
+        if (findClientIfExists(dto.getCnpj()).isPresent()) {
             throw new EntityExistsException(String.format("Cliente com cnpj '%s' já cadastrado no sistema", dto.getCnpj()));
+        }
 
-        // Converte o dto recebido para entidade
+        // Converte o DTO recebido para entidade
         Client client = new Client();
         client.setName(dto.getName());
         client.setCnpj(dto.getCnpj());
-        client.setPassword(passwordEncoder.encode(dto.getPassword()));
+        client.setEmail(dto.getEmail());
+        String encryptedPassword = dto.getPassword() != null ? passwordEncoder.encode(dto.getPassword()) : null;
+        client.setPassword(encryptedPassword);
         client.setUrlToPost(dto.getUrlToPost());
         client.setStatus(ClientStatus.ACTIVE);
 
-        // Seta os dias em que a imagem ficará ativa de acordo com o cargo
+        // Define quantos dias a imagem ficará ativa
         String authUserRole = this.provider.getAuthenticatedUserRole();
-        Integer imageActiveDays = authUserRole != null && authUserRole.equals("COMPUTEX") ? dto.getImageActiveDays() : 30; // 30 dias valor padrão
+        Integer imageActiveDays = authUserRole != null && authUserRole.equals("COMPUTEX")
+                ? dto.getImageActiveDays()
+                : 30; // valor padrão
         client.setImageActiveDays(imageActiveDays);
 
+        // Salva o cliente
         Client savedClient = this.repository.save(client);
 
+        // Mapeia para DTO de resposta
         ClientResponseDto responseDto = ClientMapper.toDto(savedClient);
         responseDto.setUsers(this.clientUserService.getUsersByClientId(client.getId()));
 
-        // Log
+        // Log de criação do cliente
         String details = String.format(
                 "Novo cliente cadastrado no sistema | Dados do cliente cadastrado: %s",
                 this.formatClientForLog(responseDto)
         );
-        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.CREATE, savedClient.getId(), AuditProgram.CLIENT, details);
+        AuditLogCreateDto logDto = new AuditLogCreateDto(
+                AuditAction.CREATE,
+                savedClient.getId(),
+                AuditProgram.CLIENT,
+                details
+        );
         this.auditLogService.create(logDto);
 
+        // Cria o e-mail para definição de senha (só grava no banco, ainda não envia)
+        if (client.getPassword() == null && client.getEmail() != null && !client.getEmail().isBlank()) {
+            createDefinePasswordEmail(savedClient);
+        }
+
+        // dispara o envio real do e-mail
+        emailService.sendForClient(client);
+
         return responseDto;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void createDefinePasswordEmail(Client client) {
+        // Gera um JWT válido por 10 minutos
+        String cnpjComputex = "12302493000101";
+        String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT";
+
+        JwtToken onDefinePasswordToken = JwtUtils.createToken(
+                client.getId(),
+                client.getCnpj(),
+                role,
+                Duration.ofMinutes(10)
+        );
+
+        // Cria o email de definição de senha
+        Map<String, Object> templateFields = Map.of(
+                "pre_header", "Esse e-mail será válido pelos próximos 10 minutos para definição da nova senha",
+                "subject", "Defina sua nova senha",
+                "user_name", client.getName(),
+                "program_name", "ABCDE",
+                "button_url", appProperties.getWebUrl() + "definePassword?key=" + onDefinePasswordToken.getToken()
+        );
+
+        EmailCreateDto emailCreateDto = new EmailCreateDto(
+                client.getId(),
+                null,
+                EmailType.DEFINE_PASSWORD,
+                "Defina sua nova senha",
+                client.getEmail(),
+                client.getName(),
+                null,
+                "d-0ea23c0ca74946cfb7a0437e430f7d82",
+                templateFields,
+                LocalDateTime.now()
+        );
+
+        emailService.create(emailCreateDto);
     }
 
     @Transactional(readOnly = true)
@@ -99,6 +173,11 @@ public class ClientService {
             responseDto.setUsers(users);
             return responseDto;
         });
+    }
+
+    @Transactional(readOnly = true)
+    public List<Client> getAll () {
+        return repository.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -132,6 +211,7 @@ public class ClientService {
 
             client.setCnpj(dto.getCnpj());
         }
+        if(dto.getEmail() != null && !dto.getEmail().equals(client.getEmail())) client.setEmail(dto.getEmail());
         if(dto.getUrlToPost() != null) client.setUrlToPost(dto.getUrlToPost());
         if(dto.getImageActiveDays() != null) {
             String authUserRole = this.provider.getAuthenticatedUserRole();
@@ -171,7 +251,6 @@ public class ClientService {
 
     @Transactional(readOnly = false)
     public void updatePassword(UUID id, ClientUpdatePasswordDto dto) {
-        String currentPassword = dto.getCurrentPassword();
         String newPassword = dto.getNewPassword();
         String confirmNewPassword = dto.getConfirmNewPassword();
 
@@ -180,10 +259,6 @@ public class ClientService {
         }
 
         Client client = this.getClientById(id);
-
-        if (!passwordEncoder.matches(currentPassword, client.getPassword())) {
-            throw new RuntimeException("Senha atual inválida");
-        }
 
         client.setPassword(passwordEncoder.encode(newPassword));
         this.repository.save(client);
@@ -198,24 +273,63 @@ public class ClientService {
         this.auditLogService.create(logDto);
     }
 
-    @Transactional(readOnly = false)
     public void restorePassword(UUID id) {
         Client client = this.getClientById(id);
-        String newPassword = passwordEncoder.encode("abcdefgh");
-        client.setPassword(newPassword);
-        this.repository.save(client);
+
+        if (client.getEmail() == null || client.getEmail().isBlank()) throw new RuntimeException("O cliente informado não possui um e-mail definido, defina um e-mail válido e tente novamente");
 
         String details = String.format(
             "Senha do cliente com ID: %s foi restaurada para o valor padrão.", client.getId()
         );
-
-        AuditLogCreateDto logDto = new AuditLogCreateDto(
-            AuditAction.UPDATE, AuditProgram.CLIENT, details
-        );
+        AuditLogCreateDto logDto = new AuditLogCreateDto(AuditAction.UPDATE, AuditProgram.CLIENT, details);
         this.auditLogService.create(logDto);
+
+        // Cria o e-mail para definição de senha (só grava no banco, ainda não envia)
+        createRestorePasswordEmail(client);
+
+        // dispara o envio real do e-mail
+        emailService.sendForClient(client);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void createRestorePasswordEmail(Client client) {
+        // Gera um JWT válido por 10 minutos
+        String cnpjComputex = "12302493000101";
+        String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT";
+
+        JwtToken onDefinePasswordToken = JwtUtils.createToken(
+                client.getId(),
+                client.getCnpj(),
+                role,
+                Duration.ofMinutes(10)
+        );
+
+        // Cria o email de definição de senha
+        Map<String, Object> templateFields = Map.of(
+                "pre_header", "Esse e-mail será válido pelos próximos 10 minutos para definição da nova senha",
+                "subject", "Esqueceu sua senha?",
+                "user_name", client.getName(),
+                "program_name", "ABCDE",
+                "button_url", appProperties.getWebUrl() + "definePassword?key=" + onDefinePasswordToken.getToken()
+        );
+
+        EmailCreateDto emailCreateDto = new EmailCreateDto(
+                client.getId(),
+                null,
+                EmailType.RESTORE_PASSWORD,
+                "Esqueceu sua senha?",
+                client.getEmail(),
+                client.getName(),
+                null,
+                "d-0ea23c0ca74946cfb7a0437e430f7d82",
+                templateFields,
+                LocalDateTime.now()
+        );
+
+        emailService.create(emailCreateDto);
+    }
+
+    @Transactional
     public ClientResponseDto restore(UUID id) {
         // Inativa o cliente
         Client client = this.getClientById(id);

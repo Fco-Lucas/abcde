@@ -7,6 +7,7 @@ import java.util.UUID;
 public interface ClientProjection {
     UUID getId();
     String getName();
+    String getEmail();
     String getCnpj();
     ClientStatus getStatus();
 }

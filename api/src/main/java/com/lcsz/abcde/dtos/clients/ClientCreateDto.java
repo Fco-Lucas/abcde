@@ -1,9 +1,6 @@
 package com.lcsz.abcde.dtos.clients;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public class ClientCreateDto {
     @NotBlank(message = "O campo 'name' é obrigatório")
@@ -11,8 +8,14 @@ public class ClientCreateDto {
     @NotBlank(message = "O campo 'cnpj' é obrigatório")
     @Size(min = 14, max = 14, message = "O campo 'cnpj' deve conter 14 caracteres")
     private String cnpj;
-    @NotBlank(message = "O campo 'password' é obrigatório")
+    @NotBlank(message = "O campo 'email' é obrigatório")
+    @Email(message = "O campo 'email' não é um email válido")
+    private String email;
     @Size(min = 6, message = "O campo 'password' deve conter ao menos 6 caracteres")
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).+$",
+            message = "A senha deve conter ao menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial"
+    )
     private String password;
     @NotNull(message = "O campo 'urlToPost' deve está presente podendo ser vazio e não NULO")
     private String urlToPost;
@@ -22,9 +25,10 @@ public class ClientCreateDto {
     public ClientCreateDto() {
     }
 
-    public ClientCreateDto(String name, String cnpj, String password, String urlToPost, Integer imageActiveDays) {
+    public ClientCreateDto(String name, String cnpj, String email, String password, String urlToPost, Integer imageActiveDays) {
         this.name = name;
         this.cnpj = cnpj;
+        this.email = email;
         this.password = password;
         this.urlToPost = urlToPost;
         this.imageActiveDays = imageActiveDays;
@@ -44,6 +48,14 @@ public class ClientCreateDto {
 
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -75,6 +87,7 @@ public class ClientCreateDto {
         return "ClientCreateDto{" +
                 "name='" + name + '\'' +
                 ", cnpj='" + cnpj + '\'' +
+                ", email='" + email + '\'' +
                 ", password=" + password +
                 ", urlToPost='" + urlToPost + '\'' +
                 ", imageActiveDays='" + imageActiveDays + '\'' +

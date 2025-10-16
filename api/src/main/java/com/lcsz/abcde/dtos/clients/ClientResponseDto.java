@@ -10,6 +10,7 @@ public class ClientResponseDto {
     private UUID id;
     private String name;
     private String cnpj;
+    private String email;
     private String urlToPost;
     private Integer imageActiveDays;
     private ClientStatus status;
@@ -18,10 +19,11 @@ public class ClientResponseDto {
     public ClientResponseDto() {
     }
 
-    public ClientResponseDto(UUID id, String name, String cnpj, String urlToPost, Integer imageActiveDays, ClientStatus status, List<ClientUserResponseDto> users) {
+    public ClientResponseDto(UUID id, String name, String cnpj, String email, String urlToPost, Integer imageActiveDays, ClientStatus status, List<ClientUserResponseDto> users) {
         this.id = id;
         this.name = name;
         this.cnpj = cnpj;
+        this.email = email;
         this.urlToPost = urlToPost;
         this.imageActiveDays = imageActiveDays;
         this.status = status;
@@ -50,6 +52,14 @@ public class ClientResponseDto {
 
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getUrlToPost() {
@@ -90,6 +100,7 @@ public class ClientResponseDto {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", cnpj='" + cnpj + '\'' +
+                ", email='" + email + '\'' +
                 ", urlToPost='" + urlToPost + '\'' +
                 ", imageActiveDays='" + imageActiveDays + '\'' +
                 ", status='" + status + '\'' +
