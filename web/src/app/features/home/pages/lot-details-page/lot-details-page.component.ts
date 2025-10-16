@@ -574,7 +574,7 @@ export class LotDetailsPageComponent {
     progressDialogRef.afterClosed().subscribe(() => {
       this.selectedImageId.set(null);
       this.forceImagesReload({ pageIndex: 0 });
-      this.notification.showSuccess("Imagens processadas com sucesso!");
+      // this.notification.showSuccess("Imagens processadas com sucesso!");
     });
   }
 
