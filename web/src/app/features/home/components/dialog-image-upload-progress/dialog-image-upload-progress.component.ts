@@ -23,6 +23,7 @@ export interface DialogImageUploadProgressData {
     MatIconModule, MatButtonModule, MatListModule
   ],
   templateUrl: './dialog-image-upload-progress.component.html',
+  styleUrl: './dialog-image-upload-progress.style.scss'
 })
 export class DialogImageUploadProgressComponent implements OnInit {
   public data: DialogImageUploadProgressData = inject(MAT_DIALOG_DATA);

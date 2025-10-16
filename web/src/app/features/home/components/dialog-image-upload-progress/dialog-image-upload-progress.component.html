@@ -28,8 +28,8 @@
   <mat-progress-bar class="mb-4" mode="determinate" [value]="progressPercentage()"></mat-progress-bar>
 
   @if(isDone() && hasError()) {
-    <div class="p-4 mt-4 bg-red-100 text-red-800 rounded-md">
-      <p class="text-md font-semibold">Os seguintes arquivos não puderam ser enviados:</p>
+    <div class="p-4 mt-4 rounded-md errorContainer">
+      <p class="text-md">Os seguintes arquivos não puderam ser enviados:</p>
       <mat-list role="list">
         @for(fileName of failedUploads(); track fileName) {
           <mat-list-item role="listitem">
@@ -38,7 +38,7 @@
           </mat-list-item>
         }
       </mat-list>
-      <p class="text-md font-semibold">Certifique-se de cada imagem possuir todas as bordas com a cor preta visíveis e nítidas</p>
+      <p class="text-md">Certifique-se de cada imagem possuir todas as bordas com a cor preta visíveis e nítidas</p>
     </div>
   }
 

@@ -1,0 +1,6 @@
+@use "@angular/material" as mat;
+
+.errorContainer {
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
