@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ClientUserInterface, ClientUserStatus, CreateClientUserInterface, PageableClientUsersList, UpdateClientUserInterface, type UpdateClientUserPasswordInterface } from '../models/clientUsers.model';
 import { Observable } from 'rxjs';
@@ -45,6 +45,15 @@ export class ClientUsersService {
 
   updatePasswordClientUser(clientId: string, clientUserId: string, data: UpdateClientUserPasswordInterface): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}clients/${clientId}/users/updatePassword/${clientUserId}`, data);
+  }
+
+  updatePasswordClientUserCustom(clientId: string, clientUserId: string, data: UpdateClientUserPasswordInterface, token: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Skip-Interceptor': 'true'
+    });
+
+    return this.http.post<void>(`${this.apiUrl}clients/${clientId}/users/updatePassword/${clientUserId}`, data, { headers });
   }
 
   restorePasswordClientUser(clientId: string, clientUserId: string): Observable<void> {

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { Client, ClientStatus, CreateClientInterface, type PageableClientList, type UpdateClientInterface, type UpdateClientPasswordInterface } from '../models/client.model';
 import { Observable, tap } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -47,6 +47,16 @@ export class ClientService {
 
   updatePasswordClient(clientId: string, data: UpdateClientPasswordInterface): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}clients/updatePassword/${clientId}`, data);
+  }
+
+  updatePasswordClientCustom(clientId: string, data: UpdateClientPasswordInterface, token: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Skip-Interceptor': 'true'
+    });
+
+    // O segundo parâmetro do post é o body, o terceiro são as opções (headers, params etc.)
+    return this.http.post<void>(`${this.apiUrl}clients/updatePassword/${clientId}`, data, { headers });
   }
 
   restorePasswordClient(clientId: string): Observable<void> {

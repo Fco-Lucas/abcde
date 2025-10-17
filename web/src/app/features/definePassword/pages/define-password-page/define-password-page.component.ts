@@ -26,10 +26,12 @@ export class DefinePasswordPageComponent {
   private notification = inject(NotificationService);
 
   private decodedToken: TokenPayload | null = null;
+  private tokenKey: string | null = null;
 
   constructor() {
     // Pega o parâmetro 'key' da URL
     const key = this.route.snapshot.queryParamMap.get('key');
+    this.tokenKey = key;
 
     if (!key) {
       console.error("Nenhuma chave (token) foi fornecida na URL.");
@@ -57,12 +59,14 @@ export class DefinePasswordPageComponent {
   }
 
   updateCustomerPassword(formValues: DefinePasswordFormValues): void {
+    if (!this.tokenKey) return;
+
     this.isLoading.set(true);
 
     const idCustomer = this.decodedToken!.id;
     const data: UpdateClientPasswordInterface = { ...formValues };
 
-    this.clientService.updatePasswordClient(idCustomer, data).pipe(
+    this.clientService.updatePasswordClientCustom(idCustomer, data, this.tokenKey).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (_) => {
@@ -77,13 +81,15 @@ export class DefinePasswordPageComponent {
   }
 
   updateCustomerUserPassword(formValues: DefinePasswordFormValues): void {
+    if (!this.tokenKey) return;
+
     this.isLoading.set(true);
 
     const idCustomer = this.decodedToken!.idClient;
     const idCustomerUser = this.decodedToken!.id;
     const data: UpdateClientUserPasswordInterface = { ...formValues };
 
-    this.clientUserService.updatePasswordClientUser(idCustomer, idCustomerUser, data).pipe(
+    this.clientUserService.updatePasswordClientUserCustom(idCustomer, idCustomerUser, data, this.tokenKey).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (_) => {
