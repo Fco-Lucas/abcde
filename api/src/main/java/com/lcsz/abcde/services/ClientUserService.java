@@ -127,7 +127,7 @@ public class ClientUserService {
     private void createDefinePasswordEmail(ClientUser clientUser, Client client) {
         // Gera um JWT válido por 10 minutos
         String cnpjComputex = "12302493000101";
-        String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT";
+        String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT_USER";
         JwtToken onDefinePasswordToken = JwtUtils.createToken(
                 clientUser.getId(),
                 clientUser.getClientId(),
@@ -297,7 +297,7 @@ public class ClientUserService {
     private void createRestorePasswordEmail(Client client, ClientUser clientUser) {
         // Gera um JWT válido por 10 minutos
         String cnpjComputex = "12302493000101";
-        String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT";
+        String role = client.getCnpj().equals(cnpjComputex) ? "COMPUTEX" : "CLIENT_USER";
         JwtToken onDefinePasswordToken = JwtUtils.createToken(
                 clientUser.getId(),
                 clientUser.getClientId(),
