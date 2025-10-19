@@ -86,7 +86,7 @@ O sistema realiza a leitura das marcações feitas pelos(as) alunos(as) em gabar
 **Desenvolvido por Francisco Lucas**  
 💼 Projeto freelancer desenvolvido **individualmente**, fora da empresa, para **Computex Sistemas Acadêmicos LTDA**.
 
-🔗 [LinkedIn](https://www.linkedin.com/in/seu-perfil) • [Portfólio](https://github.com/seu-usuario)
+🔗 [LinkedIn](https://www.linkedin.com/in/francisco-lucas-199982265/) • [Portfólio](https://github.com/Fco-Lucas)
 
 ---
 
