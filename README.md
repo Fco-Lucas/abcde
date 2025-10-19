@@ -9,6 +9,7 @@ O sistema realiza a leitura das marcações feitas pelos(as) alunos(as) em gabar
 ## 🚀 Tecnologias Utilizadas
 
 - **Back-end:** (`Spring Boot`, `Python`)
+- **Front-end:** (`ANGULAR`)
 - **Banco de Dados:** (`PostgreSQL`)
 - **Autenticação:** JWT + Criptografia de senhas (`bcrypt`)
 - **Envio de e-mails:** `SMTP utilizando a SENDGRID`
