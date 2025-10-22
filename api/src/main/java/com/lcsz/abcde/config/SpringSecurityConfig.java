@@ -36,6 +36,14 @@ public class SpringSecurityConfig {
             "/**.html", "/webjars/**", "/configuration/**", "/swagger-resources/**"
     };
 
+    private static final String[] ACTUATOR_ENDPOINTS = {
+            "/actuator/**",
+            "/actuator/prometheus/**",
+            "/actuator/health/**",
+            "/actuator/metrics/**",
+            "/actuator/info/**"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -44,13 +52,14 @@ public class SpringSecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(ACTUATOR_ENDPOINTS).permitAll()
+                        .requestMatchers(DOCUMENTATION_OPENAPI).permitAll()
                         .requestMatchers(HttpMethod.POST, apiBasePath + "emails").permitAll()
                         .requestMatchers(HttpMethod.POST, apiBasePath + "clients").permitAll()
                         .requestMatchers(HttpMethod.POST, apiBasePath + "auth").permitAll()
                         .requestMatchers(HttpMethod.GET, "/gabaritos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/ping-spring").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/ping-python").permitAll()
-                        .requestMatchers(DOCUMENTATION_OPENAPI).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ping-spring").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ping-python").permitAll()
                         .anyRequest().authenticated()
                 ).sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

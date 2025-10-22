@@ -12,6 +12,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +21,40 @@ import org.slf4j.LoggerFactory;
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthorizationFilter.class);
 
+    // Lista de URLs que devem ser ignoradas pelo filtro JWT
+    private static final List<String> EXCLUDED_PATHS = Arrays.asList(
+            "/actuator",
+            "/docs-abcde",
+            "/v3/api-docs",
+            "/swagger-ui",
+            "/webjars",
+            "/configuration",
+            "/swagger-resources",
+            "/ping-spring",
+            "/ping-python",
+            "/gabaritos"
+    );
+
     @Autowired
     private JwtUserDetailsService detailsService;
 
+    /**
+     * Este método decide se o filtro deve ser executado
+     */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
         final String token = request.getHeader(JwtUtils.JWT_AUTHORIZATION);
 
         if(token == null || !token.startsWith(JwtUtils.JWT_BEARER)) {
-            // log.info("JWT Token está nulo, vazio, ou não iniciado com 'Bearer '.");
+            // log.debug("JWT Token está nulo, vazio, ou não iniciado com 'Bearer '.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -39,7 +66,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         String login = JwtUtils.getUsernameFromToken(token);
-
         toAuthentication(request, login);
 
         filterChain.doFilter(request, response);
