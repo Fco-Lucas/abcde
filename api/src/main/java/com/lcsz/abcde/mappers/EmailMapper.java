@@ -6,13 +6,14 @@ import com.lcsz.abcde.dtos.email.EmailCreateDto;
 import com.lcsz.abcde.models.Email;
 import com.lcsz.abcde.repositorys.projection.EmailProjection;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EmailMapper {
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static String generateTxMessageId() {
+        return UUID.randomUUID().toString();
+    }
 
     public static Email createToEntity(EmailCreateDto createDto, String senderEmail) {
         Email email = new Email();
@@ -28,6 +29,7 @@ public class EmailMapper {
             email.setTemplateId(createDto.getTemplateId());
             email.setStatusCode(null);
             email.setAppointmentDate(createDto.getAppointmentDate());
+            email.setTxMessageId(generateTxMessageId());
 
             // Se estiver nulo ou vazio, seta uma lista vazia
             List<String> attachments = createDto.getAttachments() == null || createDto.getAttachments().isEmpty() ? new ArrayList<>() : createDto.getAttachments();
@@ -61,6 +63,7 @@ public class EmailMapper {
             email.setStatusCode(projection.getStatusCode());
             email.setTemplateId(projection.getTemplateId());
             email.setAppointmentDate(projection.getAppointmentDate());
+            email.setTxMessageId(projection.getTxMessageId());
 
             // ---------- attachments (String JSON -> List<String>) ----------
             String attachmentsJson = projection.getAttachments();

@@ -40,7 +40,7 @@ public class Email implements Serializable {
     @Type(JsonType.class)
     @Column(columnDefinition = "jsonb", nullable = false)
     private List<String> attachments;
-    @Column(name = "status_code", nullable = false)
+    @Column(name = "status_code")
     private Integer statusCode;
     @Column(name = "template_id", nullable = false, length = 200)
     private String templateId;
@@ -49,11 +49,13 @@ public class Email implements Serializable {
     private Map<String, Object> templateFields;
     @Column(name = "appointment_date", nullable = false)
     private LocalDateTime appointmentDate;
+    @Column(name = "tx_message_id", length = 36)
+    private String txMessageId;
 
     public Email() {
     }
 
-    public Email(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, UUID idClient, UUID idClientUser, EmailType type, String subject, String origin, String destiny, String destinyName, List<String> attachments, Integer statusCode, String templateId, Map<String, Object> templateFields, LocalDateTime appointmentDate) {
+    public Email(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, UUID idClient, UUID idClientUser, EmailType type, String subject, String origin, String destiny, String destinyName, List<String> attachments, Integer statusCode, String templateId, Map<String, Object> templateFields, LocalDateTime appointmentDate, String txMessageId) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -69,6 +71,7 @@ public class Email implements Serializable {
         this.templateId = templateId;
         this.templateFields = templateFields;
         this.appointmentDate = appointmentDate;
+        this.txMessageId = txMessageId;
     }
 
     public Long getId() {
@@ -191,6 +194,14 @@ public class Email implements Serializable {
         this.appointmentDate = appointmentDate;
     }
 
+    public String getTxMessageId() {
+        return txMessageId;
+    }
+
+    public void setTxMessageId(String txMessageId) {
+        this.txMessageId = txMessageId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -221,6 +232,7 @@ public class Email implements Serializable {
                 ", templateId='" + templateId + '\'' +
                 ", templateFields=" + templateFields +
                 ", appointmentDate=" + appointmentDate +
+                ", txMessageId=" + txMessageId +
                 '}';
     }
 }

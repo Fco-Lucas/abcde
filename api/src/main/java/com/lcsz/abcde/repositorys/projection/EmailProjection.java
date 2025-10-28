@@ -21,4 +21,5 @@ public interface EmailProjection {
     String getTemplateId();
     String getTemplateFields();
     LocalDateTime getAppointmentDate();
+    String getTxMessageId();
 }

@@ -2,7 +2,6 @@ package com.lcsz.abcde.services;
 
 import com.lcsz.abcde.AppProperties;
 import com.lcsz.abcde.dtos.auditLog.AuditLogCreateDto;
-import com.lcsz.abcde.dtos.clients.ClientResponseDto;
 import com.lcsz.abcde.dtos.email.EmailCreateDto;
 import com.lcsz.abcde.dtos.email.EmailSendResponseDto;
 import com.lcsz.abcde.enums.auditLog.AuditAction;
@@ -19,7 +18,6 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Attachments;
 import com.sendgrid.helpers.mail.objects.Personalization;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -32,10 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,7 +58,7 @@ public class EmailService {
 
     public String formatEmailForLog(Email email) {
         return String.format(
-                "{id='%d', idCliente='%s', idUsuarioCliente='%s', tipo='%s', assunto='%s', origem='%s', destino='%s', nomeDestino='%s', status='%d'}",
+                "{id='%d', idCliente='%s', idUsuarioCliente='%s', tipo='%s', assunto='%s', origem='%s', destino='%s', nomeDestino='%s', status='%d', txMessageId='%s'}",
                 email.getId(),
                 email.getIdClient(),
                 email.getIdClientUser(),
@@ -72,9 +67,12 @@ public class EmailService {
                 email.getOrigin(),
                 email.getDestiny(),
                 email.getDestinyName(),
-                email.getStatusCode()
+                email.getStatusCode(),
+                email.getTxMessageId()
         );
     }
+
+
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Email create(EmailCreateDto createDto) {
@@ -163,6 +161,9 @@ public class EmailService {
                         mail.addAttachments(attachment);
                     }
                 }
+
+                if (email.getTxMessageId() != null) mail.addCustomArg("tx_message_id", email.getTxMessageId());
+                mail.addCustomArg("programa", "ABCDE");
 
                 Request request = new Request();
                 request.setMethod(Method.POST);
